@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPosAccurate2026.Login" BackgroundColor="#f4f4f4" NavigationPage.HasNavigationBar="False"
+             Title="Login">
+    <VerticalStackLayout Margin="20"
+                         VerticalOptions="Center" 
+                         Spacing="20"
+                         >
+        <Label Text="POS ACCURATE" 
+               FontSize="Title"
+               FontAttributes="Bold" 
+               HorizontalOptions="Center" />
+
+        <Entry x:Name="EmailEntry" 
+               Placeholder="Alamat Email" 
+               Keyboard="Email" 
+               ReturnType="Next" />
+
+        <Entry x:Name="PasswordEntry" 
+               Placeholder="Password" 
+               IsPassword="True" 
+               ReturnType="Done" />
+
+        <StackLayout Orientation="Horizontal" Spacing="0">
+
+            <CheckBox Color="#333333" ></CheckBox>
+            <Label Text="Simpan info Login" TextColor="#333333" FontSize="Caption" VerticalTextAlignment="Center"></Label>
+            
+        </StackLayout>
+
+       
+
+        <Button x:Name="B_Login" Clicked="B_Login_Clicked"
+                Text="LOGIN POS" FontAttributes="Bold"
+                CornerRadius="5" 
+                 />
+    </VerticalStackLayout>
+</ContentPage>
