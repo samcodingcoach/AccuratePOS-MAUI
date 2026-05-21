@@ -42,11 +42,12 @@
             </toolkit:Expander>
         </Border>
 
-        <Border Grid.Row="1" Padding="15,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="#2c3e50">
-            <HorizontalStackLayout>
-                <Label Text="Total Transaksi:" TextColor="White" FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
-                <Label Text="{Binding FormattedGrandTotal}" TextColor="#f1c40f" FontAttributes="Bold" FontSize="20" VerticalOptions="Center"/>
-            </HorizontalStackLayout>
+        <Border Grid.Row="1" Padding="15,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="DarkCyan">
+            <StackLayout Orientation="Horizontal" Spacing="5" >
+                <Image Source="grandtotal100.png" HeightRequest="14" HorizontalOptions="Start"></Image>
+                <Label Text="Total Transaksi" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
+                <Label Text="{Binding FormattedGrandTotal}" HorizontalTextAlignment="End" HorizontalOptions="End" TextColor="#f1c40f" FontAttributes="Bold" VerticalOptions="Center"/>
+            </StackLayout>
         </Border>
 
         <CollectionView Grid.Row="2" x:Name="InvoiceCollectionView"
