@@ -36,7 +36,7 @@
 
                     <StackLayout Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="0,10,0,5">
                         <Button Text="Reset" x:Name="B_Reset" Clicked="B_Reset_Clicked" BackgroundColor="White" TextColor="Grey" BorderColor="Grey" BorderWidth="0.5" HorizontalOptions="FillAndExpand"/>
-                        <Button Text="Filter" x:Name="B_Filter" HorizontalOptions="FillAndExpand" FontAttributes="Bold"/>
+                        <Button Text="Filter" x:Name="B_Filter" Clicked="B_Filter_Clicked" HorizontalOptions="FillAndExpand" FontAttributes="Bold"/>
                     </StackLayout>
                 </Grid>
             </toolkit:Expander>

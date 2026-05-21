@@ -12,44 +12,89 @@ public partial class List_Faktur : ContentPage
 {
     public ObservableCollection<InvoiceData> InvoiceList { get; set; } = new ObservableCollection<InvoiceData>();
 
-    // Variabel state untuk akumulasi nilai & Paginasi
+    // Variabel state untuk akumulasi Grand Total & Paginasi
     private double _grandTotalAmount = 0;
     private int _currentPage = 1;
     private bool _isFetching = false;
     private bool _hasMoreData = true;
 
-    // Properti yang dibinding ke UI untuk Box Total (otomatis notify saat nilainya berubah)
+    // Menyimpan state filter agar paginasi ke halaman berikutnya tetap sinkron
+    private string _activeStartDate = "";
+    private string _activeEndDate = "";
+    private string _activeSearch = "";
+
+    // Properti ini dibinding ke UI Label Total Transaksi
     public string FormattedGrandTotal => $"Rp {_grandTotalAmount:N0}";
 
     public List_Faktur()
     {
         InitializeComponent();
 
-        // WAJIB: Agar {Binding FormattedGrandTotal} di halaman utama (bukan di list) bisa terbaca
+        // Wajib diset agar {Binding FormattedGrandTotal} dapat terbaca oleh layar utama
         BindingContext = this;
         InvoiceCollectionView.ItemsSource = InvoiceList;
+
+        // Set default nilai input tanggal ke Hari Ini menggunakan x:Name Anda
+        DP_startdate.Date = DateTime.Today;
+        DP_enddate.Date = DateTime.Today;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
 
-        // Hanya load saat pertama kali dibuka atau list kosong
+        // Membaca data pertama kali halaman dibuka (Otomatis Filter Hari Ini)
         if (InvoiceList.Count == 0)
         {
+            ResetFilterState();
             await LoadDataFromServer(isRefresh: true);
         }
     }
 
-    // Event saat user men-scroll list mendekati akhir
+    
+    private void ResetFilterState()
+    {
+        DP_startdate.Date = DateTime.Today;
+        DP_enddate.Date = DateTime.Today;
+        Search_FakturKonsumen.Text = string.Empty;
+
+        _activeStartDate = $"{DateTime.Today:yyyy-MM-dd}";
+        _activeEndDate = $"{DateTime.Today:yyyy-MM-dd}";
+        _activeSearch = string.Empty;
+    }
+
+    
+    private async void B_Filter_Clicked(object sender, EventArgs e)
+    {
+        // Mengambil nilai dari x:Name XAML Anda
+        // Menggunakan String Interpolation untuk menghindari error ToString()
+        _activeStartDate = $"{DP_startdate.Date:yyyy-MM-dd}";
+        _activeEndDate = $"{DP_enddate.Date:yyyy-MM-dd}";
+
+        _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
+
+        // Tarik data dengan mode Refresh (kembali ke page 1)
+        await LoadDataFromServer(isRefresh: true);
+    }
+
+    // EVENT HANDLER: Tombol Reset Ditekan
+    private async void B_Reset_Clicked(object sender, EventArgs e)
+    {
+        ResetFilterState();
+        await LoadDataFromServer(isRefresh: true);
+    }
+
+    // EVENT HANDLER: Scroll bawah pada CollectionView
     private async void OnLoadMoreItems(object sender, EventArgs e)
     {
+        // Tarik data mode Load More (lanjut ke page berikutnya)
         await LoadDataFromServer(isRefresh: false);
     }
 
+    // Core Logic Pemanggilan API dengan HttpClient
     private async Task LoadDataFromServer(bool isRefresh)
     {
-        // Cegah request ganda atau jika data sudah mentok (habis)
+        // Cegah pemanggilan ganda / cegah load jika data sudah habis
         if (_isFetching || (!_hasMoreData && !isRefresh)) return;
 
         _isFetching = true;
@@ -60,16 +105,25 @@ public partial class List_Faktur : ContentPage
             _grandTotalAmount = 0;
             _hasMoreData = true;
             InvoiceList.Clear();
-            OnPropertyChanged(nameof(FormattedGrandTotal));
+            OnPropertyChanged(nameof(FormattedGrandTotal)); // Beritahu UI kalau nilai jadi 0 sementara
         }
 
         try
         {
-            // Set Format Tanggal Hari Ini (Contoh: "2026-05-21")
-            string todayDate = DateTime.Now.ToString("yyyy-MM-dd");
+            // Susun Endpoint beserta paging
+            var urlBuilder = new StringBuilder($"{App.API_HOST}penjualan/list-invoice.php?page={_currentPage}&limit=100");
 
-            // Susun URL endpoint beserta parameter filter default & paginasi
-            string apiUrl = $"{App.API_HOST}penjualan/list-invoice.php?start_date={todayDate}&end_date={todayDate}&page={_currentPage}&limit=100";
+            // Filter Parameter logic
+            if (!string.IsNullOrEmpty(_activeSearch))
+            {
+                urlBuilder.Append($"&search={Uri.EscapeDataString(_activeSearch)}");
+            }
+            else
+            {
+                urlBuilder.Append($"&start_date={_activeStartDate}&end_date={_activeEndDate}");
+            }
+
+            string apiUrl = urlBuilder.ToString();
 
             string secureToken = Preferences.Get("TOKEN_KEY", "");
             string cleanToken = secureToken.Replace("Bearer ", "").Trim();
@@ -77,6 +131,7 @@ public partial class List_Faktur : ContentPage
             if (string.IsNullOrEmpty(cleanToken))
             {
                 await DisplayAlertAsync("Sesi Habis", "Anda harus login kembali.", "OK");
+                _isFetching = false;
                 return;
             }
 
@@ -89,7 +144,6 @@ public partial class List_Faktur : ContentPage
 
                 if (responseContent.StartsWith("<"))
                 {
-                    System.Diagnostics.Debug.WriteLine($"HTML Detected: {responseContent}");
                     await DisplayAlertAsync("Error Server", "Gagal membaca format data dari server.", "OK");
                     _isFetching = false;
                     return;
@@ -103,8 +157,7 @@ public partial class List_Faktur : ContentPage
 
                     if (data == null || data.Count == 0)
                     {
-                        // Data habis
-                        _hasMoreData = false;
+                        _hasMoreData = false; // Tandai data sudah habis dari API
                     }
                     else
                     {
@@ -112,21 +165,21 @@ public partial class List_Faktur : ContentPage
                         {
                             InvoiceList.Add(invoice);
 
-                            // Akumulasi nilai uang
+                            // Tambahkan total uang ke Grand Total
                             _grandTotalAmount += invoice.totalAmount;
                         }
 
-                        // Beri tahu UI bahwa nilai Grand Total berubah agar ter-update di layar
+                        // Beri tahu halaman agar text Grand Total ter-update di layar UI
                         OnPropertyChanged(nameof(FormattedGrandTotal));
 
-                        // Jika data yang dikembalikan kurang dari 100 baris, artinya kita sudah di halaman terakhir
+                        // Jika data yg didapat < limit(100), maka tidak ada lagi halaman berikutnya
                         if (data.Count < 100)
                         {
                             _hasMoreData = false;
                         }
                         else
                         {
-                            _currentPage++; // Siapkan untuk request halaman berikutnya
+                            _currentPage++;
                         }
                     }
                 }
@@ -139,7 +192,6 @@ public partial class List_Faktur : ContentPage
         }
         catch (Exception ex)
         {
-            System.Diagnostics.Debug.WriteLine($"Exception: {ex.Message}");
             await DisplayAlertAsync("Koneksi Gagal", ex.Message, "OK");
         }
         finally
@@ -169,7 +221,6 @@ public partial class List_Faktur : ContentPage
         public CustomerData customer { get; set; }
 
         public string FormattedTotalAmount => $"Rp {totalAmount:N0}";
-
         public string CustomerDisplay => $"{customer?.customerNo} - {customer?.name}";
 
         public Color StatusTextColor =>
@@ -188,10 +239,5 @@ public partial class List_Faktur : ContentPage
         public string name { get; set; }
         public int id { get; set; }
         public string customerNo { get; set; }
-    }
-
-    private void B_Reset_Clicked(object sender, EventArgs e)
-    {
-
     }
 }
