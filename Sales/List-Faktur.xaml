@@ -7,7 +7,7 @@
              Title="List_Faktur">
 
     <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10" ColumnDefinitions="*" ColumnSpacing="10" Padding="15,15,15,15">
-
+        <!--gemini kerjakan ini bagian filter dan search-->
         <Border Grid.Row="0" Padding="20,20,20,10" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
             <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
@@ -19,29 +19,29 @@
 
                 <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto"  RowSpacing="10"   ColumnSpacing="10"  Padding="5,10,5,5">
                     <StackLayout Grid.Column="0" Grid.Row="0">
-                        <Label Text="Tanggal Mulai" FontAttributes="Bold"/>
-                        <DatePicker FontSize="Large"/>
+                        <Label Text="Tanggal Mulai" FontAttributes="Bold" />
+                        <DatePicker FontSize="Large" x:Name="DP_startdate"/>
                     </StackLayout>
 
                     <StackLayout Grid.Column="1" Grid.Row="0">
                         <Label Text="Tanggal Selesai" FontAttributes="Bold"/>
-                        <DatePicker FontSize="Large"/>
+                        <DatePicker FontSize="Large" x:Name="DP_enddate"/>
                     </StackLayout>
 
                     <StackLayout Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
                         <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                            <Entry Placeholder="No. Faktur / Kode Konsumen"/>
+                            <Entry Placeholder="No. Faktur / Kode Konsumen" x:Name="Search_FakturKonsumen" ClearButtonVisibility="WhileEditing"/>
                         </Border>
                     </StackLayout>
 
                     <StackLayout Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="0,10,0,5">
-                        <Button Text="Reset" BackgroundColor="White" TextColor="Grey" BorderColor="Grey" BorderWidth="0.5" HorizontalOptions="FillAndExpand"/>
-                        <Button Text="Filter" HorizontalOptions="FillAndExpand" FontAttributes="Bold"/>
+                        <Button Text="Reset" x:Name="B_Reset" Clicked="B_Reset_Clicked" BackgroundColor="White" TextColor="Grey" BorderColor="Grey" BorderWidth="0.5" HorizontalOptions="FillAndExpand"/>
+                        <Button Text="Filter" x:Name="B_Filter" HorizontalOptions="FillAndExpand" FontAttributes="Bold"/>
                     </StackLayout>
                 </Grid>
             </toolkit:Expander>
         </Border>
-
+        <!--gemini kerjakan ini bagian filter dan search-->
         <Border Grid.Row="1" Padding="15,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="DarkCyan">
             <StackLayout Orientation="Horizontal" Spacing="5" >
                 <Image Source="grandtotal100.png" HeightRequest="14" HorizontalOptions="Start"></Image>

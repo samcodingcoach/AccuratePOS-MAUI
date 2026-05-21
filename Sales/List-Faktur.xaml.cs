@@ -189,4 +189,9 @@ public partial class List_Faktur : ContentPage
         public int id { get; set; }
         public string customerNo { get; set; }
     }
+
+    private void B_Reset_Clicked(object sender, EventArgs e)
+    {
+
+    }
 }
