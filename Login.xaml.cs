@@ -171,8 +171,8 @@ public partial class Login : ContentPage
 
                
                 
-
-                Application.Current.MainPage = new MainPage();
+                //Direct setelah login
+                Application.Current.MainPage = new Sales.List_Faktur();
             }
             else
             {
