@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPosAccurate2026.Sales.New_Faktur"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             NavigationPage.HasNavigationBar="False"
+             BackgroundColor="#d2dae2" 
+             Title="New_Faktur">
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10" ColumnDefinitions="*" ColumnSpacing="10" Padding="0,0">
+        <!--row 0-->
+        <Border Grid.Row="0" Padding="20,20,20,10" StrokeShape="RoundRectangle 0,0,20,20"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+            <toolkit:Expander IsExpanded="False">
+                <toolkit:Expander.Header>
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="NEW FAKTUR JUAL" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
+                        <Image Source="chevron24.png" TranslationY="-3"></Image>
+                    </StackLayout>
+                </toolkit:Expander.Header>
+
+                <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto"  RowSpacing="10"   ColumnSpacing="10"  Padding="0">
+                    <StackLayout Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Spacing="10">
+                        <Border Padding="10,0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                            <!--cari api konsumen-->
+                            <StackLayout Orientation="Horizontal">
+                                <Picker x:Name="PickerKonsumen" HorizontalOptions="FillAndExpand" Title="Pilih Konsumen / Pelanggan"  ItemDisplayBinding="{Binding Text}" SelectedIndexChanged="OnKonsumenSelected" Margin="0,5,0,0"/>
+                                <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
+                            </StackLayout>
+                            <!--cari api konsumen-->
+                        </Border>
+
+                        <Border Padding="10,0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                            <!--buat faktur otomatis / tidak-->
+                            <StackLayout Orientation="Horizontal" Spacing="2">
+                                <Entry Placeholder="No. Faktur (Optional)" HorizontalOptions="FillAndExpand" x:Name="Entry_NoFaktur" ClearButtonVisibility="WhileEditing"/>
+                            </StackLayout>
+
+                        </Border>
+                    </StackLayout>
+                </Grid>
+            </toolkit:Expander>
+        </Border>
+        <!--row 1 cari barang dan detail-->
+        <Border Grid.Row="1" Padding="10" StrokeShape="RoundRectangle 10" Margin="15,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+            <toolkit:Expander IsExpanded="False">
+                <toolkit:Expander.Header>
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="DETAIL BARANG" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
+                        <Image Source="chevron24.png" TranslationY="-3"></Image>
+                    </StackLayout>
+                </toolkit:Expander.Header>
+
+                
+                <!--Pili Barang dan Jasa-->
+                <StackLayout Spacing="10">
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry Placeholder="Masukkan Kode Barang / UPC NO" HorizontalOptions="FillAndExpand" x:Name="Entry_NoBarcode" ClearButtonVisibility="WhileEditing"/>
+                        <!--List Barang Detail Item-->
+                    </Border>
+
+                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                        <Image Source="nophotoproduct150.jpg" Grid.Column="0" HeightRequest="60"></Image>
+                        <StackLayout Grid.Column="1">
+                            <!--nama_barang-->
+                            <Label FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" Text="Laptop LENOVO YOGA 7 | IDEAPAD 5 2in1 Touchscreen AMD RYZEN 7 AI"></Label>
+                            <!--kode_barang-->
+                            <Label Text="100312100" TextColor="Grey"></Label>
+                            <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" Spacing="5">
+
+                                <StackLayout HorizontalOptions="FillAndExpand">
+                                    <!--harga-->
+                                    <Label Text="Rp 50.000.000" HorizontalOptions="FillAndExpand" TextColor="DarkGray" FontSize="18" FontAttributes="Bold"></Label>
+
+                                    <HorizontalStackLayout>
+                                        <Image Source="discount100.png" HeightRequest="12"></Image>
+                                        <Label Text="-Rp 100.000" HorizontalOptions="FillAndExpand" TextColor="#E22284" FontSize="Small" FontAttributes="Bold" VerticalTextAlignment="Center"></Label>
+                                    </HorizontalStackLayout>
+
+                                </StackLayout>
+
+                                <!--jumlah jual-->
+                                <Label Text="x5" VerticalOptions="Center" HorizontalOptions="End" TranslationX="-5" HorizontalTextAlignment="End" TextColor="Grey"></Label>
+                            </StackLayout>
+                        </StackLayout>
+
+                        <StackLayout Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0">
+
+                            <BoxView HeightRequest="0.4" Margin="0,10,0,10" Opacity="1" Color="WhiteSmoke" HorizontalOptions="Fill" Grid.Row="3" Grid.ColumnSpan="2"/>
+                            <StackLayout Orientation="Horizontal">
+                                <Label Text="Total Harga :" HorizontalOptions="FillAndExpand" VerticalTextAlignment="Center"></Label>
+                                <Label Text="Rp 100.000.000" FontAttributes="Bold" FontSize="20" TextColor="DarkCyan" HorizontalTextAlignment="End" HorizontalOptions="End"></Label>
+                            </StackLayout>
+                        </StackLayout>
+                    </Grid>
+                </StackLayout>
+            </toolkit:Expander>
+        </Border>
+
+        <Button Grid.Row="2" CornerRadius="0" 
+                FontSize="20" FontAttributes="Bold"
+                BackgroundColor="DarkCyan" ImageSource="add24.png" Text="BUAT FAKTUR"></Button>
+    </Grid>
+</ContentPage>
