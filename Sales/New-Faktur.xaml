@@ -97,8 +97,8 @@
                 <!--pengirim jenis dan alamat-->
                 <StackLayout x:Name="ViewPengirim" IsVisible="True" Spacing="10">
 
-                    <HorizontalStackLayout>
-                        
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="shipmentgrey100.png" HeightRequest="14"></Image>
                         <Label Text="Pengiriman dan Alamat" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
                     </HorizontalStackLayout>
                     
@@ -120,12 +120,50 @@
                         <Entry HeightRequest="100" VerticalTextAlignment="Start" Placeholder="Alamat Pengiriman"></Entry>
                     </Border>
 
-                    <Button Text="Close" HorizontalOptions="End" WidthRequest="60" BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
+                    
 
                 </StackLayout>
 
                 <!--biaya, diskon akhir dan pajak-->
-                
+                <StackLayout x:Name="ViewBiaya" IsVisible="True" Spacing="10">
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="propertiesgrey100.png" HeightRequest="14"></Image>
+                        <Label Text="Biaya, Diskon dan Pajak" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
+                    </HorizontalStackLayout>
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <StackLayout Orientation="Horizontal">
+                            <Picker x:Name="PickerBiaya" HorizontalOptions="FillAndExpand" Title="Pilih Biaya Lain">
+                                <Picker.Items>
+                                    <x:String>4402 - Pengantaran ke Customer</x:String>
+                                    <x:String>4403 - Instalasi</x:String>
+                                </Picker.Items>
+                            </Picker>
+                            <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
+                        </StackLayout>
+                    </Border>
+
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry Placeholder="Harga biaya Ex. 25000" Keyboard="Numeric"></Entry>
+                    </Border>
+
+                    <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" 
+                            HorizontalOptions="End"></Button>
+
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry Placeholder="Diskon Ex. 10000 or 5%" Keyboard="Numeric"></Entry>
+                    </Border>
+
+
+                    <HorizontalStackLayout>
+                        <CheckBox IsChecked="True" Color="DarkCyan"></CheckBox>
+                        <Label Text="Kena pajak 12%" VerticalTextAlignment="Center" FontSize="15" TextColor="Grey"></Label>
+                    </HorizontalStackLayout>
+                    
+                    
+                </StackLayout>
+
+                <Button Text="Close" HorizontalOptions="End" WidthRequest="60" BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
+
             </StackLayout>
         </Border>
         <!--row 2 tombol tombol-->
