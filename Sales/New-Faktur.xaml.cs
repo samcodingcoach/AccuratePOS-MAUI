@@ -24,6 +24,21 @@ public partial class New_Faktur : ContentPage
         PickerKonsumen.ItemsSource = listKonsumen;
     }
 
+    private void B_ShipmentTapGesture_Tapped(object sender, TappedEventArgs e)
+    {
+
+    }
+
+    private void B_BiayaTapGesture_Tapped(object sender, TappedEventArgs e)
+    {
+
+    }
+
+    private void B_NewFaktur_Clicked(object sender, EventArgs e)
+    {
+
+    }
+
     private void OnKonsumenSelected(object sender, EventArgs e)
     {
         var picker = sender as Picker;

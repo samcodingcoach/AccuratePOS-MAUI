@@ -39,79 +39,114 @@
                 </Grid>
             </toolkit:Expander>
         </Border>
-        <!--row 1 cari barang dan detail-->
-        <Border Grid.Row="1" Padding="10" StrokeShape="RoundRectangle 10" Margin="15,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
-            <toolkit:Expander IsExpanded="False">
-                <toolkit:Expander.Header>
-                    <StackLayout Orientation="Horizontal">
-                        <Label Text="DETAIL BARANG" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
-                        <Image Source="chevron24.png" TranslationY="-3"></Image>
-                    </StackLayout>
-                </toolkit:Expander.Header>
+        <!--row 1 cari barang dan detail , Munculkan Sistem Dialog Pengiriman Visible On Off-->
+        <Border Grid.Row="1" VerticalOptions="Start" Padding="10" StrokeShape="RoundRectangle 10" Margin="15,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+            <StackLayout>
+                <!--detail barang-->
+                <toolkit:Expander IsExpanded="False" x:Name="ViewBarang" IsVisible="False">
+                    <toolkit:Expander.Header>
+                        <StackLayout Orientation="Horizontal">
+                            <Label Text="DETAIL BARANG" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
+                            <Image Source="chevron24.png" TranslationY="-3"></Image>
+                        </StackLayout>
+                    </toolkit:Expander.Header>
+                    <!--Pili Barang dan Jasa-->
+                    <StackLayout Spacing="10">
+                        <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                            <Entry Placeholder="Masukkan Kode Barang / UPC NO" HorizontalOptions="FillAndExpand" x:Name="Entry_NoBarcode" ClearButtonVisibility="WhileEditing"/>
+                            <!--List Barang Detail Item-->
+                        </Border>
 
+                        <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                            <Image Source="nophotoproduct150.jpg" Grid.Column="0" HeightRequest="60"></Image>
+                            <StackLayout Grid.Column="1">
+                                <!--nama_barang-->
+                                <Label FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" Text="Laptop LENOVO YOGA 7 | IDEAPAD 5 2in1 Touchscreen AMD RYZEN 7 AI"></Label>
+                                <!--kode_barang-->
+                                <Label Text="100312100" TextColor="Grey"></Label>
+                                <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" Spacing="5">
+
+                                    <StackLayout HorizontalOptions="FillAndExpand">
+                                        <!--harga-->
+                                        <Label Text="Rp 50.000.000" HorizontalOptions="FillAndExpand" TextColor="DarkGray" FontSize="18" FontAttributes="Bold"></Label>
+
+                                        <HorizontalStackLayout>
+                                            <Image Source="discount100.png" HeightRequest="12"></Image>
+                                            <Label Text="-Rp 100.000" HorizontalOptions="FillAndExpand" TextColor="#E22284" FontSize="Small" FontAttributes="Bold" VerticalTextAlignment="Center"></Label>
+                                        </HorizontalStackLayout>
+
+                                    </StackLayout>
+
+                                    <!--jumlah jual-->
+                                    <Label Text="x5" VerticalOptions="Center" HorizontalOptions="End" TranslationX="-5" HorizontalTextAlignment="End" TextColor="Grey"></Label>
+                                </StackLayout>
+                            </StackLayout>
+
+                            <StackLayout Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0">
+
+                                <BoxView HeightRequest="0.4" Margin="0,10,0,10" Opacity="1" Color="WhiteSmoke" HorizontalOptions="Fill" Grid.Row="3" Grid.ColumnSpan="2"/>
+                                <StackLayout Orientation="Horizontal">
+                                    <Label Text="Total Harga :" HorizontalOptions="FillAndExpand" VerticalTextAlignment="Center"></Label>
+                                    <Label Text="Rp 100.000.000" FontAttributes="Bold" FontSize="20" TextColor="DarkCyan" HorizontalTextAlignment="End" HorizontalOptions="End"></Label>
+                                </StackLayout>
+                            </StackLayout>
+                        </Grid>
+                    </StackLayout>
+                </toolkit:Expander>
                 
-                <!--Pili Barang dan Jasa-->
-                <StackLayout Spacing="10">
+                <!--pengirim jenis dan alamat-->
+                <StackLayout x:Name="ViewPengirim" IsVisible="True" Spacing="10">
+
+                    <HorizontalStackLayout>
+                        
+                        <Label Text="Pengiriman dan Alamat" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
+                    </HorizontalStackLayout>
+                    
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Masukkan Kode Barang / UPC NO" HorizontalOptions="FillAndExpand" x:Name="Entry_NoBarcode" ClearButtonVisibility="WhileEditing"/>
-                        <!--List Barang Detail Item-->
+
+                        <StackLayout Orientation="Horizontal">
+                            <Picker x:Name="PickerPengirim" HorizontalOptions="FillAndExpand" Title="Pilih Pengirim">
+                                <Picker.Items>
+                                    <x:String>Kurir Toko</x:String>
+                                    <x:String>Ambil Sendiri</x:String>
+                                </Picker.Items>
+                            </Picker>
+                            <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
+                        </StackLayout>
+
                     </Border>
 
-                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
-                        <Image Source="nophotoproduct150.jpg" Grid.Column="0" HeightRequest="60"></Image>
-                        <StackLayout Grid.Column="1">
-                            <!--nama_barang-->
-                            <Label FontAttributes="Bold" MaxLines="1" LineBreakMode="TailTruncation" Text="Laptop LENOVO YOGA 7 | IDEAPAD 5 2in1 Touchscreen AMD RYZEN 7 AI"></Label>
-                            <!--kode_barang-->
-                            <Label Text="100312100" TextColor="Grey"></Label>
-                            <StackLayout Orientation="Horizontal" VerticalOptions="EndAndExpand" Spacing="5">
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry HeightRequest="100" VerticalTextAlignment="Start" Placeholder="Alamat Pengiriman"></Entry>
+                    </Border>
 
-                                <StackLayout HorizontalOptions="FillAndExpand">
-                                    <!--harga-->
-                                    <Label Text="Rp 50.000.000" HorizontalOptions="FillAndExpand" TextColor="DarkGray" FontSize="18" FontAttributes="Bold"></Label>
+                    <Button Text="Close" HorizontalOptions="End" WidthRequest="60" BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
 
-                                    <HorizontalStackLayout>
-                                        <Image Source="discount100.png" HeightRequest="12"></Image>
-                                        <Label Text="-Rp 100.000" HorizontalOptions="FillAndExpand" TextColor="#E22284" FontSize="Small" FontAttributes="Bold" VerticalTextAlignment="Center"></Label>
-                                    </HorizontalStackLayout>
-
-                                </StackLayout>
-
-                                <!--jumlah jual-->
-                                <Label Text="x5" VerticalOptions="Center" HorizontalOptions="End" TranslationX="-5" HorizontalTextAlignment="End" TextColor="Grey"></Label>
-                            </StackLayout>
-                        </StackLayout>
-
-                        <StackLayout Grid.Row="1" Grid.ColumnSpan="2" Grid.Column="0">
-
-                            <BoxView HeightRequest="0.4" Margin="0,10,0,10" Opacity="1" Color="WhiteSmoke" HorizontalOptions="Fill" Grid.Row="3" Grid.ColumnSpan="2"/>
-                            <StackLayout Orientation="Horizontal">
-                                <Label Text="Total Harga :" HorizontalOptions="FillAndExpand" VerticalTextAlignment="Center"></Label>
-                                <Label Text="Rp 100.000.000" FontAttributes="Bold" FontSize="20" TextColor="DarkCyan" HorizontalTextAlignment="End" HorizontalOptions="End"></Label>
-                            </StackLayout>
-                        </StackLayout>
-                    </Grid>
                 </StackLayout>
-            </toolkit:Expander>
+
+                <!--biaya, diskon akhir dan pajak-->
+                
+            </StackLayout>
         </Border>
         <!--row 2 tombol tombol-->
         <Grid ColumnDefinitions="0.25*,0.25*,*" Grid.Row="2">
-            
-
             <StackLayout BackgroundColor="OrangeRed" Grid.Column="0" VerticalOptions="Fill">
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="B_ShipmentTapGesture" Tapped="B_ShipmentTapGesture_Tapped"></TapGestureRecognizer>
+                </StackLayout.GestureRecognizers>
                 <Image Source="shipment.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
             </StackLayout>
 
             <StackLayout BackgroundColor="DodgerBlue" Grid.Column="1">
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="B_BiayaTapGesture" Tapped="B_BiayaTapGesture_Tapped"></TapGestureRecognizer>
+                </StackLayout.GestureRecognizers>
                 <Image Source="propertieswhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
             </StackLayout>
 
             <Button Grid.Row="2" CornerRadius="0" Grid.Column="2"
-                FontSize="20" FontAttributes="Bold"
+                FontSize="20" FontAttributes="Bold" x:Name="B_NewFaktur" Clicked="B_NewFaktur_Clicked"
                 BackgroundColor="DarkCyan" ImageSource="add24.png" Text="BUAT FAKTUR"></Button>
-            
-            
-
         </Grid>
         
         
