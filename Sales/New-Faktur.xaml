@@ -94,9 +94,26 @@
                 </StackLayout>
             </toolkit:Expander>
         </Border>
+        <!--row 2 tombol tombol-->
+        <Grid ColumnDefinitions="0.25*,0.25*,*" Grid.Row="2">
+            
 
-        <Button Grid.Row="2" CornerRadius="0" 
+            <StackLayout BackgroundColor="OrangeRed" Grid.Column="0" VerticalOptions="Fill">
+                <Image Source="shipment.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
+            </StackLayout>
+
+            <StackLayout BackgroundColor="DodgerBlue" Grid.Column="1">
+                <Image Source="propertieswhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
+            </StackLayout>
+
+            <Button Grid.Row="2" CornerRadius="0" Grid.Column="2"
                 FontSize="20" FontAttributes="Bold"
                 BackgroundColor="DarkCyan" ImageSource="add24.png" Text="BUAT FAKTUR"></Button>
+            
+            
+
+        </Grid>
+        
+        
     </Grid>
 </ContentPage>
