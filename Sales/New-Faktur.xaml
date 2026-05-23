@@ -9,7 +9,7 @@
     <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10" ColumnDefinitions="*" ColumnSpacing="10" Padding="0,0">
         <!--row 0-->
         <Border Grid.Row="0" Padding="20,20,20,10" StrokeShape="RoundRectangle 0,0,20,20"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
-            <toolkit:Expander IsExpanded="False">
+            <toolkit:Expander IsExpanded="True">
                 <toolkit:Expander.Header>
                     <StackLayout Orientation="Horizontal">
                         <Label Text="NEW FAKTUR JUAL" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
@@ -43,7 +43,7 @@
         <Border Grid.Row="1" VerticalOptions="Start" Padding="10" StrokeShape="RoundRectangle 10" Margin="15,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <StackLayout>
                 <!--detail barang-->
-                <toolkit:Expander IsExpanded="False" x:Name="ViewBarang" IsVisible="False">
+                <toolkit:Expander IsExpanded="True" x:Name="ViewBarang">
                     <toolkit:Expander.Header>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="DETAIL BARANG" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
@@ -95,7 +95,7 @@
                 </toolkit:Expander>
                 
                 <!--pengirim jenis dan alamat-->
-                <StackLayout x:Name="ViewPengirim" IsVisible="True" Spacing="10">
+                <StackLayout x:Name="ViewPengirim" IsVisible="False" Spacing="10">
 
                     <HorizontalStackLayout Spacing="10">
                         <Image Source="shipmentgrey100.png" HeightRequest="14"></Image>
@@ -116,7 +116,7 @@
 
                     </Border>
 
-                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" Margin="0,0,0,10">
                         <Entry HeightRequest="100" VerticalTextAlignment="Start" Placeholder="Alamat Pengiriman"></Entry>
                     </Border>
 
@@ -124,11 +124,11 @@
 
                 </StackLayout>
 
-                <!--biaya, diskon akhir dan pajak-->
-                <StackLayout x:Name="ViewBiaya" IsVisible="True" Spacing="10">
+                <!--biaya dan pajak-->
+                <StackLayout x:Name="ViewBiaya" IsVisible="False" Spacing="10">
                     <HorizontalStackLayout Spacing="10">
                         <Image Source="propertiesgrey100.png" HeightRequest="14"></Image>
-                        <Label Text="Biaya, Diskon dan Pajak" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
+                        <Label Text="Biaya dan Pajak" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
                     </HorizontalStackLayout>
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                         <StackLayout Orientation="Horizontal">
@@ -142,16 +142,55 @@
                         </StackLayout>
                     </Border>
 
-                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Harga biaya Ex. 25000" Keyboard="Numeric"></Entry>
-                    </Border>
+                    <StackLayout Spacing="10" Orientation="Horizontal">
+                        <Border Padding="10,5" StrokeShape="RoundRectangle 10" HorizontalOptions="FillAndExpand" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                            <Entry Placeholder="Harga biaya Ex. 25000" Keyboard="Numeric" HorizontalOptions="FillAndExpand"></Entry>
+                        </Border>
+                        <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                    </StackLayout>
+                    
+                    <!--grid data biaya lain-->
 
-                    <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" 
-                            HorizontalOptions="End"></Button>
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" 
+                          BackgroundColor="WhiteSmoke" Padding="10,10,10,10">
 
-                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Diskon Ex. 10000 or 5%" Keyboard="Numeric"></Entry>
-                    </Border>
+                        <Label Text="No." FontAttributes="Bold" Grid.Column="0" Grid.Row="0" TextColor="Grey"
+                               VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
+                        <Label Text="Keterangan Biaya" FontAttributes="Bold" Grid.Column="1" Grid.Row="0" TextColor="Grey" 
+                               VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+                        <Label Text="Nominal" FontAttributes="Bold" Grid.Column="2" Grid.Row="0" TextColor="Grey" 
+                               VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+     
+                        <BoxView HeightRequest="1" Margin="0,10,0,10" Opacity="1" Color="Grey" HorizontalOptions="Fill" Grid.Row="1" Grid.ColumnSpan="4"/>
+                        
+                        <!--data-->
+
+                        <Label Text="40041" FontAttributes="Bold" Grid.Column="0" Grid.Row="2" TextColor="DodgerBlue"
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
+                        <Label Text="Pengantaran ke Konsumen" FontAttributes="Bold" Grid.Column="1" Grid.Row="2" TextColor="Grey" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+                        <Label Text="Rp 100.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" TextColor="Grey" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
+                        <Label Text="Hapus" FontAttributes="Bold" Grid.Column="3" Grid.Row="2" TextColor="OrangeRed" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>
+                        
+                        <Label Text="40042" FontAttributes="Bold" Grid.Column="0" Grid.Row="3" TextColor="DodgerBlue"
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
+                        <Label Text="Instalasi" FontAttributes="Bold" Grid.Column="1" Grid.Row="3" TextColor="Grey" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+                        <Label Text="Rp 50.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" TextColor="Grey" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
+                        <Label Text="Hapus" FontAttributes="Bold" Grid.Column="3" Grid.Row="3" TextColor="OrangeRed" 
+                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
+
+                        <!--data-->
+
+                    </Grid>
+                    
+                    
+                    <!--grid data biaya lain-->
+                    
+                   
 
 
                     <HorizontalStackLayout>
@@ -162,12 +201,37 @@
                     
                 </StackLayout>
 
-                <Button Text="Close" HorizontalOptions="End" WidthRequest="60" BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
+                <StackLayout x:Name="ViewDiskon" IsVisible="False" Spacing="10">
+                    <HorizontalStackLayout Spacing="10">
+                        <Image Source="diskon100.png" HeightRequest="14"></Image>
+                        <Label Text="Diskon Akhir" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
+                    </HorizontalStackLayout>
+
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry Placeholder="Diskon Nominal Ex. 10.000" Keyboard="Numeric"></Entry>
+                    </Border>
+
+                    <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Entry Placeholder="Diskon Persen Ex. 50%"></Entry>
+                    </Border>
+
+                    <HorizontalStackLayout Spacing="10">
+                        <Button Text="Hapus" BackgroundColor="OrangeRed" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                        <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                        
+                    </HorizontalStackLayout>
+
+                    
+                </StackLayout>
+                
+                
+
+                <Button Text="Close" x:Name="BClose" IsVisible="False" Clicked="BClose_Clicked" HorizontalOptions="End" WidthRequest="60" BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
 
             </StackLayout>
         </Border>
         <!--row 2 tombol tombol-->
-        <Grid ColumnDefinitions="0.25*,0.25*,*" Grid.Row="2">
+        <Grid ColumnDefinitions="0.25*,0.25*,0.25*,*" Grid.Row="2">
             <StackLayout BackgroundColor="OrangeRed" Grid.Column="0" VerticalOptions="Fill">
                 <StackLayout.GestureRecognizers>
                     <TapGestureRecognizer x:Name="B_ShipmentTapGesture" Tapped="B_ShipmentTapGesture_Tapped"></TapGestureRecognizer>
@@ -182,7 +246,14 @@
                 <Image Source="propertieswhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
             </StackLayout>
 
-            <Button Grid.Row="2" CornerRadius="0" Grid.Column="2"
+            <StackLayout BackgroundColor="DeepPink" Grid.Column="2">
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="B_Diskon" Tapped="B_Diskon_Tapped"></TapGestureRecognizer>
+                </StackLayout.GestureRecognizers>
+                <Image Source="diskonwhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
+            </StackLayout>
+
+            <Button Grid.Row="2" CornerRadius="0" Grid.Column="3"
                 FontSize="20" FontAttributes="Bold" x:Name="B_NewFaktur" Clicked="B_NewFaktur_Clicked"
                 BackgroundColor="DarkCyan" ImageSource="add24.png" Text="BUAT FAKTUR"></Button>
         </Grid>

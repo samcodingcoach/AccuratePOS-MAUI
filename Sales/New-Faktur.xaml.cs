@@ -26,17 +26,44 @@ public partial class New_Faktur : ContentPage
 
     private void B_ShipmentTapGesture_Tapped(object sender, TappedEventArgs e)
     {
-
+        ViewBarang.IsVisible = false;
+        ViewDiskon.IsVisible = false;
+        ViewPengirim.IsVisible = true;
+        ViewBiaya.IsVisible = false;
+        BClose.IsVisible = true;
     }
 
     private void B_BiayaTapGesture_Tapped(object sender, TappedEventArgs e)
     {
-
+        ViewBarang.IsVisible = false;
+        ViewDiskon.IsVisible = false;
+        ViewPengirim.IsVisible = false;
+        ViewBiaya.IsVisible = true;
+        BClose.IsVisible =true;
     }
 
     private void B_NewFaktur_Clicked(object sender, EventArgs e)
     {
 
+    }
+
+    private void BClose_Clicked(object sender, EventArgs e)
+    {
+        ViewBarang.IsVisible = true;
+        ViewDiskon.IsVisible = false;
+        ViewPengirim.IsVisible = false;
+        ViewBiaya.IsVisible = false;
+        BClose.IsVisible = false;
+
+    }
+
+    private void B_Diskon_Tapped(object sender, TappedEventArgs e)
+    {
+        ViewBarang.IsVisible = false;
+        ViewDiskon.IsVisible = true;
+        ViewPengirim.IsVisible = false;
+        ViewBiaya.IsVisible = false;
+        BClose.IsVisible = true;
     }
 
     private void OnKonsumenSelected(object sender, EventArgs e)
