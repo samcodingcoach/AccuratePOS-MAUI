@@ -56,7 +56,7 @@
                             <Entry Placeholder="Masukkan Kode Barang / UPC NO" HorizontalOptions="FillAndExpand" x:Name="Entry_NoBarcode" ClearButtonVisibility="WhileEditing"/>
                             <!--List Barang Detail Item-->
                         </Border>
-
+                        <!--template nantinya di ganti listview atau collection view-->
                         <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" ColumnSpacing="10">
                             <Image Source="nophotoproduct150.jpg" Grid.Column="0" HeightRequest="60"></Image>
                             <StackLayout Grid.Column="1">
@@ -91,6 +91,7 @@
                                 </StackLayout>
                             </StackLayout>
                         </Grid>
+                        <!--template nantinya di ganti listview atau collection view-->
                     </StackLayout>
                 </toolkit:Expander>
                 
@@ -278,7 +279,6 @@
 
             </toolkit:Expander>
         </Border>
-
 
 
         <!--row 3 tombol tombol-->
