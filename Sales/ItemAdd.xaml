@@ -29,7 +29,7 @@
             <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                 <StackLayout>
                     <Label Text="Harga Jual" FontAttributes="Bold" TranslationX="2"></Label>
-                    <Entry Placeholder="Masukan Harga Jual" HorizontalTextAlignment="End" Keyboard="Numeric" x:Name="FormHargaJual" IsEnabled="False"
+                    <Entry Placeholder="Masukan Harga Jual" Keyboard="Numeric" x:Name="FormHargaJual" IsEnabled="False"
                            ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
                 </StackLayout>
             </Border>
@@ -43,7 +43,22 @@
                            ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
                 </StackLayout>
             </Border>
+
+            <!--No Seri Input-->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Border Padding="10,5,10,5" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                    <StackLayout>
+                        
+                        <Entry Placeholder="Masukan Nomor Serial Barang" x:Name="FormNomorSerial" ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                    </StackLayout>
+                </Border>
+                
+                <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed"></Button>
+            </Grid>
             
+            <!--No Seri List-->
+            
+
             <!-- Sales -->
             <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                 <StackLayout>
@@ -54,6 +69,9 @@
                     </StackLayout>
                 </StackLayout>
             </Border>
+        
+            
+        
         </StackLayout>
 
         <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Grid.Row="1">
