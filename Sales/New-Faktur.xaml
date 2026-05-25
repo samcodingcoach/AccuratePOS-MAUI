@@ -6,14 +6,14 @@
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="#d2dae2" 
              Title="New_Faktur">
-    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="10" ColumnDefinitions="*" ColumnSpacing="10" Padding="0,0">
+    <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="0" ColumnDefinitions="*" ColumnSpacing="10" Padding="0,0">
         <!--row 0-->
         <Border Grid.Row="0" Padding="20,20,20,10" StrokeShape="RoundRectangle 0,0,20,20"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <toolkit:Expander IsExpanded="True">
                 <toolkit:Expander.Header>
                     <StackLayout Orientation="Horizontal">
                         <Label Text="NEW FAKTUR JUAL" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
-                        <Image Source="chevron24.png" TranslationY="-3"></Image>
+                        <Image Source="chevron100.png" TranslationY="-3" HeightRequest="24"></Image>
                     </StackLayout>
                 </toolkit:Expander.Header>
 
@@ -40,14 +40,14 @@
             </toolkit:Expander>
         </Border>
         <!--row 1 cari barang dan detail , Munculkan Sistem Dialog Pengiriman Visible On Off-->
-        <Border Grid.Row="1" VerticalOptions="Start" Padding="10" StrokeShape="RoundRectangle 10" Margin="15,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+        <Border Grid.Row="1" VerticalOptions="Start" Padding="10" StrokeShape="RoundRectangle 10" Margin="10,10"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <StackLayout>
                 <!--detail barang-->
                 <toolkit:Expander IsExpanded="True" x:Name="ViewBarang">
                     <toolkit:Expander.Header>
                         <StackLayout Orientation="Horizontal">
                             <Label Text="DETAIL BARANG" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
-                            <Image Source="chevron24.png" TranslationY="-3"></Image>
+                            <Image Source="chevron100.png" TranslationY="-3" HeightRequest="24"></Image>
                         </StackLayout>
                     </toolkit:Expander.Header>
                     <!--Pili Barang dan Jasa-->
@@ -230,8 +230,59 @@
 
             </StackLayout>
         </Border>
-        <!--row 2 tombol tombol-->
-        <Grid ColumnDefinitions="0.25*,0.25*,0.25*,*" Grid.Row="2">
+        
+        <!--row 2 subtotal pajak diskon harga grand total-->
+        <Border Grid.Row="2" Padding="20,15,20,10" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+            <toolkit:Expander IsExpanded="True">
+                <toolkit:Expander.Header>
+                    <StackLayout Orientation="Horizontal">
+                        <Label Text="Grand Total" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
+                        <Image Source="chevron100.png" TranslationY="-3" HeightRequest="24"></Image>
+                    </StackLayout>
+                </toolkit:Expander.Header>
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+                    
+                    <!--subtotal-->
+                    <Image Source="subtotal100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="0"></Image>
+                    <Label Text="Subtotal" Grid.Column="1" Grid.Row="0" TextColor="#575757"></Label>
+                    <Label Text="Rp 100.000" FontAttributes="Bold" HorizontalTextAlignment="End" Grid.Column="2" Grid.Row="0"></Label>
+
+                    <!--diskon-->
+                    <Image Source="diskon100.png" HeightRequest="16" Grid.Column="0" Grid.Row="1"></Image>
+                    <Label Text="Diskon" Grid.Column="1" Grid.Row="1" TextColor="#575757"></Label>
+                    <Label Text="Rp 50" FontAttributes="Bold" Grid.Column="2" Grid.Row="1" HorizontalTextAlignment="End"></Label>
+
+
+                    <!--biaya-->
+                    <Image Source="propertiesgrey100.png" HeightRequest="16" Grid.Column="0" Grid.Row="2"></Image>
+                    <Label Text="Biaya Lain" Grid.Column="1" Grid.Row="2" TextColor="#575757"></Label>
+                    <Label Text="Rp 80.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" HorizontalTextAlignment="End"></Label>
+
+                    <!--biaya-->
+                    <Image Source="tax100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="3"></Image>
+                    <Label Text="PPN 12%" Grid.Column="1" Grid.Row="3" TextColor="#575757"></Label>
+                    <Label Text="Rp 50.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" HorizontalTextAlignment="End"></Label>
+                    
+                    <!--garis-->
+                    <BoxView HeightRequest="0.4" Margin="0" Opacity="0.2" Color="#575757" HorizontalOptions="Fill" Grid.Row="4" Grid.ColumnSpan="3"/>
+
+                    <!--total harga-->
+                    <Image Source="grandtotal100gray.png" HeightRequest="16" Grid.Column="0" Grid.Row="5"></Image>
+                    <Label Text="Total Faktur" Grid.Column="1" Grid.Row="5" TextColor="#575757"></Label>
+                    <Label Text="Rp 12.250.000" FontSize="20" TextColor="DarkCyan" FontAttributes="Bold" Grid.Column="2" Grid.Row="5" HorizontalTextAlignment="End"></Label>
+
+
+
+                </Grid>
+                
+
+            </toolkit:Expander>
+        </Border>
+
+
+
+        <!--row 3 tombol tombol-->
+        <Grid ColumnDefinitions="0.25*,0.25*,0.25*,*" Grid.Row="3">
             <StackLayout BackgroundColor="OrangeRed" Grid.Column="0" VerticalOptions="Fill">
                 <StackLayout.GestureRecognizers>
                     <TapGestureRecognizer x:Name="B_ShipmentTapGesture" Tapped="B_ShipmentTapGesture_Tapped"></TapGestureRecognizer>
