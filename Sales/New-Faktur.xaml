@@ -245,23 +245,23 @@
                     <!--subtotal-->
                     <Image Source="subtotal100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="0"></Image>
                     <Label Text="Subtotal" Grid.Column="1" Grid.Row="0" TextColor="#575757"></Label>
-                    <Label Text="Rp 100.000" FontAttributes="Bold" HorizontalTextAlignment="End" Grid.Column="2" Grid.Row="0"></Label>
+                    <Label Text="Rp 0" x:Name="EntrySubtotal" FontAttributes="Bold" HorizontalTextAlignment="End" Grid.Column="2" Grid.Row="0"></Label>
 
                     <!--diskon-->
                     <Image Source="diskon100.png" HeightRequest="16" Grid.Column="0" Grid.Row="1"></Image>
                     <Label Text="Diskon" Grid.Column="1" Grid.Row="1" TextColor="#575757"></Label>
-                    <Label Text="Rp 50" FontAttributes="Bold" Grid.Column="2" Grid.Row="1" HorizontalTextAlignment="End"></Label>
+                    <Label Text="Rp 0" x:Name="EntryTotalDiskon" FontAttributes="Bold" Grid.Column="2" Grid.Row="1" HorizontalTextAlignment="End"></Label>
 
 
                     <!--biaya-->
                     <Image Source="propertiesgrey100.png" HeightRequest="16" Grid.Column="0" Grid.Row="2"></Image>
                     <Label Text="Biaya Lain" Grid.Column="1" Grid.Row="2" TextColor="#575757"></Label>
-                    <Label Text="Rp 80.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" HorizontalTextAlignment="End"></Label>
+                    <Label Text="Rp 0" x:Name="EntryTotalBiaya" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" HorizontalTextAlignment="End"></Label>
 
                     <!--biaya-->
                     <Image Source="tax100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="3"></Image>
                     <Label Text="PPN 12%" Grid.Column="1" Grid.Row="3" TextColor="#575757"></Label>
-                    <Label Text="Rp 50.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" HorizontalTextAlignment="End"></Label>
+                    <Label Text="Rp 0" x:Name="EntryTotalPajak" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" HorizontalTextAlignment="End"></Label>
                     
                     <!--garis-->
                     <BoxView HeightRequest="0.4" Margin="0" Opacity="0.2" Color="#575757" HorizontalOptions="Fill" Grid.Row="4" Grid.ColumnSpan="3"/>
@@ -269,7 +269,7 @@
                     <!--total harga-->
                     <Image Source="grandtotal100gray.png" HeightRequest="16" Grid.Column="0" Grid.Row="5"></Image>
                     <Label Text="Total Faktur" Grid.Column="1" Grid.Row="5" TextColor="#575757"></Label>
-                    <Label Text="Rp 12.250.000" FontSize="20" TextColor="DarkCyan" FontAttributes="Bold" Grid.Column="2" Grid.Row="5" HorizontalTextAlignment="End"></Label>
+                    <Label Text="Rp 0" x:Name="EntryGrandTotal" FontSize="20" TextColor="DarkCyan" FontAttributes="Bold" Grid.Column="2" Grid.Row="5" HorizontalTextAlignment="End"></Label>
 
 
 
