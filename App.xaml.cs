@@ -16,8 +16,8 @@ public partial class App : Application
 	{
 		InitializeComponent();
 
-        //string publik = "https://resto.samdev.org/pos-accurate/";
-        string publik = "http://192.168.77.8/pos-accurate/";
+        string publik = "https://resto.samdev.org/pos-accurate/";
+        //string publik = "http://192.168.77.8/pos-accurate/";
         API_HOST = publik + "api/";
         
         API_LOGIN = publik + "config/mobile-login-api.php";

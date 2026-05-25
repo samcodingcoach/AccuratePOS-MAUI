@@ -93,7 +93,7 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Button Grid.Row="3" Text="New Faktur Penjualan" FontAttributes="Bold" FontSize="Large"></Button>
+        <Button Grid.Row="3" Text="New Faktur Penjualan" x:Name="B_NewFak" Clicked="B_NewFak_Clicked" FontAttributes="Bold" FontSize="Large"></Button>
 
     </Grid>
 </ContentPage>

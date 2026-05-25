@@ -240,4 +240,9 @@ public partial class List_Faktur : ContentPage
         public int id { get; set; }
         public string customerNo { get; set; }
     }
+
+    private async void B_NewFak_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new Sales.New_Faktur());
+    }
 }

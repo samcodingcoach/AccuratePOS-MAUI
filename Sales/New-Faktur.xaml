@@ -53,7 +53,43 @@
                     <!--Pili Barang dan Jasa-->
                     <StackLayout Spacing="10">
                         <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                            <Entry Placeholder="Masukkan Kode Barang / UPC NO" HorizontalOptions="FillAndExpand" x:Name="Entry_NoBarcode" ClearButtonVisibility="WhileEditing"/>
+                            <StackLayout>
+                                <SearchBar Placeholder="Ketik Nama atau Kode Barang..."  x:Name="SearchBar_Item" TextChanged="SearchBar_Item_TextChanged" HorizontalOptions="FillAndExpand"/>
+
+                                <Border x:Name="Border_AutoComplete"  IsVisible="False"
+                                        Padding="0"  
+                                        Margin="0, -10, 0, 10" 
+                                        StrokeShape="RoundRectangle 5" 
+                                        Stroke="#CCCCCC" StrokeThickness="1" 
+                                        BackgroundColor="White" MaximumHeightRequest="200">
+
+                                    <Border.Shadow>
+                                        <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.2" />
+                                    </Border.Shadow>
+
+                                    <CollectionView x:Name="List_AutoComplete" SelectionMode="Single" SelectionChanged="List_AutoComplete_SelectionChanged">
+                                        <CollectionView.EmptyView>
+                                            <StackLayout Padding="15">
+                                                <Label Text="Tidak ada barang yang cocok." TextColor="Red" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center"/>
+                                            </StackLayout>
+                                        </CollectionView.EmptyView>
+                                        
+                                        <CollectionView.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackLayout Padding="10" Orientation="Horizontal" BackgroundColor="White">
+                                                    <StackLayout HorizontalOptions="FillAndExpand">
+                                                        <Label Text="{Binding name}" FontAttributes="Bold" FontSize="14" TextColor="Black"/>
+                                                        <Label Text="{Binding item_no}" FontSize="12" TextColor="Gray"/>
+                                                    </StackLayout>
+                                                    <StackLayout HorizontalOptions="End" VerticalOptions="Center">
+                                                        <Label Text="{Binding balance, StringFormat='Stok: {0:N0}'}" FontSize="12" TextColor="DarkGreen"/>
+                                                    </StackLayout>
+                                                </StackLayout>
+                                            </DataTemplate>
+                                        </CollectionView.ItemTemplate>
+                                    </CollectionView>
+                                </Border>
+                            </StackLayout>
                             <!--List Barang Detail Item-->
                         </Border>
                         <!--template nantinya di ganti listview atau collection view-->
@@ -234,7 +270,7 @@
         
         <!--row 2 subtotal pajak diskon harga grand total-->
         <Border Grid.Row="2" Padding="20,15,20,10" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
-            <toolkit:Expander IsExpanded="True">
+            <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
                     <StackLayout Orientation="Horizontal">
                         <Label Text="Grand Total" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
