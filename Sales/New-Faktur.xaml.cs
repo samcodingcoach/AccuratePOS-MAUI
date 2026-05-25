@@ -5,7 +5,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
-
 using Newtonsoft.Json;
 namespace MyPosAccurate2026.Sales;
 

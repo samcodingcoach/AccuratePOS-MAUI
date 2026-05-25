@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPosAccurate2026.Sales.ItemAdd"
+             Title="ItemAdd">
+    <Grid RowDefinitions="*, Auto" Padding="20">
+        <StackLayout Grid.Row="0" Spacing="10">
+
+            <Label Text="KODE / NO ITEM" FontAttributes="Bold" TextColor="DarkCyan" FontSize="18"></Label>
+            
+            <!--Nama Barang-->
+            <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                <StackLayout>
+                    <Label Text="Nama Barang" FontAttributes="Bold" TranslationX="2"></Label>
+                    <Entry Placeholder="Masukan Nama Barang" Text="Xiaomi " x:Name="FormNamaBarang" IsEnabled="False"
+                           ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                </StackLayout>
+            </Border>
+            <!--Kuantitas-->
+            <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                <StackLayout>
+                    <Label Text="Kuantitas Jual" FontAttributes="Bold" TranslationX="2"></Label>
+                    <Entry Placeholder="Masukan Kuantitas" Text="1" Keyboard="Numeric" x:Name="FormQty"
+                           ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                </StackLayout>
+            </Border>
+            
+            <!--Harga -->
+            <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                <StackLayout>
+                    <Label Text="Harga Jual" FontAttributes="Bold" TranslationX="2"></Label>
+                    <Entry Placeholder="Masukan Harga Jual" HorizontalTextAlignment="End" Keyboard="Numeric" x:Name="FormHargaJual" IsEnabled="False"
+                           ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                </StackLayout>
+            </Border>
+
+            <!-- Gudang -->
+            <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                <StackLayout>
+                    <Label Text="Gudang" FontAttributes="Bold" TranslationX="2"></Label>
+                    <Entry Placeholder="Masukan Gudang" Text="Gudang Utama" 
+                           x:Name="FormNamaGudang"
+                           ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                </StackLayout>
+            </Border>
+            
+            <!-- Sales -->
+            <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                <StackLayout>
+                    <Label Text="Sales / Penjual" FontAttributes="Bold" TranslationX="2"></Label>
+                    <StackLayout Orientation="Horizontal">
+                        <Picker x:Name="PickerSales" HorizontalOptions="FillAndExpand" Title="Pilih Sales" ItemDisplayBinding="{Binding DisplayName}" SelectedIndexChanged="PickerSales_SelectedIndexChanged" Margin="0,5,0,0"/>
+                        <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
+                    </StackLayout>
+                </StackLayout>
+            </Border>
+        </StackLayout>
+
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Grid.Row="1">
+            <Button Text="Close" x:Name="BClose"  Clicked="BClose_Clicked" Grid.Column="0"
+                    BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
+
+            <Button Text="Simpan" x:Name="BSimpan" FontAttributes="Bold" Clicked="BSimpan_Clicked" Grid.Column="1"
+                    BackgroundColor="DarkCyan"></Button>
+        </Grid>
+    </Grid>
+</ContentPage>

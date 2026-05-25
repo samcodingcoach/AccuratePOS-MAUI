@@ -117,6 +117,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Sales\ItemAdd.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Sales\List-Faktur.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
