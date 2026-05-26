@@ -24,7 +24,7 @@ public partial class App : Application
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new NavigationPage(new Sales.ItemAdd());
+        MainPage = new NavigationPage(new Sales.New_Faktur());
 
     }
 

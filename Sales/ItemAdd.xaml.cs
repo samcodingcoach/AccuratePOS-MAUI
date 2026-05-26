@@ -10,6 +10,8 @@ namespace MyPosAccurate2026.Sales;
 
 public partial class ItemAdd : ContentPage
 {
+    public double ItemBalance { get; set; }
+    public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
     public ItemAdd()
 	{
@@ -17,6 +19,16 @@ public partial class ItemAdd : ContentPage
         cek_token();
         LoadSalesData();
 	}
+
+
+    public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
+    {
+        InitializeComponent();
+        CustomerCode = konsumenValue;
+        ItemBalance = balance;
+        FormNoItem.Text = itemNo;
+        FormNamaBarang.Text = name;
+    }
 
     private async void cek_token()
     {

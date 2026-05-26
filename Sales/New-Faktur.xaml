@@ -57,11 +57,7 @@
                                 <SearchBar Placeholder="Ketik Nama atau Kode Barang..."  x:Name="SearchBar_Item" TextChanged="SearchBar_Item_TextChanged" HorizontalOptions="FillAndExpand"/>
 
                                 <Border x:Name="Border_AutoComplete"  IsVisible="False"
-                                        Padding="0"  
-                                        Margin="0, -10, 0, 10" 
-                                        StrokeShape="RoundRectangle 5" 
-                                        Stroke="#CCCCCC" StrokeThickness="1" 
-                                        BackgroundColor="White" MaximumHeightRequest="200">
+                                        Padding="0" Margin="0, -10, 0, 10" StrokeShape="RoundRectangle 5" Stroke="#CCCCCC" StrokeThickness="1"  BackgroundColor="White" MaximumHeightRequest="200">
 
                                     <Border.Shadow>
                                         <Shadow Brush="Black" Offset="0,2" Radius="5" Opacity="0.2" />
@@ -89,6 +85,7 @@
                                         </CollectionView.ItemTemplate>
                                     </CollectionView>
                                 </Border>
+                                
                             </StackLayout>
                             <!--List Barang Detail Item-->
                         </Border>
@@ -167,13 +164,10 @@
                         <Image Source="propertiesgrey100.png" HeightRequest="14"></Image>
                         <Label Text="Biaya dan Pajak" FontSize="16" FontAttributes="Bold" TextColor="Grey"></Label>
                     </HorizontalStackLayout>
+
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                         <StackLayout Orientation="Horizontal">
-                            <Picker x:Name="PickerBiaya" HorizontalOptions="FillAndExpand" Title="Pilih Biaya Lain">
-                                <Picker.Items>
-                                    <x:String>4402 - Pengantaran ke Customer</x:String>
-                                    <x:String>4403 - Instalasi</x:String>
-                                </Picker.Items>
+                            <Picker x:Name="PickerBiaya" HorizontalOptions="FillAndExpand" Title="Pilih Biaya Lain" ItemDisplayBinding="{Binding DisplayName}">
                             </Picker>
                             <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
                         </StackLayout>
@@ -181,61 +175,41 @@
 
                     <StackLayout Spacing="10" Orientation="Horizontal">
                         <Border Padding="10,5" StrokeShape="RoundRectangle 10" HorizontalOptions="FillAndExpand" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                            <Entry Placeholder="Harga biaya Ex. 25000" Keyboard="Numeric" HorizontalOptions="FillAndExpand"></Entry>
+                            <Entry x:Name="EntryHargaBiaya" Placeholder="Harga biaya Ex. 25000" Keyboard="Numeric" HorizontalOptions="FillAndExpand" TextChanged="EntryHargaBiaya_TextChanged"></Entry>
                         </Border>
-                        <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                        <Button x:Name="BTambahBiaya" Text="Tambah" Clicked="BTambahBiaya_Clicked" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
                     </StackLayout>
-                    
-                    <!--grid data biaya lain-->
 
-                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="10" 
-                          BackgroundColor="WhiteSmoke" Padding="10,10,10,10">
-
-                        <Label Text="No." FontAttributes="Bold" Grid.Column="0" Grid.Row="0" TextColor="Grey"
-                               VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
-                        <Label Text="Keterangan Biaya" FontAttributes="Bold" Grid.Column="1" Grid.Row="0" TextColor="Grey" 
-                               VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
-                        <Label Text="Nominal" FontAttributes="Bold" Grid.Column="2" Grid.Row="0" TextColor="Grey" 
-                               VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
-     
-                        <BoxView HeightRequest="1" Margin="0,10,0,10" Opacity="1" Color="Grey" HorizontalOptions="Fill" Grid.Row="1" Grid.ColumnSpan="4"/>
-                        
-                        <!--data-->
-
-                        <Label Text="40041" FontAttributes="Bold" Grid.Column="0" Grid.Row="2" TextColor="DodgerBlue"
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
-                        <Label Text="Pengantaran ke Konsumen" FontAttributes="Bold" Grid.Column="1" Grid.Row="2" TextColor="Grey" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
-                        <Label Text="Rp 100.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" TextColor="Grey" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
-                        <Label Text="Hapus" FontAttributes="Bold" Grid.Column="3" Grid.Row="2" TextColor="OrangeRed" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>
-                        
-                        <Label Text="40042" FontAttributes="Bold" Grid.Column="0" Grid.Row="3" TextColor="DodgerBlue"
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
-                        <Label Text="Instalasi" FontAttributes="Bold" Grid.Column="1" Grid.Row="3" TextColor="Grey" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
-                        <Label Text="Rp 50.000" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" TextColor="Grey" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
-                        <Label Text="Hapus" FontAttributes="Bold" Grid.Column="3" Grid.Row="3" TextColor="OrangeRed" 
-                            VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>     
-
-                        <!--data-->
-
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" BackgroundColor="WhiteSmoke" Padding="10,10,10,0">
+                        <Label Text="No." FontAttributes="Bold" Grid.Column="0" TextColor="Grey" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
+                        <Label Text="Keterangan Biaya" FontAttributes="Bold" Grid.Column="1" TextColor="Grey" VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+                        <Label Text="Nominal" FontAttributes="Bold" Grid.Column="2" TextColor="Grey" VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>
                     </Grid>
-                    
-                    
-                    <!--grid data biaya lain-->
-                    
-                   
 
+                    <BoxView HeightRequest="1" Margin="10,5,10,5" Opacity="1" Color="Grey" HorizontalOptions="Fill" />
+
+                    <StackLayout x:Name="ListBiayaContainer" BackgroundColor="WhiteSmoke" Padding="10,0,10,10" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+                                    <Label Text="{Binding No}" FontAttributes="Bold" Grid.Column="0" TextColor="DodgerBlue" VerticalTextAlignment="Center" HorizontalTextAlignment="Center"></Label>
+                                    <Label Text="{Binding Name}" FontAttributes="Bold" Grid.Column="1" TextColor="Grey" VerticalTextAlignment="Center" HorizontalTextAlignment="Start"></Label>
+                                    <Label Text="{Binding FormattedNominal}" FontAttributes="Bold" Grid.Column="2" TextColor="Grey" VerticalTextAlignment="Center" HorizontalTextAlignment="End"></Label>
+                                    <Label Text="Hapus" FontAttributes="Bold" Grid.Column="3" TextColor="OrangeRed" VerticalTextAlignment="Center" HorizontalTextAlignment="End">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="HapusBiaya_Tapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
 
                     <HorizontalStackLayout>
                         <CheckBox IsChecked="True" Color="DarkCyan"></CheckBox>
                         <Label Text="Kena pajak 12%" VerticalTextAlignment="Center" FontSize="15" TextColor="Grey"></Label>
                     </HorizontalStackLayout>
-                    
-                    
+
                 </StackLayout>
 
                 <StackLayout x:Name="ViewDiskon" IsVisible="False" Spacing="10">

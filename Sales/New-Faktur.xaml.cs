@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Globalization; 
 namespace MyPosAccurate2026.Sales;
 
 public partial class New_Faktur : ContentPage
@@ -14,6 +15,7 @@ public partial class New_Faktur : ContentPage
     public record KonsumenOption(string Text, string Value);
 
     public ObservableCollection<ItemModel> AutoCompleteResults { get; set; } = new ObservableCollection<ItemModel>();
+    public ObservableCollection<SelectedBiayaModel> SelectedBiayaList { get; set; } = new ObservableCollection<SelectedBiayaModel>();
 
     // 1. Deklarasikan HttpClient tanpa langsung mengisi string URL di sini
     private readonly HttpClient _httpClient;
@@ -36,6 +38,12 @@ public partial class New_Faktur : ContentPage
         PickerKonsumen.ItemsSource = listKonsumen;
 
         List_AutoComplete.ItemsSource = AutoCompleteResults;
+
+       
+        BindableLayout.SetItemsSource(ListBiayaContainer, SelectedBiayaList);
+
+       
+        _ = LoadCoaData();
     }
 
     private async void cek_token()
@@ -61,9 +69,6 @@ public partial class New_Faktur : ContentPage
 
     }
 
-
-    
-
     public class ApiResponse
     {
         public string status { get; set; }
@@ -78,6 +83,28 @@ public partial class New_Faktur : ContentPage
         public double balance { get; set; }
     }
 
+    public class CoaResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
+        public List<CoaData> data { get; set; }
+    }
+
+    public class CoaData
+    {
+        public string no { get; set; }
+        public string name { get; set; }
+        public int id { get; set; }
+        public string DisplayName => $"{no} - {name}";
+    }
+
+    public class SelectedBiayaModel
+    {
+        public string No { get; set; }
+        public string Name { get; set; }
+        public double Nominal { get; set; }
+        public string FormattedNominal => $"Rp {Nominal:N0}";
+    }
 
     private async void SearchBar_Item_TextChanged(object sender, TextChangedEventArgs e)
     {
@@ -159,20 +186,36 @@ public partial class New_Faktur : ContentPage
         }
     }
 
-    private void List_AutoComplete_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void List_AutoComplete_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (e.CurrentSelection.FirstOrDefault() is ItemModel selectedItem)
         {
-            // Pindahkan teks dan sembunyikan dropdown
+           
+            if (string.IsNullOrWhiteSpace(SelectedKonsumenValue))
+            {
+                // Reset pilihan auto-complete agar tidak menggantung
+                List_AutoComplete.SelectedItem = null;
+                Border_AutoComplete.IsVisible = false;
+
+                // Tampilkan pesan error dan arahkan fokus kursor ke Picker Konsumen
+                await DisplayAlertAsync("Peringatan", "Silakan pilih Konsumen / Pelanggan terlebih dahulu!", "OK");
+                PickerKonsumen.Focus();
+                return;
+            }
+
+            // Jika lolos validasi, sembunyikan dropdown pencarian
             SearchBar_Item.Text = selectedItem.item_no;
             Border_AutoComplete.IsVisible = false;
 
             System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - {selectedItem.item_no}");
 
+            
+            await Navigation.PushAsync(new ItemAdd(selectedItem.item_no,selectedItem.name, selectedItem.balance,SelectedKonsumenValue));
+
+            // Bersihkan seleksi list
             List_AutoComplete.SelectedItem = null;
         }
     }
-
 
     private void B_ShipmentTapGesture_Tapped(object sender, TappedEventArgs e)
     {
@@ -223,12 +266,126 @@ public partial class New_Faktur : ContentPage
         // Cek apakah ada yang dipilih (hindari null saat user batal pilih)
         if (picker?.SelectedItem is KonsumenOption selected)
         {
-          
             SelectedKonsumenValue = selected.Value;
-            System.Diagnostics.Debug.WriteLine($"Value tersimpan: {SelectedKonsumenValue}");
-            
         }
     }
 
 
+    private async Task LoadCoaData()
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            if (string.IsNullOrEmpty(cleanToken)) return;
+
+            string apiUrl = $"{App.API_HOST}coa/list.php";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                var response = await client.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var apiResult = JsonConvert.DeserializeObject<CoaResponse>(responseContent);
+
+                    if (apiResult != null && apiResult.status == "success" && apiResult.data != null)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            PickerBiaya.ItemsSource = apiResult.data;
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Gagal memuat COA: {ex.Message}");
+        }
+    }
+
+    private void EntryHargaBiaya_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        
+        if (string.IsNullOrWhiteSpace(e.NewTextValue))
+            return;
+
+        string cleanText = new string(e.NewTextValue.Where(char.IsDigit).ToArray());
+
+        if (string.IsNullOrEmpty(cleanText))
+        {
+            EntryHargaBiaya.Text = string.Empty;
+            return;
+        }
+        if (long.TryParse(cleanText, out long value))
+        {
+           
+            string formatted = value.ToString("N0", new CultureInfo("id-ID"));
+
+            if (EntryHargaBiaya.Text != formatted)
+            {
+                EntryHargaBiaya.Text = formatted;
+            }
+        }
+    }
+
+    private void UpdateTotalBiaya()
+    {
+        // Jumlahkan semua nilai 'Nominal' yang ada di list menggunakan LINQ
+        double totalBiaya = SelectedBiayaList.Sum(x => x.Nominal);
+
+        // Tampilkan ke Label dengan format Rupiah (titik ribuan)
+        EntryTotalBiaya.Text = $"Rp {totalBiaya.ToString("N0", new CultureInfo("id-ID"))}";
+    }
+
+    private async void BTambahBiaya_Clicked(object sender, EventArgs e)
+    {
+        if (PickerBiaya.SelectedItem is CoaData selectedCoa)
+        {
+            // HILANGKAN TITIK SEBELUM DI-PARSE JADI ANGKA
+            string cleanNominal = EntryHargaBiaya.Text?.Replace(".", "") ?? "";
+
+            if (string.IsNullOrWhiteSpace(cleanNominal) || !double.TryParse(cleanNominal, out double nominal))
+            {
+                await DisplayAlertAsync("Validasi", "Masukkan nominal harga yang valid.", "OK");
+                return;
+            }
+
+            if (SelectedBiayaList.Any(x => x.No == selectedCoa.no))
+            {
+               await DisplayAlertAsync("Validasi", "Biaya ini sudah ditambahkan sebelumnya.", "OK");
+                return;
+            }
+
+            SelectedBiayaList.Add(new SelectedBiayaModel
+            {
+                No = selectedCoa.no,
+                Name = selectedCoa.name,
+                Nominal = nominal
+            });
+
+            PickerBiaya.SelectedItem = null;
+            EntryHargaBiaya.Text = string.Empty;
+
+            // PANGGIL UPDATE TOTAL BIAYA DI SINI
+            UpdateTotalBiaya();
+        }
+        else
+        {
+           await DisplayAlertAsync("Peringatan", "Pilih jenis biaya terlebih dahulu dari dropdown.", "OK");
+        }
+    }
+
+    private void HapusBiaya_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Label label && label.BindingContext is SelectedBiayaModel biayaData)
+        {
+            SelectedBiayaList.Remove(biayaData);
+
+            
+            UpdateTotalBiaya();
+        }
+    }
 }
