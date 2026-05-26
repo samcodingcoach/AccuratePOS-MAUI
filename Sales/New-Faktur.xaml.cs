@@ -28,10 +28,10 @@ public partial class New_Faktur : ContentPage
 
         var listKonsumen = new List<KonsumenOption>
         {
-            new("Free", "MB003"),
-            new("Konsumen Shopee", "C.00001"),
-            new("Membership", "MB002"),
-            new("Non Member", "MB001")
+            new("Free - MB003", "Free"),
+            new("Shopee - C.00001", "Shopee"),
+            new("Membership - MB002", "Membership"),
+            new("Non Member - MB001", "Non Member")
         };
 
         // 2. Bind ke Picker
@@ -267,6 +267,7 @@ public partial class New_Faktur : ContentPage
         if (picker?.SelectedItem is KonsumenOption selected)
         {
             SelectedKonsumenValue = selected.Value;
+            DisplayAlertAsync("Tes", SelectedKonsumenValue, "OK");
         }
     }
 
