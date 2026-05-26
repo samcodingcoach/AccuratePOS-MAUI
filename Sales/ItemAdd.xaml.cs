@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Globalization;
 namespace MyPosAccurate2026.Sales;
 
 public partial class ItemAdd : ContentPage
@@ -13,28 +14,101 @@ public partial class ItemAdd : ContentPage
     public double ItemBalance { get; set; }
     public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
-    public ItemAdd()
-	{
-		InitializeComponent();
-        cek_token();
-        LoadSalesData();
-	}
-
-
+    
     public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
     {
         InitializeComponent();
+
+        cek_token();
+        
         CustomerCode = konsumenValue;
         ItemBalance = balance;
         FormNoItem.Text = itemNo;
         FormNamaBarang.Text = name;
+        FormPriceCategory.Text = CustomerCode;
+
+        _ = LoadItemStockPrice(itemNo, konsumenValue);
+
+        LoadSalesData();
+    }
+
+
+    private async Task LoadItemStockPrice(string itemNo, string customerCode)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+
+            if (string.IsNullOrEmpty(cleanToken))
+            {
+                System.Diagnostics.Debug.WriteLine("Token tidak ditemukan.");
+                return;
+            }
+
+            // Susun URL API (Gunakan Uri.EscapeDataString untuk menghindari error jika ada spasi pada string)
+            string apiUrl = $"{App.API_HOST}item/stokharga.php?no={Uri.EscapeDataString(itemNo)}&priceCategoryName={Uri.EscapeDataString(customerCode)}";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                var response = await client.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Deserialize data dari server
+                    var apiResult = JsonConvert.DeserializeObject<ItemStockPriceResponse>(responseContent);
+
+                    if (apiResult != null && apiResult.data != null)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            // 1. Update Harga Jual (Otomatis ditambah format titik ribuan)
+                            FormHargaJual.Text = apiResult.data.unitPrice.ToString("N0", new CultureInfo("id-ID"));
+
+                            // 2. Update Nilai Balance (Stok Terkini dari API)
+                            ItemBalance = apiResult.data.availableStock;
+
+                            System.Diagnostics.Debug.WriteLine($"Harga: {apiResult.data.unitPrice}, Stok: {apiResult.data.availableStock}");
+
+                            // [OPSIONAL] Jika di ItemAdd.xaml Anda membuat Label untuk stok, 
+                            // tambahkan x:Name="LabelStokInfo" lalu buka kode di bawah ini:
+                            // LabelStokInfo.Text = apiResult.data.availableStock.ToString();
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Gagal memuat harga dan stok: {ex.Message}");
+        }
+    }
+
+
+    
+    public class ItemStockPriceResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
+
+        // Perhatikan ini BUKAN List<T>, melainkan langsung satu objek
+        public ItemStockPriceData data { get; set; }
+    }
+
+    public class ItemStockPriceData
+    {
+        public string no { get; set; }
+        public string name { get; set; }
+        public double unitPrice { get; set; }
+        public double availableStock { get; set; }
     }
 
     private async void cek_token()
     {
         string token = Preferences.Get("TOKEN_KEY", string.Empty);
-
-
 
         // Cek dengan if
         if (!string.IsNullOrEmpty(token))

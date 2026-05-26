@@ -31,7 +31,7 @@ public partial class New_Faktur : ContentPage
             new("Free - MB003", "Free"),
             new("Shopee - C.00001", "Shopee"),
             new("Membership - MB002", "Membership"),
-            new("Non Member - MB001", "Non Member")
+            new("Non Member - MB001", "Umum")
         };
 
         // 2. Bind ke Picker
@@ -267,10 +267,9 @@ public partial class New_Faktur : ContentPage
         if (picker?.SelectedItem is KonsumenOption selected)
         {
             SelectedKonsumenValue = selected.Value;
-            DisplayAlertAsync("Tes", SelectedKonsumenValue, "OK");
+           // DisplayAlertAsync("Tes", SelectedKonsumenValue, "OK");
         }
     }
-
 
     private async Task LoadCoaData()
     {
