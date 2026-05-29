@@ -14,7 +14,9 @@ public partial class ItemAdd : ContentPage
     public double ItemBalance { get; set; }
     public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
-    
+
+    public List<SerialData> AvailableSerialNumbers { get; set; } = new List<SerialData>();
+
     public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
     {
         InitializeComponent();
@@ -30,6 +32,8 @@ public partial class ItemAdd : ContentPage
         _ = LoadItemStockPrice(itemNo, konsumenValue);
 
         LoadSalesData();
+
+        _ = LoadSerialNumber(itemNo);
     }
 
 
@@ -87,8 +91,57 @@ public partial class ItemAdd : ContentPage
         }
     }
 
+    private async Task LoadSerialNumber(string itemNo)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            if (string.IsNullOrEmpty(cleanToken)) return;
 
-    
+            string apiUrl = $"{App.API_HOST}item/serial_byNo.php?no={Uri.EscapeDataString(itemNo)}";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                var response = await client.GetAsync(apiUrl);
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                // Parsing JSON yang masuk
+                var apiResult = JsonConvert.DeserializeObject<SerialResponse>(responseContent);
+
+                MainThread.BeginInvokeOnMainThread(() =>
+                {
+                    if (apiResult != null && apiResult.status == "success")
+                    {
+                        // Akses list melalui apiResult.data.d
+                        if (apiResult.data != null && apiResult.data.d != null)
+                        {
+                            AvailableSerialNumbers = apiResult.data.d;
+                            GridNoSeri.IsVisible = true;
+
+                            System.Diagnostics.Debug.WriteLine($"Form SN Dimunculkan. Ada {AvailableSerialNumbers.Count} SN tersedia.");
+                        }
+                    }
+                    else
+                    {
+                        // Otomatis tereksekusi jika status == "error" 
+                        // (Barang yang dicari bukan merupakan barang dengan Serial Number)
+                        AvailableSerialNumbers.Clear();
+                        GridNoSeri.IsVisible = false;
+
+                        System.Diagnostics.Debug.WriteLine($"Form SN Disembunyikan. Pesan: {apiResult?.message}");
+                    }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(() => GridNoSeri.IsVisible = false);
+            System.Diagnostics.Debug.WriteLine($"CRASH di LoadSerialNumber: {ex.Message}");
+        }
+    }
+
     public class ItemStockPriceResponse
     {
         public string status { get; set; }
@@ -140,6 +193,47 @@ public partial class ItemAdd : ContentPage
 
         // Properti khusus untuk digabungkan dan ditampilkan ke Picker (ItemDisplayBinding)
         public string DisplayName => $"{number} - {name}";
+    }
+
+
+    // =========================================================
+    // CLASS MODEL MAPPING SERIAL NUMBER
+    // =========================================================
+    public class SerialResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
+
+        // Sekarang data adalah objek wrapper, bukan list langsung
+        public SerialDataWrapper data { get; set; }
+    }
+
+    public class SerialDataWrapper
+    {
+        public bool s { get; set; }
+        // Properti 'd' inilah yang menyimpan list array Serial Number-nya
+        public List<SerialData> d { get; set; }
+    }
+
+    public class SerialData
+    {
+        public WarehouseData warehouse { get; set; }
+        public SerialNumberInfo serialNumber { get; set; }
+        public double quantity { get; set; }
+    }
+
+    public class WarehouseData
+    {
+        public int id { get; set; }
+        public string name { get; set; }
+    }
+
+    public class SerialNumberInfo
+    {
+        public int id { get; set; }
+        public string number { get; set; }
+        public string createDate { get; set; }
+        public string expiredDate { get; set; }
     }
 
     private void BClose_Clicked(object sender, EventArgs e)

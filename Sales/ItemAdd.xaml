@@ -73,11 +73,12 @@
             </Grid>
 
             <!--No Seri Input-->
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" x:Name="GridNoSeri">
                 <Border Padding="10,5,10,5" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                     <StackLayout>
 
-                        <Entry Placeholder="Masukan Nomor Serial Barang" x:Name="FormNomorSerial" ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
+                        <Entry Placeholder="Masukan Nomor Serial Barang" x:Name="FormNomorSerial" 
+                               ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
                     </StackLayout>
                 </Border>
 
