@@ -36,7 +36,7 @@
                 <Border Padding="10,10,10,5" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                     <StackLayout>
                         <Label Text="Qty" FontAttributes="Bold" TranslationX="2"></Label>
-                        <Entry Placeholder="Qty" Text="1" Keyboard="Numeric" x:Name="FormQty"
+                        <Entry Placeholder="Qty" Text="1" Keyboard="Numeric" x:Name="FormQty" TextChanged="FormQty_TextChanged"
                             ClearButtonVisibility="WhileEditing" HorizontalTextAlignment="Center"></Entry>
                     </StackLayout>
                 </Border>
@@ -90,24 +90,32 @@
                 <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed" x:Name="BTambahSN" Clicked="BTambahSN_Clicked"></Button>
             </Grid>
             <!--No Seri List-->
-
-         
             <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
-                            <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
+                <Label Text="" x:Name="FormSerialCounter" TextColor="Grey" Margin="0,5,0,0"></Label>
 
-                            <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
+                <ScrollView MaximumHeightRequest="200" VerticalOptions="FillAndExpand">
 
-                            <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
-                                <Label.GestureRecognizers>
-                                    <TapGestureRecognizer Tapped="HapusSN_Tapped" />
-                                </Label.GestureRecognizers>
-                            </Label>
-                        </Grid>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
+                    <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
+
+                                    <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
+
+                                    <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
+
+                                    <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="HapusSN_Tapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </StackLayout>
+                </ScrollView>
+
             </StackLayout>
 
         </StackLayout>

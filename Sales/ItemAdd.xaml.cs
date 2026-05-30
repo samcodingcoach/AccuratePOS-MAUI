@@ -32,6 +32,8 @@ public partial class ItemAdd : ContentPage
 
         BindableLayout.SetItemsSource(ListSnContainer, AddedSerialNumbers);
 
+        UpdateSerialCounter();
+
         _ = LoadItemStockPrice(itemNo, konsumenValue);
 
         _= LoadSalesData();
@@ -383,5 +385,87 @@ public partial class ItemAdd : ContentPage
         {
             AddedSerialNumbers.Remove(snData);
         }
+    }
+
+    private async void FormQty_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(e.NewTextValue))
+            return;
+
+        string cleanText = new string(e.NewTextValue.Where(char.IsDigit).ToArray());
+
+        if (string.IsNullOrEmpty(cleanText))
+        {
+            FormQty.Text = string.Empty;
+            return;
+        }
+
+        if (double.TryParse(cleanText, out double qty))
+        {
+            if (balanceQty <= 0)
+            {
+                if (qty != 0) FormQty.Text = "0";
+                return;
+            }
+
+            if (qty == 0)
+            {
+                FormQty.Text = "1";
+                return;
+            }
+
+            if (qty > balanceQty)
+            {
+                FormQty.Text = balanceQty.ToString();
+                Dispatcher.Dispatch(async () =>
+                {
+                    await DisplayAlert("Stok Terbatas", $"Kuantitas tidak boleh melebihi stok yang tersedia ({balanceQty}).", "OK");
+                });
+                return;
+            }
+
+            // ==========================================================
+            // TAMBAHAN VALIDASI: Cegah Qty lebih kecil dari SN yang sudah diinput
+            // ==========================================================
+            if (qty < AddedSerialNumbers.Count)
+            {
+                FormQty.Text = AddedSerialNumbers.Count.ToString();
+                Dispatcher.Dispatch(async () =>
+                {
+                    await DisplayAlertAsync("Peringatan", $"Kuantitas tidak boleh kurang dari jumlah Nomor Serial yang sudah dimasukkan ({AddedSerialNumbers.Count}). Hapus SN terlebih dahulu.", "OK");
+                });
+                return;
+            }
+
+            if (FormQty.Text != cleanText)
+            {
+                FormQty.Text = cleanText;
+            }
+
+            // TAMBAHKAN INI: Update label counter jika Qty berubah
+            UpdateSerialCounter();
+        }
+    }
+
+
+
+
+
+    private void UpdateSerialCounter()
+    {
+        int batasQty = 1;
+        if (int.TryParse(FormQty.Text, out int parsedQty))
+        {
+            batasQty = parsedQty;
+        }
+
+        // Hitung sisa kebutuhan SN
+        int sisa = batasQty - AddedSerialNumbers.Count;
+
+        // Pastikan angka tidak negatif
+        if (sisa < 0) sisa = 0;
+
+        // Update teks ke Label UI
+        FormSerialCounter.Text = $"Butuh serial: {sisa}";
     }
 }
