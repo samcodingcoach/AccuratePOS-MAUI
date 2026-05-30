@@ -12,10 +12,11 @@ namespace MyPosAccurate2026.Sales;
 public partial class ItemAdd : ContentPage
 {
     public double ItemBalance { get; set; }
+    public double balanceQty { get; set; }
     public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
-
     public List<SerialData> AvailableSerialNumbers { get; set; } = new List<SerialData>();
+    public ObservableCollection<AddedSerialModel> AddedSerialNumbers { get; set; } = new ObservableCollection<AddedSerialModel>();
 
     public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
     {
@@ -29,9 +30,11 @@ public partial class ItemAdd : ContentPage
         FormNamaBarang.Text = name;
         FormPriceCategory.Text = CustomerCode;
 
+        BindableLayout.SetItemsSource(ListSnContainer, AddedSerialNumbers);
+
         _ = LoadItemStockPrice(itemNo, konsumenValue);
 
-        LoadSalesData();
+        _= LoadSalesData();
 
         _ = LoadSerialNumber(itemNo);
     }
@@ -79,7 +82,8 @@ public partial class ItemAdd : ContentPage
 
                             // [OPSIONAL] Jika di ItemAdd.xaml Anda membuat Label untuk stok, 
                             // tambahkan x:Name="LabelStokInfo" lalu buka kode di bawah ini:
-                            // LabelStokInfo.Text = apiResult.data.availableStock.ToString();
+                            balanceQty = apiResult.data.availableStock;
+                            FormLabelStokAvailable.Text = "Stock tersedia: " + balanceQty;
                         });
                     }
                 }
@@ -236,6 +240,16 @@ public partial class ItemAdd : ContentPage
         public string expiredDate { get; set; }
     }
 
+    // =========================================================
+    // CLASS MODEL PENAMPUNG SN INPUTAN USER
+    // =========================================================
+    public class AddedSerialModel
+    {
+        public string SerialNumber { get; set; }
+        public double Qty { get; set; }
+        public string WarehouseName { get; set; }
+    }
+
     private void BClose_Clicked(object sender, EventArgs e)
     {
 
@@ -302,6 +316,72 @@ public partial class ItemAdd : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine("Gagal memuat data sales: " + ex.Message);
+        }
+    }
+
+    private async void BTambahSN_Clicked(object sender, EventArgs e)
+    {
+        string snInput = FormNomorSerial.Text?.Trim();
+
+        // 1. Validasi Input Kosong
+        if (string.IsNullOrEmpty(snInput))
+        {
+            await DisplayAlertAsync("Peringatan", "Kolom Nomor Serial tidak boleh kosong.", "OK");
+            return;
+        }
+
+        // 2. Baca batas maksimal dari Qty
+        int batasQty = 1;
+        if (int.TryParse(FormQty.Text, out int parsedQty))
+        {
+            batasQty = parsedQty;
+        }
+
+        // 3. Validasi Batas Kuantitas
+        if (AddedSerialNumbers.Count >= batasQty)
+        {
+            await DisplayAlertAsync("Peringatan", $"Anda hanya memasukkan Qty {batasQty}. Tidak dapat menambah SN melebihi kuantitas.", "OK");
+            return;
+        }
+
+        // 4. Cegah Duplikasi Input SN yang sama
+        if (AddedSerialNumbers.Any(x => x.SerialNumber.Equals(snInput, StringComparison.OrdinalIgnoreCase)))
+        {
+            await DisplayAlertAsync("Peringatan", "Nomor Serial ini sudah Anda tambahkan ke daftar.", "OK");
+            FormNomorSerial.Text = string.Empty;
+            return;
+        }
+
+        // 5. Pencocokan dengan Stok di API Accurate
+        var matchedSn = AvailableSerialNumbers.FirstOrDefault(x =>
+            x.serialNumber != null &&
+            x.serialNumber.number.Equals(snInput, StringComparison.OrdinalIgnoreCase));
+
+        if (matchedSn != null)
+        {
+            // Validasi sukses, masukkan ke keranjang SN
+            AddedSerialNumbers.Add(new AddedSerialModel
+            {
+                SerialNumber = matchedSn.serialNumber.number,
+                Qty = 1,
+                WarehouseName = matchedSn.warehouse?.name ?? "Gudang Default"
+            });
+
+            // Bersihkan kolom input agar siap untuk ketikan SN berikutnya
+            FormNomorSerial.Text = string.Empty;
+        }
+        else
+        {
+            await DisplayAlertAsync("Gagal", "Nomor Serial tidak ditemukan di sistem atau stok sudah habis.", "OK");
+        }
+    }
+
+    private void HapusSN_Tapped(object sender, TappedEventArgs e)
+    {
+        // Menghapus SN jika tulisan "Hapus" diklik
+        if (sender is Label label && label.BindingContext is AddedSerialModel snData)
+        {
+            AddedSerialNumbers.Remove(snData);
         }
     }
 }

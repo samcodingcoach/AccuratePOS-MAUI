@@ -7,15 +7,20 @@
         <StackLayout Grid.Row="0" Spacing="10">
 
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                <Label Text="KODE / NO ITEM" Grid.Column="0" x:Name="FormNoItem" 
-                       FontAttributes="Bold" TextColor="DarkCyan" FontSize="20"></Label>
+                
+                <StackLayout Grid.Column="0">
+                    <Label Text="KODE / NO ITEM" Grid.Column="0" x:Name="FormNoItem" 
+                        FontAttributes="Bold" TextColor="DarkCyan" FontSize="20"></Label>
+
+                    <Label Text="" x:Name="FormLabelStokAvailable" TextColor="DarkGoldenrod"></Label>
+                    
+                </StackLayout>
 
                 <StackLayout Grid.Column="1" HorizontalOptions="EndAndExpand">
                     <Label Text="Kategori Konsumen" FontAttributes="Bold"></Label>
                     <Label Text="" x:Name="FormPriceCategory" HorizontalTextAlignment="End" TextColor="Grey"></Label>
                 </StackLayout>
             </Grid>
-            
             
             <!--Nama Barang-->
             <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
@@ -82,12 +87,32 @@
                     </StackLayout>
                 </Border>
 
-                <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed"></Button>
+                <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed" x:Name="BTambahSN" Clicked="BTambahSN_Clicked"></Button>
             </Grid>
             <!--No Seri List-->
-            
+
+         
+            <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
+                            <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
+
+                            <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
+
+                            <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="HapusSN_Tapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </StackLayout>
+
         </StackLayout>
 
+      
         <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Grid.Row="1">
             <Button Text="Close" x:Name="BClose"  Clicked="BClose_Clicked" Grid.Column="0"
                     BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
