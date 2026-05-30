@@ -257,7 +257,7 @@ public partial class ItemAdd : ContentPage
 
     }
 
-    private void BSimpan_Clicked(object sender, EventArgs e)
+    private async void BSimpan_Clicked(object sender, EventArgs e)
     {
 
     }

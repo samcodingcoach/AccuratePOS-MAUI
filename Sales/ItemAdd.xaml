@@ -90,10 +90,10 @@
                 <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed" x:Name="BTambahSN" Clicked="BTambahSN_Clicked"></Button>
             </Grid>
             <!--No Seri List-->
-            <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
-                <Label Text="" x:Name="FormSerialCounter" TextColor="Grey" Margin="0,5,0,0"></Label>
+           
+            <Label Text="" x:Name="FormSerialCounter" TextColor="Grey" Margin="0,5,0,0"></Label>
 
-                <ScrollView MaximumHeightRequest="200" VerticalOptions="FillAndExpand">
+            <ScrollView MaximumHeightRequest="200" VerticalOptions="FillAndExpand">
 
                     <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
                         <BindableLayout.ItemTemplate>
@@ -116,7 +116,7 @@
                     </StackLayout>
                 </ScrollView>
 
-            </StackLayout>
+          
 
         </StackLayout>
 
