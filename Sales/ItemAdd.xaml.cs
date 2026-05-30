@@ -80,12 +80,16 @@ public partial class ItemAdd : ContentPage
                             // 2. Update Nilai Balance (Stok Terkini dari API)
                             ItemBalance = apiResult.data.availableStock;
 
-                            System.Diagnostics.Debug.WriteLine($"Harga: {apiResult.data.unitPrice}, Stok: {apiResult.data.availableStock}");
+                            
 
                             // [OPSIONAL] Jika di ItemAdd.xaml Anda membuat Label untuk stok, 
                             // tambahkan x:Name="LabelStokInfo" lalu buka kode di bawah ini:
                             balanceQty = apiResult.data.availableStock;
                             FormLabelStokAvailable.Text = "Stock tersedia: " + balanceQty;
+
+                            HitungTotalHarga();
+
+                            System.Diagnostics.Debug.WriteLine($"Harga: {apiResult.data.unitPrice}, Stok: {apiResult.data.availableStock}");
                         });
                     }
                 }
@@ -252,10 +256,7 @@ public partial class ItemAdd : ContentPage
         public string WarehouseName { get; set; }
     }
 
-    private void BClose_Clicked(object sender, EventArgs e)
-    {
-
-    }
+    
 
     private async void BSimpan_Clicked(object sender, EventArgs e)
     {
@@ -419,7 +420,7 @@ public partial class ItemAdd : ContentPage
                 FormQty.Text = balanceQty.ToString();
                 Dispatcher.Dispatch(async () =>
                 {
-                    await DisplayAlert("Stok Terbatas", $"Kuantitas tidak boleh melebihi stok yang tersedia ({balanceQty}).", "OK");
+                    await DisplayAlertAsync("Stok Terbatas", $"Kuantitas tidak boleh melebihi stok yang tersedia ({balanceQty}).", "OK");
                 });
                 return;
             }
@@ -444,12 +445,10 @@ public partial class ItemAdd : ContentPage
 
             // TAMBAHKAN INI: Update label counter jika Qty berubah
             UpdateSerialCounter();
+
+            HitungTotalHarga();
         }
     }
-
-
-
-
 
     private void UpdateSerialCounter()
     {
@@ -467,5 +466,30 @@ public partial class ItemAdd : ContentPage
 
         // Update teks ke Label UI
         FormSerialCounter.Text = $"Butuh serial: {sisa}";
+    }
+
+    private void HitungTotalHarga()
+    {
+        // 1. Ambil nilai Qty (Default 1 jika kosong/error)
+        double qty = 1;
+        if (double.TryParse(FormQty.Text, out double parsedQty))
+        {
+            qty = parsedQty;
+        }
+
+        // 2. Ambil nilai Harga Jual dan bersihkan dari titik atau tulisan "Rp"
+        double hargaJual = 0;
+        string cleanHarga = FormHargaJual.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
+
+        if (double.TryParse(cleanHarga, out double parsedHarga))
+        {
+            hargaJual = parsedHarga;
+        }
+
+        // 3. Kalikan
+        double totalHarga = qty * hargaJual;
+
+        // 4. Tampilkan ke Label dengan format pemisah ribuan ala Indonesia
+        FormTotalHarga.Text = $"Rp {totalHarga.ToString("N0", new CultureInfo("id-ID"))}";
     }
 }

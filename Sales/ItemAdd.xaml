@@ -81,7 +81,6 @@
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" x:Name="GridNoSeri">
                 <Border Padding="10,5,10,5" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                     <StackLayout>
-
                         <Entry Placeholder="Masukan Nomor Serial Barang" x:Name="FormNomorSerial" 
                                ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
                     </StackLayout>
@@ -122,8 +121,10 @@
 
       
         <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Grid.Row="1">
-            <Button Text="Close" x:Name="BClose"  Clicked="BClose_Clicked" Grid.Column="0"
-                    BackgroundColor="Transparent" TextColor="Grey" BorderColor="Grey" BorderWidth="1" ></Button>
+            <StackLayout Grid.Column ="0">
+                <Label Text="Total Harga" FontAttributes="Bold"></Label>
+                <Label Text="Rp 0" FontSize="18" x:Name="FormTotalHarga" FontAttributes="Bold" TextColor="DarkCyan"></Label>
+            </StackLayout>
 
             <Button Text="Simpan" x:Name="BSimpan" FontAttributes="Bold" Clicked="BSimpan_Clicked" Grid.Column="1"
                     BackgroundColor="DarkCyan"></Button>
