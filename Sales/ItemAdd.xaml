@@ -4,16 +4,16 @@
              x:Class="MyPosAccurate2026.Sales.ItemAdd"
              Title="Item Add">
     <Grid RowDefinitions="*, Auto" Padding="20,0,20,10">
-        <StackLayout Grid.Row="0" Spacing="10">
+        <StackLayout Grid.Row="0" Spacing="5">
 
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-                
+
                 <StackLayout Grid.Column="0">
                     <Label Text="KODE / NO ITEM" Grid.Column="0" x:Name="FormNoItem" 
                         FontAttributes="Bold" TextColor="DarkCyan" FontSize="20"></Label>
 
                     <Label Text="" x:Name="FormLabelStokAvailable" TextColor="DarkGoldenrod"></Label>
-                    
+
                 </StackLayout>
 
                 <StackLayout Grid.Column="1" HorizontalOptions="EndAndExpand">
@@ -21,7 +21,7 @@
                     <Label Text="" x:Name="FormPriceCategory" HorizontalTextAlignment="End" TextColor="Grey"></Label>
                 </StackLayout>
             </Grid>
-            
+
             <!--Nama Barang-->
             <Border Padding="10,10,10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                 <StackLayout>
@@ -30,7 +30,7 @@
                            ClearButtonVisibility="WhileEditing" HorizontalOptions="FillAndExpand"></Entry>
                 </StackLayout>
             </Border>
-             <!--qty dan harga-->
+            <!--qty dan harga-->
             <Grid ColumnDefinitions="0.4*,*" ColumnSpacing="10">
                 <!--Kuantitas-->
                 <Border Padding="10,10,10,5" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
@@ -89,37 +89,34 @@
                 <Button Text="Tambah" Grid.Column="1" BackgroundColor="OrangeRed" x:Name="BTambahSN" Clicked="BTambahSN_Clicked"></Button>
             </Grid>
             <!--No Seri List-->
-           
+
             <Label Text="" x:Name="FormSerialCounter" TextColor="Grey" Margin="0,5,0,0"></Label>
 
             <ScrollView MaximumHeightRequest="200" VerticalOptions="FillAndExpand">
+                <StackLayout x:Name="ListSnContainer">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
 
-                    <StackLayout x:Name="ListSnContainer" Spacing="8" Margin="0,5,0,0">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate>
-                                <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
+                                <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
 
-                                    <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
+                                <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
 
-                                    <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
+                                <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
+                                    <Label.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="HapusSN_Tapped" />
+                                    </Label.GestureRecognizers>
+                                </Label>
 
-                                    <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
-                                        <Label.GestureRecognizers>
-                                            <TapGestureRecognizer Tapped="HapusSN_Tapped" />
-                                        </Label.GestureRecognizers>
-                                    </Label>
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </StackLayout>
+            </ScrollView>
 
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </StackLayout>
-                </ScrollView>
 
-          
 
         </StackLayout>
-
-      
         <Grid ColumnDefinitions="*,*" ColumnSpacing="10" Grid.Row="1">
             <StackLayout Grid.Column ="0">
                 <Label Text="Total Harga" FontAttributes="Bold"></Label>
