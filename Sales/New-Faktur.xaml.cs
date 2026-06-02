@@ -90,7 +90,8 @@ public partial class New_Faktur : ContentPage
         public double balance { get; set; }
 
         public double price { get; set; }
-        
+        public string image { get; set; }
+
 
         public Color StockColor => balance > 0 ? Color.FromArgb("#006400") : Color.FromArgb("#FF0000");
     }
@@ -131,6 +132,23 @@ public partial class New_Faktur : ContentPage
         public int quantity { get; set; }
         public string warehouseName { get; set; }
         public string salesmanListNumber { get; set; }
+
+        public string imagePath { get; set; }
+
+        public string DisplayImage
+        {
+            get
+            {
+               
+                if (string.IsNullOrWhiteSpace(imagePath))
+                    return "nophotoproduct150.jpg";
+                if (imagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                    return imagePath;
+                string baseHost = App.API_HOST.Replace("api/", "");
+                string cleanFileName = imagePath.Replace("../", "").Replace("images/", "").TrimStart('/');
+                return $"{baseHost}images/{cleanFileName}";
+            }
+        }
         public List<DetailSerialNumber> detailSerialNumber { get; set; }
 
         // Properti Khusus UI (Tidak ikut diparsing API, hanya untuk tampilan)
@@ -265,7 +283,7 @@ public partial class New_Faktur : ContentPage
 
             System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - Harga: {selectedItem.price}");
 
-            var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue);
+            var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue, selectedItem.image);
 
             // Tangkap Data yang dikirim dari BSimpan_Clicked
             itemAddPage.OnItemSaved += (s, cartItem) =>

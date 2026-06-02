@@ -8,7 +8,7 @@
             Padding="30,0"
             Spacing="25">
             <Image
-                Source="dotnet_bot.png"
+                Source="https://odin.accurate.id/accurate/files/data_2640769/item-image/item_150/item-image-thumb_7ff12e18-cea0-4554-a78b-37bb8f27e708.jpeg"
                 HeightRequest="185"
                 Aspect="AspectFit"
                 SemanticProperties.Description="dot net bot in a submarine number ten" />

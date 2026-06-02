@@ -16,12 +16,13 @@ public partial class ItemAdd : ContentPage
     public double balanceQty { get; set; }
     public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
+    public string ItemImagePath { get; set; }
     public List<SerialData> AvailableSerialNumbers { get; set; } = new List<SerialData>();
     public ObservableCollection<AddedSerialModel> AddedSerialNumbers { get; set; } = new ObservableCollection<AddedSerialModel>();
 
     public event EventHandler<CartItemModel> OnItemSaved;
 
-    public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
+    public ItemAdd(string itemNo, string name, double balance, string konsumenValue, string imagePath = null)
     {
         InitializeComponent();
 
@@ -32,6 +33,7 @@ public partial class ItemAdd : ContentPage
         FormNoItem.Text = itemNo;
         FormNamaBarang.Text = name;
         FormPriceCategory.Text = CustomerCode;
+        ItemImagePath = imagePath;
 
         BindableLayout.SetItemsSource(ListSnContainer, AddedSerialNumbers);
 
@@ -285,16 +287,23 @@ public partial class ItemAdd : ContentPage
             return;
         }
 
-        // ==========================================================
-        // 4. TAMBAHAN: Validasi Harga Tidak Boleh 0
-        // ==========================================================
+        // 4. Validasi Harga Tidak Boleh 0
         if (harga <= 0)
         {
             await DisplayAlertAsync("Peringatan", "Barang belum diberi harga jual.", "OK");
             return;
         }
 
-        // 5. SUSUN JSON / DATA OBJECT 
+        // ==========================================================
+        // 5. TAMBAHAN: Validasi Sales Wajib Dipilih
+        // ==========================================================
+        if (string.IsNullOrWhiteSpace(SelectedSalesNumber))
+        {
+            await DisplayAlertAsync("Peringatan", "Sales / Penjual harus dipilih terlebih dahulu.", "OK");
+            return;
+        }
+
+        // 6. SUSUN JSON / DATA OBJECT 
         var cartItem = new CartItemModel
         {
             itemNo = FormNoItem.Text,
@@ -302,7 +311,12 @@ public partial class ItemAdd : ContentPage
             unitPrice = harga,
             quantity = qty,
             warehouseName = FormNamaGudang.Text ?? "Gudang Utama",
-            salesmanListNumber = SelectedSalesNumber ?? "",
+
+           
+            salesmanListNumber = SelectedSalesNumber,
+            imagePath = ItemImagePath,
+            
+
             detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
             {
                 serialNumberNo = sn.SerialNumber,
@@ -310,10 +324,10 @@ public partial class ItemAdd : ContentPage
             }).ToList()
         };
 
-        // 6. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
+        // 7. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
         OnItemSaved?.Invoke(this, cartItem);
 
-        // 7. TUTUP HALAMAN ADD ITEM
+        // 8. TUTUP HALAMAN ADD ITEM
         await Navigation.PopAsync();
     }
 

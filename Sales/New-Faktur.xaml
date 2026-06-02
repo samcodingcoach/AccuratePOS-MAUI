@@ -94,7 +94,7 @@
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate>
                                     <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" Margin="0,0,0,10">
-                                        <Image Source="nophotoproduct150.jpg" Grid.Column="0" HeightRequest="60" VerticalOptions="Start"></Image>
+                                        <Image Source="{Binding DisplayImage}" Grid.Column="0" HeightRequest="60" VerticalOptions="Start"></Image>
 
                                         <StackLayout Grid.Column="1">
                                             <Label FontAttributes="Bold" MaxLines="2" LineBreakMode="TailTruncation" Text="{Binding itemName}"></Label>
