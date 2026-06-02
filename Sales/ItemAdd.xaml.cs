@@ -142,7 +142,7 @@ public partial class ItemAdd : ContentPage
                         // (Barang yang dicari bukan merupakan barang dengan Serial Number)
                         AvailableSerialNumbers.Clear();
                         GridNoSeri.IsVisible = false;
-
+                        FormSerialCounter.IsVisible = false;
                         System.Diagnostics.Debug.WriteLine($"Form SN Disembunyikan. Pesan: {apiResult?.message}");
                     }
                 });
@@ -285,14 +285,23 @@ public partial class ItemAdd : ContentPage
             return;
         }
 
-        // 4. SUSUN JSON / DATA OBJECT (Sesuai Permintaan Anda)
+        // ==========================================================
+        // 4. TAMBAHAN: Validasi Harga Tidak Boleh 0
+        // ==========================================================
+        if (harga <= 0)
+        {
+            await DisplayAlertAsync("Peringatan", "Barang belum diberi harga jual.", "OK");
+            return;
+        }
+
+        // 5. SUSUN JSON / DATA OBJECT 
         var cartItem = new CartItemModel
         {
             itemNo = FormNoItem.Text,
             itemName = FormNamaBarang.Text,
             unitPrice = harga,
             quantity = qty,
-            warehouseName = FormNamaGudang.Text,
+            warehouseName = FormNamaGudang.Text ?? "Gudang Utama",
             salesmanListNumber = SelectedSalesNumber ?? "",
             detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
             {
@@ -301,10 +310,10 @@ public partial class ItemAdd : ContentPage
             }).ToList()
         };
 
-        // 5. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
+        // 6. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
         OnItemSaved?.Invoke(this, cartItem);
 
-        // 6. TUTUP HALAMAN ADD ITEM
+        // 7. TUTUP HALAMAN ADD ITEM
         await Navigation.PopAsync();
     }
 

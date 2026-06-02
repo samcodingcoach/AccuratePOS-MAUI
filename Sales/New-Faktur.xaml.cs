@@ -89,6 +89,9 @@ public partial class New_Faktur : ContentPage
         public string name { get; set; }
         public double balance { get; set; }
 
+        public double price { get; set; }
+        
+
         public Color StockColor => balance > 0 ? Color.FromArgb("#006400") : Color.FromArgb("#FF0000");
     }
 
@@ -229,20 +232,25 @@ public partial class New_Faktur : ContentPage
     {
         if (e.CurrentSelection.FirstOrDefault() is ItemModel selectedItem)
         {
-            // ==============================================================
-            // TAMBAHAN: Validasi Stok Tidak Boleh 0
-            // ==============================================================
+            // 1. Validasi Stok Tidak Boleh 0
             if (selectedItem.balance <= 0)
             {
-                // Lepas pilihan dan beri peringatan
                 List_AutoComplete.SelectedItem = null;
                 await DisplayAlertAsync("Stok Habis", "Barang ini tidak dapat dipilih karena stok kosong (0).", "OK");
                 return;
             }
 
+            // 2. Validasi Harga Tidak Boleh 0
+            if (selectedItem.price <= 0)
+            {
+                List_AutoComplete.SelectedItem = null;
+                await DisplayAlertAsync("Harga Tidak Valid", "Barang ini belum memiliki harga jual (Rp 0). Silakan perbarui harga master barang terlebih dahulu.", "OK");
+                return;
+            }
+
+            // 3. Validasi Konsumen (Harus dipilih dulu)
             if (string.IsNullOrWhiteSpace(SelectedKonsumenValue))
             {
-                // Reset pilihan auto-complete agar tidak menggantung
                 List_AutoComplete.SelectedItem = null;
                 Border_AutoComplete.IsVisible = false;
 
@@ -251,11 +259,11 @@ public partial class New_Faktur : ContentPage
                 return;
             }
 
-            // Jika lolos validasi, sembunyikan dropdown pencarian
+            // Jika semua lolos validasi, proses navigasi
             SearchBar_Item.Text = selectedItem.item_no;
             Border_AutoComplete.IsVisible = false;
 
-            System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - {selectedItem.item_no}");
+            System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - Harga: {selectedItem.price}");
 
             var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue);
 
