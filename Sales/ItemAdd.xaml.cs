@@ -1,12 +1,13 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Newtonsoft.Json;
-using System.Globalization;
+using static MyPosAccurate2026.Sales.New_Faktur;
 namespace MyPosAccurate2026.Sales;
 
 public partial class ItemAdd : ContentPage
@@ -17,6 +18,8 @@ public partial class ItemAdd : ContentPage
     public string SelectedSalesNumber { get; private set; }
     public List<SerialData> AvailableSerialNumbers { get; set; } = new List<SerialData>();
     public ObservableCollection<AddedSerialModel> AddedSerialNumbers { get; set; } = new ObservableCollection<AddedSerialModel>();
+
+    public event EventHandler<CartItemModel> OnItemSaved;
 
     public ItemAdd(string itemNo, string name, double balance, string konsumenValue)
     {
@@ -256,11 +259,53 @@ public partial class ItemAdd : ContentPage
         public string WarehouseName { get; set; }
     }
 
-    
+
 
     private async void BSimpan_Clicked(object sender, EventArgs e)
     {
+        // 1. Validasi Qty
+        if (!int.TryParse(FormQty.Text, out int qty) || qty <= 0)
+        {
+            await DisplayAlertAsync("Peringatan", "Kuantitas tidak valid.", "OK");
+            return;
+        }
 
+        // 2. Validasi Serial Number (Jika form SN muncul, SN harus diisi penuh)
+        if (GridNoSeri.IsVisible && AddedSerialNumbers.Count < qty)
+        {
+            await DisplayAlertAsync("Peringatan", $"Barang ini butuh {qty} Serial Number, Anda baru memasukkan {AddedSerialNumbers.Count}.", "OK");
+            return;
+        }
+
+        // 3. Ambil Nilai Harga Bersih
+        string cleanHarga = FormHargaJual.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
+        if (!double.TryParse(cleanHarga, out double harga))
+        {
+            await DisplayAlertAsync("Peringatan", "Harga jual tidak valid.", "OK");
+            return;
+        }
+
+        // 4. SUSUN JSON / DATA OBJECT (Sesuai Permintaan Anda)
+        var cartItem = new CartItemModel
+        {
+            itemNo = FormNoItem.Text,
+            itemName = FormNamaBarang.Text,
+            unitPrice = harga,
+            quantity = qty,
+            warehouseName = FormNamaGudang.Text,
+            salesmanListNumber = SelectedSalesNumber ?? "",
+            detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
+            {
+                serialNumberNo = sn.SerialNumber,
+                quantity = (int)sn.Qty
+            }).ToList()
+        };
+
+        // 5. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
+        OnItemSaved?.Invoke(this, cartItem);
+
+        // 6. TUTUP HALAMAN ADD ITEM
+        await Navigation.PopAsync();
     }
 
     private void PickerSales_SelectedIndexChanged(object sender, EventArgs e)

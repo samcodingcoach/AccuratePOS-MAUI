@@ -17,8 +17,12 @@ public partial class New_Faktur : ContentPage
     public ObservableCollection<ItemModel> AutoCompleteResults { get; set; } = new ObservableCollection<ItemModel>();
     public ObservableCollection<SelectedBiayaModel> SelectedBiayaList { get; set; } = new ObservableCollection<SelectedBiayaModel>();
 
+    public ObservableCollection<CartItemModel> CartItems { get; set; } = new ObservableCollection<CartItemModel>();
+
     // 1. Deklarasikan HttpClient tanpa langsung mengisi string URL di sini
     private readonly HttpClient _httpClient;
+
+    private bool _isFormattingBiaya = false;
 
     public New_Faktur()
 	{
@@ -42,7 +46,10 @@ public partial class New_Faktur : ContentPage
        
         BindableLayout.SetItemsSource(ListBiayaContainer, SelectedBiayaList);
 
-       
+        // Tambahkan di dalam constructor New_Faktur()
+        BindableLayout.SetItemsSource(CartContainer, CartItems);
+
+
         _ = LoadCoaData();
     }
 
@@ -81,6 +88,8 @@ public partial class New_Faktur : ContentPage
         public string item_no { get; set; }
         public string name { get; set; }
         public double balance { get; set; }
+
+        public Color StockColor => balance > 0 ? Color.FromArgb("#006400") : Color.FromArgb("#FF0000");
     }
 
     public class CoaResponse
@@ -104,6 +113,36 @@ public partial class New_Faktur : ContentPage
         public string Name { get; set; }
         public double Nominal { get; set; }
         public string FormattedNominal => $"Rp {Nominal:N0}";
+    }
+
+
+    // =========================================================
+    // MODEL KERANJANG BELANJA (CART ITEM)
+    // Sesuai dengan spesifikasi JSON API
+    // =========================================================
+    public class CartItemModel
+    {
+        public string itemNo { get; set; }
+        public string itemName { get; set; }
+        public double unitPrice { get; set; }
+        public int quantity { get; set; }
+        public string warehouseName { get; set; }
+        public string salesmanListNumber { get; set; }
+        public List<DetailSerialNumber> detailSerialNumber { get; set; }
+
+        // Properti Khusus UI (Tidak ikut diparsing API, hanya untuk tampilan)
+        public string FormattedUnitPrice => $"Rp {unitPrice.ToString("N0", new CultureInfo("id-ID"))}";
+        public string FormattedTotalPrice => $"Rp {(unitPrice * quantity).ToString("N0", new CultureInfo("id-ID"))}";
+        public string DisplayQty => $"x{quantity}";
+        public bool HasSerialNumbers => detailSerialNumber != null && detailSerialNumber.Count > 0;
+        public string SerialNumbersDisplay => HasSerialNumbers ? "SN: " + string.Join(", ", detailSerialNumber.Select(x => x.serialNumberNo)) : "";
+        public string InfoGudangSales => $"Gudang: {warehouseName} | Sales: {salesmanListNumber}";
+    }
+
+    public class DetailSerialNumber
+    {
+        public string serialNumberNo { get; set; }
+        public int quantity { get; set; }
     }
 
     private async void SearchBar_Item_TextChanged(object sender, TextChangedEventArgs e)
@@ -190,14 +229,23 @@ public partial class New_Faktur : ContentPage
     {
         if (e.CurrentSelection.FirstOrDefault() is ItemModel selectedItem)
         {
-           
+            // ==============================================================
+            // TAMBAHAN: Validasi Stok Tidak Boleh 0
+            // ==============================================================
+            if (selectedItem.balance <= 0)
+            {
+                // Lepas pilihan dan beri peringatan
+                List_AutoComplete.SelectedItem = null;
+                await DisplayAlertAsync("Stok Habis", "Barang ini tidak dapat dipilih karena stok kosong (0).", "OK");
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(SelectedKonsumenValue))
             {
                 // Reset pilihan auto-complete agar tidak menggantung
                 List_AutoComplete.SelectedItem = null;
                 Border_AutoComplete.IsVisible = false;
 
-                // Tampilkan pesan error dan arahkan fokus kursor ke Picker Konsumen
                 await DisplayAlertAsync("Peringatan", "Silakan pilih Konsumen / Pelanggan terlebih dahulu!", "OK");
                 PickerKonsumen.Focus();
                 return;
@@ -209,10 +257,17 @@ public partial class New_Faktur : ContentPage
 
             System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - {selectedItem.item_no}");
 
-            
-            await Navigation.PushAsync(new ItemAdd(selectedItem.item_no,selectedItem.name, selectedItem.balance,SelectedKonsumenValue));
+            var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue);
 
-            // Bersihkan seleksi list
+            // Tangkap Data yang dikirim dari BSimpan_Clicked
+            itemAddPage.OnItemSaved += (s, cartItem) =>
+            {
+                CartItems.Add(cartItem);
+                UpdateSubtotal();
+            };
+
+            await Navigation.PushAsync(itemAddPage);
+
             List_AutoComplete.SelectedItem = null;
         }
     }
@@ -308,25 +363,42 @@ public partial class New_Faktur : ContentPage
 
     private void EntryHargaBiaya_TextChanged(object sender, TextChangedEventArgs e)
     {
-        
+        // 1. Jika sistem sedang memformat teks, hentikan proses untuk mencegah infinite loop
+        if (_isFormattingBiaya) return;
+
         if (string.IsNullOrWhiteSpace(e.NewTextValue))
             return;
 
+        // 2. Buang semua karakter yang BUKAN angka
         string cleanText = new string(e.NewTextValue.Where(char.IsDigit).ToArray());
 
         if (string.IsNullOrEmpty(cleanText))
         {
+            _isFormattingBiaya = true;
             EntryHargaBiaya.Text = string.Empty;
+            _isFormattingBiaya = false;
             return;
         }
+
+        // 3. Ubah ke format angka dan titik ribuan
         if (long.TryParse(cleanText, out long value))
         {
-           
             string formatted = value.ToString("N0", new CultureInfo("id-ID"));
 
             if (EntryHargaBiaya.Text != formatted)
             {
-                EntryHargaBiaya.Text = formatted;
+                _isFormattingBiaya = true;
+
+                // 4. BUNGKUS DENGAN DISPATCHER (Solusi Anti-Crash Android)
+                Dispatcher.Dispatch(() =>
+                {
+                    EntryHargaBiaya.Text = formatted;
+
+                    // Pindahkan posisi kursor ke paling kanan agar tidak kembali ke kiri
+                    EntryHargaBiaya.CursorPosition = formatted.Length;
+
+                    _isFormattingBiaya = false;
+                });
             }
         }
     }
@@ -386,6 +458,27 @@ public partial class New_Faktur : ContentPage
 
             
             UpdateTotalBiaya();
+        }
+    }
+
+    private void UpdateSubtotal()
+    {
+        double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
+        EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
+    }
+
+    // =========================================================
+    // FUNGSI HAPUS ITEM DARI KERANJANG BELANJA
+    // =========================================================
+    private void HapusCartItem_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Label label && label.BindingContext is CartItemModel cartItem)
+        {
+            // Hapus dari koleksi, UI akan otomatis hilang
+            CartItems.Remove(cartItem);
+
+            // Hitung ulang subtotal setelah barang dihapus
+            UpdateSubtotal();
         }
     }
 }
