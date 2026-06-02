@@ -47,9 +47,9 @@ public partial class New_Faktur : ContentPage
         BindableLayout.SetItemsSource(ListBiayaContainer, SelectedBiayaList);
 
         // Tambahkan di dalam constructor New_Faktur()
-        BindableLayout.SetItemsSource(CartContainer, CartItems);
+        //BindableLayout.SetItemsSource(CartContainer, CartItems);
 
-
+        CartContainer.ItemsSource = CartItems;
         _ = LoadCoaData();
     }
 
