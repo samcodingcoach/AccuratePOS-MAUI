@@ -3,6 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyPosAccurate2026.Sales.ItemAdd"
              Title="Item Add">
+
+  
+    
     <Grid RowDefinitions="*, Auto" Padding="20,0,20,10">
         <StackLayout Grid.Row="0" Spacing="5">
 
@@ -52,9 +55,9 @@
                     </StackLayout>
                 </Border>
             </Grid>
-
+            <!--Gudang dan Sales-->
             <Grid ColumnDefinitions="0.4*,*" ColumnSpacing="10">
-                <!-- Gudang -->
+             
                 <Border Padding="10,10,10,5" Grid.Column="0"  StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                     <StackLayout>
                         <Label Text="Gudang" FontAttributes="Bold" TranslationX="2"></Label>
@@ -64,7 +67,6 @@
                     </StackLayout>
                 </Border>
 
-                <!-- Sales -->
                 <Border Padding="10,10,10,5" Grid.Column="1" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                     <StackLayout>
                         <Label Text="Sales / Penjual" FontAttributes="Bold" TranslationX="2"></Label>
@@ -90,30 +92,33 @@
             </Grid>
             <!--No Seri List-->
 
-            <Label Text="" x:Name="FormSerialCounter" TextColor="Grey" Margin="0,5,0,0"></Label>
+            <Label Text="" x:Name="FormSerialCounter" TextColor="Grey"></Label>
 
-            <ScrollView MaximumHeightRequest="200" VerticalOptions="FillAndExpand">
-                <StackLayout x:Name="ListSnContainer">
-                    <BindableLayout.ItemTemplate>
-                        <DataTemplate>
-                            <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,8" BackgroundColor="#F9F9F9">
+            <CollectionView x:Name="ListSnContainer" MaximumHeightRequest="150" VerticalOptions="Start" Margin="0,5,0,0">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical" ItemSpacing="2" />
+                </CollectionView.ItemsLayout>
 
-                                <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan"/>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*, Auto, Auto" ColumnSpacing="15" Padding="10,6" Margin="0,1" BackgroundColor="{Binding RowColor}">
 
-                                <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray"/>
+                            
 
-                                <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center">
-                                    <Label.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="HapusSN_Tapped" />
-                                    </Label.GestureRecognizers>
-                                </Label>
+                            <Label Text="{Binding SerialNumber}" VerticalOptions="Center" FontAttributes="Bold" TextColor="DarkCyan" FontSize="14"/>
 
-                            </Grid>
-                        </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </StackLayout>
-            </ScrollView>
+                            <Label Text="{Binding Qty, StringFormat='Qty: {0}'}" VerticalOptions="Center" Grid.Column="1" TextColor="Gray" FontSize="13"/>
 
+                            <Label Text="Hapus" Grid.Column="2" TextColor="OrangeRed" FontAttributes="Bold" VerticalOptions="Center" FontSize="13">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="HapusSN_Tapped" />
+                                </Label.GestureRecognizers>
+                            </Label>
+
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
 
         </StackLayout>

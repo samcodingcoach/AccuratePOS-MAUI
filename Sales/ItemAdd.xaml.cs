@@ -35,7 +35,7 @@ public partial class ItemAdd : ContentPage
         FormPriceCategory.Text = CustomerCode;
         ItemImagePath = imagePath;
 
-        BindableLayout.SetItemsSource(ListSnContainer, AddedSerialNumbers);
+        ListSnContainer.ItemsSource = AddedSerialNumbers;
 
         UpdateSerialCounter();
 
@@ -259,10 +259,9 @@ public partial class ItemAdd : ContentPage
         public string SerialNumber { get; set; }
         public double Qty { get; set; }
         public string WarehouseName { get; set; }
+
+        public Color RowColor { get; set; }
     }
-
-
-
     private async void BSimpan_Clicked(object sender, EventArgs e)
     {
         // 1. Validasi Qty
@@ -330,7 +329,6 @@ public partial class ItemAdd : ContentPage
         // 8. TUTUP HALAMAN ADD ITEM
         await Navigation.PopAsync();
     }
-
     private void PickerSales_SelectedIndexChanged(object sender, EventArgs e)
     {
         // Tangkap objek dari item yang dipilih
@@ -342,7 +340,6 @@ public partial class ItemAdd : ContentPage
             System.Diagnostics.Debug.WriteLine($"Sales Dipilih: {SelectedSalesNumber} - {selectedSales.name}");
         }
     }
-
     private async Task LoadSalesData()
     {
         try
@@ -389,7 +386,6 @@ public partial class ItemAdd : ContentPage
             System.Diagnostics.Debug.WriteLine("Gagal memuat data sales: " + ex.Message);
         }
     }
-
     private async void BTambahSN_Clicked(object sender, EventArgs e)
     {
         string snInput = FormNomorSerial.Text?.Trim();
@@ -430,12 +426,16 @@ public partial class ItemAdd : ContentPage
 
         if (matchedSn != null)
         {
+            Color warnaBaru = (AddedSerialNumbers.Count % 2 == 0) ? Color.FromArgb("#F9F9F9") : Colors.White;
             // Validasi sukses, masukkan ke keranjang SN
             AddedSerialNumbers.Add(new AddedSerialModel
             {
                 SerialNumber = matchedSn.serialNumber.number,
                 Qty = 1,
-                WarehouseName = matchedSn.warehouse?.name ?? "Gudang Default"
+                WarehouseName = matchedSn.warehouse?.name ?? "Gudang Default",
+                RowColor = warnaBaru
+
+
             });
 
             // Bersihkan kolom input agar siap untuk ketikan SN berikutnya
@@ -446,7 +446,6 @@ public partial class ItemAdd : ContentPage
             await DisplayAlertAsync("Gagal", "Nomor Serial tidak ditemukan di sistem atau stok sudah habis.", "OK");
         }
     }
-
     private void HapusSN_Tapped(object sender, TappedEventArgs e)
     {
         // Menghapus SN jika tulisan "Hapus" diklik
@@ -455,7 +454,6 @@ public partial class ItemAdd : ContentPage
             AddedSerialNumbers.Remove(snData);
         }
     }
-
     private async void FormQty_TextChanged(object sender, TextChangedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(e.NewTextValue))
@@ -517,7 +515,6 @@ public partial class ItemAdd : ContentPage
             HitungTotalHarga();
         }
     }
-
     private void UpdateSerialCounter()
     {
         int batasQty = 1;
@@ -535,7 +532,6 @@ public partial class ItemAdd : ContentPage
         // Update teks ke Label UI
         FormSerialCounter.Text = $"Butuh serial: {sisa}";
     }
-
     private void HitungTotalHarga()
     {
         // 1. Ambil nilai Qty (Default 1 jika kosong/error)
@@ -561,3 +557,5 @@ public partial class ItemAdd : ContentPage
         FormTotalHarga.Text = $"Rp {totalHarga.ToString("N0", new CultureInfo("id-ID"))}";
     }
 }
+
+
