@@ -487,10 +487,12 @@ public partial class New_Faktur : ContentPage
         }
     }
 
-    private void UpdateSubtotal()
+    private async void UpdateSubtotal()
     {
         double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
         EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
+
+        HitungPajakPPN();
     }
 
     private void HitungDiskonDinamis()
@@ -533,17 +535,23 @@ public partial class New_Faktur : ContentPage
         EntryDiskonNominal.Text = string.Empty;
         EntryDiskonPersen.Text = string.Empty;
         EntryTotalDiskon.Text = "Rp 0";
+
+        HitungPajakPPN();
     }
 
     private async void BTambahkanDiskon_Clicked(object sender, EventArgs e)
     {
         HitungDiskonDinamis();
-        
+        HitungPajakPPN();
+
     }
 
-    // =========================================================
-    // FUNGSI HAPUS ITEM DARI KERANJANG BELANJA
-    // =========================================================
+    private void CheckBoxPPN_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        HitungPajakPPN();
+    }
+
+    
     private void HapusCartItem_Tapped(object sender, TappedEventArgs e)
     {
         if (sender is Label label && label.BindingContext is CartItemModel cartItem)
@@ -553,6 +561,35 @@ public partial class New_Faktur : ContentPage
 
             // Hitung ulang subtotal setelah barang dihapus
             UpdateSubtotal();
+        }
+    }
+
+    private void HitungPajakPPN()
+    {
+        // Ambil nilai Subtotal
+        string cleanSubtotal = EntrySubtotal.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
+        if (!double.TryParse(cleanSubtotal, out double subtotal)) subtotal = 0;
+
+        // Ambil nilai Total Diskon dari output kalkulasi diskon sebelumnya
+        string cleanDiskon = EntryTotalDiskon.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
+        if (!double.TryParse(cleanDiskon, out double totalDiskon)) totalDiskon = 0;
+
+        double totalPajak = 0;
+
+        // Validasi: Pastikan objek CheckBox sudah ter-render dan statusnya dicentang (Checked)
+        if (CheckBoxPPN != null && CheckBoxPPN.IsChecked)
+        {
+            double nilaiSetelahDiskon = subtotal - totalDiskon;
+            if (nilaiSetelahDiskon < 0) nilaiSetelahDiskon = 0;
+
+            // Rumus: (Subtotal - Total Diskon) x 11%
+            totalPajak = nilaiSetelahDiskon * 0.11;
+        }
+
+        // Tampilkan output secara real-time ke EntryTotalPajak Anda
+        if (EntryTotalPajak != null)
+        {
+            EntryTotalPajak.Text = $"Rp {totalPajak.ToString("N0", new CultureInfo("id-ID"))}";
         }
     }
 }

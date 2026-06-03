@@ -206,8 +206,8 @@
                     </StackLayout>
 
                     <HorizontalStackLayout>
-                        <CheckBox IsChecked="True" Color="DarkCyan"></CheckBox>
-                        <Label Text="Kena pajak 12%" VerticalTextAlignment="Center" FontSize="15" TextColor="Grey"></Label>
+                        <CheckBox IsChecked="True" Color="DarkCyan" x:Name="CheckBoxPPN" CheckedChanged="CheckBoxPPN_CheckedChanged"></CheckBox>
+                        <Label Text="Pajak 11/12" VerticalTextAlignment="Center" FontSize="15" TextColor="Grey"></Label>
                     </HorizontalStackLayout>
                 </StackLayout>
                 <!--Diskon ViewDiskon-->
@@ -265,7 +265,7 @@
                     <Label Text="Biaya Lain" Grid.Column="1" Grid.Row="2" TextColor="#575757"></Label>
                     <Label Text="Rp 0" x:Name="EntryTotalBiaya" FontAttributes="Bold" Grid.Column="2" Grid.Row="2" HorizontalTextAlignment="End"></Label>
 
-                    <!--biaya-->
+                    <!--PPN11/12-->
                     <Image Source="tax100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="3"></Image>
                     <Label Text="PPN 11/12" Grid.Column="1" Grid.Row="3" TextColor="#575757"></Label>
                     <Label Text="Rp 0" x:Name="EntryTotalPajak" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" HorizontalTextAlignment="End"></Label>
@@ -277,8 +277,11 @@
                     <Image Source="grandtotal100gray.png" HeightRequest="16" Grid.Column="0" Grid.Row="5"></Image>
                     <Label Text="Total Faktur" Grid.Column="1" Grid.Row="5" TextColor="#575757"></Label>
                     <Label Text="Rp 0" x:Name="EntryGrandTotal" FontSize="20" TextColor="DarkCyan" FontAttributes="Bold" Grid.Column="2" Grid.Row="5" HorizontalTextAlignment="End"></Label>
-
-
+                    
+                    <!--Bayar Pas, membulatkan--> 
+                    <Image Source="paypas.png" HeightRequest="16" Grid.Column="0" Grid.Row="5"></Image>
+                    <Label Text="Total Pembulatan" Grid.Column="1" Grid.Row="5" TextColor="#575757"></Label>
+                    <Label Text="Rp 0" x:Name="EntryGrandTotalRounded" FontSize="20" TextColor="DarkCyan" FontAttributes="Bold" Grid.Column="2" Grid.Row="5" HorizontalTextAlignment="End"></Label>
 
                 </Grid>
                 
