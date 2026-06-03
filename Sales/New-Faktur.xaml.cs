@@ -289,7 +289,8 @@ public partial class New_Faktur : ContentPage
             itemAddPage.OnItemSaved += (s, cartItem) =>
             {
                 CartItems.Add(cartItem);
-                UpdateSubtotal();
+                KalkulasiSemuaTotal();
+
             };
 
             await Navigation.PushAsync(itemAddPage);
@@ -429,14 +430,7 @@ public partial class New_Faktur : ContentPage
         }
     }
 
-    private void UpdateTotalBiaya()
-    {
-        // Jumlahkan semua nilai 'Nominal' yang ada di list menggunakan LINQ
-        double totalBiaya = SelectedBiayaList.Sum(x => x.Nominal);
-
-        // Tampilkan ke Label dengan format Rupiah (titik ribuan)
-        EntryTotalBiaya.Text = $"Rp {totalBiaya.ToString("N0", new CultureInfo("id-ID"))}";
-    }
+    
 
     private async void BTambahBiaya_Clicked(object sender, EventArgs e)
     {
@@ -467,8 +461,8 @@ public partial class New_Faktur : ContentPage
             PickerBiaya.SelectedItem = null;
             EntryHargaBiaya.Text = string.Empty;
 
-            // PANGGIL UPDATE TOTAL BIAYA DI SINI
-            UpdateTotalBiaya();
+            KalkulasiSemuaTotal();
+
         }
         else
         {
@@ -481,53 +475,17 @@ public partial class New_Faktur : ContentPage
         if (sender is Label label && label.BindingContext is SelectedBiayaModel biayaData)
         {
             SelectedBiayaList.Remove(biayaData);
+            KalkulasiSemuaTotal();
 
-            
-            UpdateTotalBiaya();
+
         }
     }
 
-    private async void UpdateSubtotal()
-    {
-        double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
-        EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
+    
 
-        HitungPajakPPN();
-    }
+    
 
-    private void HitungDiskonDinamis()
-    {
-        // Ambil nilai dasar dari EntrySubtotal, bersihkan titik/Rp
-        string cleanSubtotal = EntrySubtotal.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
-        if (!double.TryParse(cleanSubtotal, out double subtotal)) subtotal = 0;
-
-        double totalDiskon = 0;
-
-        // Cek jika user sedang mengisi Diskon Nominal
-        if (!string.IsNullOrWhiteSpace(EntryDiskonNominal.Text))
-        {
-            string cleanNominal = EntryDiskonNominal.Text.Replace(".", "").Trim();
-            if (double.TryParse(cleanNominal, out double diskonNominal))
-            {
-                totalDiskon = diskonNominal;
-            }
-        }
-        // Cek jika user mengisi Diskon Persen (Hitung dinamis dari subtotal)
-        else if (!string.IsNullOrWhiteSpace(EntryDiskonPersen.Text))
-        {
-            if (double.TryParse(EntryDiskonPersen.Text, out double diskonPersen))
-            {
-                totalDiskon = (diskonPersen / 100) * subtotal;
-            }
-        }
-
-        // Batasi agar total potongan tidak minus atau melebihi subtotal belanja
-        if (totalDiskon > subtotal) totalDiskon = subtotal;
-        if (totalDiskon < 0) totalDiskon = 0;
-
-        // Kirim hasil akhir ke EntryTotalDiskon dengan format ribuan rupiah
-        EntryTotalDiskon.Text = $"Rp {totalDiskon.ToString("N0", new CultureInfo("id-ID"))}";
-    }
+    
 
     private async void BHapusDiskon_Clicked(object sender, EventArgs e)
     {
@@ -536,20 +494,18 @@ public partial class New_Faktur : ContentPage
         EntryDiskonPersen.Text = string.Empty;
         EntryTotalDiskon.Text = "Rp 0";
 
-        HitungPajakPPN();
+        KalkulasiSemuaTotal(); KalkulasiSemuaTotal();
     }
 
     private async void BTambahkanDiskon_Clicked(object sender, EventArgs e)
     {
-        HitungDiskonDinamis();
-        HitungPajakPPN();
+
+        KalkulasiSemuaTotal();
 
     }
 
-    private void CheckBoxPPN_CheckedChanged(object sender, CheckedChangedEventArgs e)
-    {
-        HitungPajakPPN();
-    }
+    private void CheckBoxPPN_CheckedChanged(object sender, CheckedChangedEventArgs e) => KalkulasiSemuaTotal();
+    
 
     
     private void HapusCartItem_Tapped(object sender, TappedEventArgs e)
@@ -559,37 +515,62 @@ public partial class New_Faktur : ContentPage
             // Hapus dari koleksi, UI akan otomatis hilang
             CartItems.Remove(cartItem);
 
-            // Hitung ulang subtotal setelah barang dihapus
-            UpdateSubtotal();
+            KalkulasiSemuaTotal();
+
         }
     }
 
-    private void HitungPajakPPN()
+
+    // ====================================================================
+    // FUNGSI MASTER KALKULASI (Memproses segalanya dari atas ke bawah)
+    // ====================================================================
+    private void KalkulasiSemuaTotal()
     {
-        // Ambil nilai Subtotal
-        string cleanSubtotal = EntrySubtotal.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
-        if (!double.TryParse(cleanSubtotal, out double subtotal)) subtotal = 0;
+        // 1. HITUNG SUBTOTAL (Langsung dari keranjang memori, sangat aman)
+        double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
+        EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
 
-        // Ambil nilai Total Diskon dari output kalkulasi diskon sebelumnya
-        string cleanDiskon = EntryTotalDiskon.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
-        if (!double.TryParse(cleanDiskon, out double totalDiskon)) totalDiskon = 0;
+        // 2. HITUNG DISKON (Aman dari inputan ngawur seperti simbol % atau titik)
+        double totalDiskon = 0;
+        string cleanNominal = EntryDiskonNominal.Text?.Replace(".", "")?.Trim();
+        string cleanPersen = EntryDiskonPersen.Text?.Replace("%", "")?.Trim();
 
+        if (!string.IsNullOrWhiteSpace(cleanNominal) && double.TryParse(cleanNominal, out double diskonNominal))
+        {
+            totalDiskon = diskonNominal;
+        }
+        else if (!string.IsNullOrWhiteSpace(cleanPersen) && double.TryParse(cleanPersen, out double diskonPersen))
+        {
+            totalDiskon = (diskonPersen / 100) * subtotal; // Dinamis ikut subtotal baru
+        }
+
+        if (totalDiskon > subtotal) totalDiskon = subtotal; // Pengaman
+        if (totalDiskon < 0) totalDiskon = 0;
+        EntryTotalDiskon.Text = $"Rp {totalDiskon.ToString("N0", new CultureInfo("id-ID"))}";
+
+        // 3. HITUNG BIAYA LAIN (Langsung dari list biaya)
+        double totalBiaya = SelectedBiayaList.Sum(x => x.Nominal);
+        EntryTotalBiaya.Text = $"Rp {totalBiaya.ToString("N0", new CultureInfo("id-ID"))}";
+
+        // 4. HITUNG PPN 11%
         double totalPajak = 0;
-
-        // Validasi: Pastikan objek CheckBox sudah ter-render dan statusnya dicentang (Checked)
         if (CheckBoxPPN != null && CheckBoxPPN.IsChecked)
         {
             double nilaiSetelahDiskon = subtotal - totalDiskon;
             if (nilaiSetelahDiskon < 0) nilaiSetelahDiskon = 0;
-
-            // Rumus: (Subtotal - Total Diskon) x 11%
             totalPajak = nilaiSetelahDiskon * 0.11;
         }
+        EntryTotalPajak.Text = $"Rp {totalPajak.ToString("N0", new CultureInfo("id-ID"))}";
 
-        // Tampilkan output secara real-time ke EntryTotalPajak Anda
-        if (EntryTotalPajak != null)
-        {
-            EntryTotalPajak.Text = $"Rp {totalPajak.ToString("N0", new CultureInfo("id-ID"))}";
-        }
+        // 5. HITUNG GRAND TOTAL MURNI
+        double grandTotal = (subtotal - totalDiskon) + totalBiaya + totalPajak;
+        if (grandTotal < 0) grandTotal = 0;
+        EntryGrandTotal.Text = $"Rp {grandTotal.ToString("N0", new CultureInfo("id-ID"))}";
+
+        // 6. PEMBULATAN KE BAWAH (KELIPATAN 100 PERAK)
+        double grandTotalRounded = Math.Floor(grandTotal / 100) * 100;
+        EntryGrandTotalRounded.Text = $"Rp {grandTotalRounded.ToString("N0", new CultureInfo("id-ID"))}";
     }
+
+
 }
