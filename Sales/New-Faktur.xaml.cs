@@ -493,6 +493,54 @@ public partial class New_Faktur : ContentPage
         EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
     }
 
+    private void HitungDiskonDinamis()
+    {
+        // Ambil nilai dasar dari EntrySubtotal, bersihkan titik/Rp
+        string cleanSubtotal = EntrySubtotal.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
+        if (!double.TryParse(cleanSubtotal, out double subtotal)) subtotal = 0;
+
+        double totalDiskon = 0;
+
+        // Cek jika user sedang mengisi Diskon Nominal
+        if (!string.IsNullOrWhiteSpace(EntryDiskonNominal.Text))
+        {
+            string cleanNominal = EntryDiskonNominal.Text.Replace(".", "").Trim();
+            if (double.TryParse(cleanNominal, out double diskonNominal))
+            {
+                totalDiskon = diskonNominal;
+            }
+        }
+        // Cek jika user mengisi Diskon Persen (Hitung dinamis dari subtotal)
+        else if (!string.IsNullOrWhiteSpace(EntryDiskonPersen.Text))
+        {
+            if (double.TryParse(EntryDiskonPersen.Text, out double diskonPersen))
+            {
+                totalDiskon = (diskonPersen / 100) * subtotal;
+            }
+        }
+
+        // Batasi agar total potongan tidak minus atau melebihi subtotal belanja
+        if (totalDiskon > subtotal) totalDiskon = subtotal;
+        if (totalDiskon < 0) totalDiskon = 0;
+
+        // Kirim hasil akhir ke EntryTotalDiskon dengan format ribuan rupiah
+        EntryTotalDiskon.Text = $"Rp {totalDiskon.ToString("N0", new CultureInfo("id-ID"))}";
+    }
+
+    private async void BHapusDiskon_Clicked(object sender, EventArgs e)
+    {
+        // Kosongkan input dan kembalikan output ke Rp 0
+        EntryDiskonNominal.Text = string.Empty;
+        EntryDiskonPersen.Text = string.Empty;
+        EntryTotalDiskon.Text = "Rp 0";
+    }
+
+    private async void BTambahkanDiskon_Clicked(object sender, EventArgs e)
+    {
+        HitungDiskonDinamis();
+        
+    }
+
     // =========================================================
     // FUNGSI HAPUS ITEM DARI KERANJANG BELANJA
     // =========================================================

@@ -218,16 +218,16 @@
                     </HorizontalStackLayout>
 
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Diskon Nominal Ex. 10.000" Keyboard="Numeric"></Entry>
+                        <Entry Placeholder="Diskon Nominal Ex. 10.000" x:Name="EntryDiskonNominal" Keyboard="Numeric"></Entry>
                     </Border>
 
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Diskon Persen Ex. 50%"></Entry>
+                        <Entry Placeholder="Diskon Persen Ex. 50%" x:Name="EntryDiskonPersen"></Entry>
                     </Border>
 
                     <HorizontalStackLayout Spacing="10">
-                        <Button Text="Hapus" BackgroundColor="OrangeRed" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
-                        <Button Text="Tambah" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                        <Button Text="Hapus" x:Name="BHapusDiskon" Clicked="BHapusDiskon_Clicked" BackgroundColor="OrangeRed" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
+                        <Button Text="Tambah" x:Name="BTambahkanDiskon" Clicked="BTambahkanDiskon_Clicked" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
                     </HorizontalStackLayout>
                 </StackLayout>
                 
@@ -267,7 +267,7 @@
 
                     <!--biaya-->
                     <Image Source="tax100grey.png" HeightRequest="16" Grid.Column="0" Grid.Row="3"></Image>
-                    <Label Text="PPN 12%" Grid.Column="1" Grid.Row="3" TextColor="#575757"></Label>
+                    <Label Text="PPN 11/12" Grid.Column="1" Grid.Row="3" TextColor="#575757"></Label>
                     <Label Text="Rp 0" x:Name="EntryTotalPajak" FontAttributes="Bold" Grid.Column="2" Grid.Row="3" HorizontalTextAlignment="End"></Label>
                     
                     <!--garis-->
@@ -285,7 +285,6 @@
 
             </toolkit:Expander>
         </Border>
-
 
         <!--row 3 tombol tombol-->
         <Grid ColumnDefinitions="0.25*,0.25*,0.25*,*" Grid.Row="3">
