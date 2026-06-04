@@ -120,9 +120,9 @@ public partial class New_Faktur : ContentPage
     }
 
 
+
     // =========================================================
     // MODEL KERANJANG BELANJA (CART ITEM)
-    // Sesuai dengan spesifikasi JSON API
     // =========================================================
     public class CartItemModel
     {
@@ -132,32 +132,38 @@ public partial class New_Faktur : ContentPage
         public int quantity { get; set; }
         public string warehouseName { get; set; }
         public string salesmanListNumber { get; set; }
-
         public string imagePath { get; set; }
+        public double itemDiscPercent { get; set; } // Pastikan properti diskon ini ada dari tahap sebelumnya
 
         public string DisplayImage
         {
             get
             {
-               
-                if (string.IsNullOrWhiteSpace(imagePath))
-                    return "nophotoproduct150.jpg";
-                if (imagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
-                    return imagePath;
+                if (string.IsNullOrWhiteSpace(imagePath)) return "nophotoproduct150.jpg";
+                if (imagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase)) return imagePath;
                 string baseHost = App.API_HOST.Replace("api/", "");
                 string cleanFileName = imagePath.Replace("../", "").Replace("images/", "").TrimStart('/');
                 return $"{baseHost}images/{cleanFileName}";
             }
         }
+
         public List<DetailSerialNumber> detailSerialNumber { get; set; }
 
-        // Properti Khusus UI (Tidak ikut diparsing API, hanya untuk tampilan)
+        // Properti Khusus UI (Sesuai Gambar Desain Baru)
         public string FormattedUnitPrice => $"Rp {unitPrice.ToString("N0", new CultureInfo("id-ID"))}";
         public string FormattedTotalPrice => $"Rp {(unitPrice * quantity).ToString("N0", new CultureInfo("id-ID"))}";
-        public string DisplayQty => $"x{quantity}";
+        public string DisplayQty => $"x {quantity}";
         public bool HasSerialNumbers => detailSerialNumber != null && detailSerialNumber.Count > 0;
         public string SerialNumbersDisplay => HasSerialNumbers ? "SN: " + string.Join(", ", detailSerialNumber.Select(x => x.serialNumberNo)) : "";
-        public string InfoGudangSales => $"Gudang: {warehouseName} | Sales: {salesmanListNumber}";
+
+        // GABUNGAN INFO (Baris ke-2)
+        public string ItemInfoDisplay => $"{itemNo} | Gudang: {warehouseName} | Sales: {salesmanListNumber}";
+
+        // GABUNGAN HARGA & QTY (Baris ke-3)
+        public string PriceAndQtyDisplay => $"{FormattedUnitPrice} {DisplayQty}";
+
+        // LOGIKA MUNCULNYA TEKS DISKON (Baris ke-5)
+        public string TotalHargaLabel => itemDiscPercent > 0 ? $"Total Harga - Diskon {itemDiscPercent}% :" : "Total Harga :";
     }
 
     public class DetailSerialNumber

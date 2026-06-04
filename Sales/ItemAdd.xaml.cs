@@ -318,7 +318,7 @@ public partial class ItemAdd : ContentPage
             return;
         }
 
-        // 2. Validasi Serial Number (Jika form SN muncul, SN harus diisi penuh)
+        // 2. Validasi Serial Number
         if (GridNoSeri.IsVisible && AddedSerialNumbers.Count < qty)
         {
             await DisplayAlertAsync("Peringatan", $"Barang ini butuh {qty} Serial Number, Anda baru memasukkan {AddedSerialNumbers.Count}.", "OK");
@@ -340,13 +340,24 @@ public partial class ItemAdd : ContentPage
             return;
         }
 
-        // ==========================================================
-        // 5. TAMBAHAN: Validasi Sales Wajib Dipilih
-        // ==========================================================
+        // 5. Validasi Sales Wajib Dipilih
         if (string.IsNullOrWhiteSpace(SelectedSalesNumber))
         {
             await DisplayAlertAsync("Peringatan", "Sales / Penjual harus dipilih terlebih dahulu.", "OK");
             return;
+        }
+
+       
+        double persenDiskon = 0;
+        // Pastikan checkbox diskon tercentang dan field diskon muncul
+        if (FormCheckDiskonItem.IsChecked == true && FormInputDiskonItem.IsVisible)
+        {
+            // Ambil teks diskon, hilangkan tanda '%' agar menjadi angka murni
+            string cleanPercent = FormPersenDiskon.Text?.Replace("%", "")?.Trim() ?? "0";
+            if (double.TryParse(cleanPercent, out double parsedPercent))
+            {
+                persenDiskon = parsedPercent;
+            }
         }
 
         // 6. SUSUN JSON / DATA OBJECT 
@@ -357,11 +368,11 @@ public partial class ItemAdd : ContentPage
             unitPrice = harga,
             quantity = qty,
             warehouseName = FormNamaGudang.Text ?? "Gudang Utama",
-
-           
             salesmanListNumber = SelectedSalesNumber,
             imagePath = ItemImagePath,
-            
+
+            // MASUKKAN PERSENTASE DISKON KE DALAM MODEL
+            itemDiscPercent = persenDiskon,
 
             detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
             {
@@ -644,5 +655,3 @@ public partial class ItemAdd : ContentPage
         }
     }
 }
-
-
