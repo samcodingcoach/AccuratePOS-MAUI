@@ -556,6 +556,23 @@ public partial class ItemAdd : ContentPage
         // 4. Tampilkan ke Label dengan format pemisah ribuan ala Indonesia
         FormTotalHarga.Text = $"Rp {totalHarga.ToString("N0", new CultureInfo("id-ID"))}";
     }
+
+    private async void FormCheckDiskonItem_CheckedChanged(object sender, CheckedChangedEventArgs e)
+    {
+        if (FormCheckDiskonItem.IsChecked == true)
+        {
+            FormInputDiskonItem.IsVisible = true;
+        }
+        else
+        {
+            FormInputDiskonItem.IsVisible = false;
+        }
+    }
+
+    private void PickerPromo_SelectedIndexChanged(object sender, EventArgs e)
+    {
+
+    }
 }
 
 
