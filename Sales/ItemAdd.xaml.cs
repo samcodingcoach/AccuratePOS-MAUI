@@ -17,6 +17,8 @@ public partial class ItemAdd : ContentPage
     public string CustomerCode { get; set; }
     public string SelectedSalesNumber { get; private set; }
     public string ItemImagePath { get; set; }
+    // TAMBAHKAN INI UNTUK MENGUNCI HARGA ASLI
+    private double _originalBasePrice = 0;
     public List<SerialData> AvailableSerialNumbers { get; set; } = new List<SerialData>();
     public ObservableCollection<AddedSerialModel> AddedSerialNumbers { get; set; } = new ObservableCollection<AddedSerialModel>();
 
@@ -40,10 +42,67 @@ public partial class ItemAdd : ContentPage
         UpdateSerialCounter();
 
         _ = LoadItemStockPrice(itemNo, konsumenValue);
+        _ = LoadPromoData(itemNo, konsumenValue);
 
-        _= LoadSalesData();
+        _ = LoadSalesData();
 
         _ = LoadSerialNumber(itemNo);
+    }
+
+  
+    public class PromoResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
+        public List<PromoModel> data { get; set; }
+    }
+
+    public class PromoModel
+    {
+        public int id_promo { get; set; }
+        public string promo_name { get; set; }
+        public string category_user { get; set; }
+        public double percentage { get; set; }
+        public string item_no { get; set; }
+
+        // Properti ini yang dipanggil oleh ItemDisplayBinding di XAML
+        public string DisplayPromo => $"{promo_name} / {percentage}%";
+    }
+
+    private async Task LoadPromoData(string itemNo, string customerCode)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            if (string.IsNullOrEmpty(cleanToken)) return;
+
+            // Tembak API Promo dengan parameter No Item dan Kategori
+            string apiUrl = $"{App.API_HOST}promo/listpromo-lokal.php?no={Uri.EscapeDataString(itemNo)}&category={Uri.EscapeDataString(customerCode)}";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                var response = await client.GetAsync(apiUrl);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    var apiResult = JsonConvert.DeserializeObject<PromoResponse>(responseContent);
+
+                    if (apiResult != null && apiResult.status == "success" && apiResult.data != null)
+                    {
+                        MainThread.BeginInvokeOnMainThread(() =>
+                        {
+                            PickerPromo.ItemsSource = apiResult.data;
+                        });
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Gagal memuat Promo: {ex.Message}");
+        }
     }
 
 
@@ -79,16 +138,9 @@ public partial class ItemAdd : ContentPage
                     {
                         MainThread.BeginInvokeOnMainThread(() =>
                         {
-                            // 1. Update Harga Jual (Otomatis ditambah format titik ribuan)
-                            FormHargaJual.Text = apiResult.data.unitPrice.ToString("N0", new CultureInfo("id-ID"));
 
-                            // 2. Update Nilai Balance (Stok Terkini dari API)
-                            ItemBalance = apiResult.data.availableStock;
-
-                            
-
-                            // [OPSIONAL] Jika di ItemAdd.xaml Anda membuat Label untuk stok, 
-                            // tambahkan x:Name="LabelStokInfo" lalu buka kode di bawah ini:
+                            _originalBasePrice = apiResult.data.unitPrice;
+                            FormHargaJual.Text = _originalBasePrice.ToString("N0", new CultureInfo("id-ID"));
                             balanceQty = apiResult.data.availableStock;
                             FormLabelStokAvailable.Text = "Stock tersedia: " + balanceQty;
 
@@ -211,9 +263,6 @@ public partial class ItemAdd : ContentPage
     }
 
 
-    // =========================================================
-    // CLASS MODEL MAPPING SERIAL NUMBER
-    // =========================================================
     public class SerialResponse
     {
         public string status { get; set; }
@@ -251,9 +300,7 @@ public partial class ItemAdd : ContentPage
         public string expiredDate { get; set; }
     }
 
-    // =========================================================
-    // CLASS MODEL PENAMPUNG SN INPUTAN USER
-    // =========================================================
+  
     public class AddedSerialModel
     {
         public string SerialNumber { get; set; }
@@ -566,12 +613,35 @@ public partial class ItemAdd : ContentPage
         else
         {
             FormInputDiskonItem.IsVisible = false;
+
+            // RESET SEMUA KEMBALI KE HARGA NORMAL
+            PickerPromo.SelectedItem = null;
+            FormPersenDiskon.Text = "0%";
+            FormHargaJual.Text = _originalBasePrice.ToString("N0", new CultureInfo("id-ID"));
+
+            // Hitung ulang total dengan harga normal
+            HitungTotalHarga();
         }
     }
 
     private void PickerPromo_SelectedIndexChanged(object sender, EventArgs e)
     {
+        // 1. Pastikan ada promo yang dipilih
+        if (PickerPromo.SelectedItem is PromoModel selectedPromo)
+        {
+            // 2. Ubah label persentase diskon
+            FormPersenDiskon.Text = $"{selectedPromo.percentage}%";
 
+            // 3. Hitung harga baru setelah diskon (Gunakan Harga Asli sebagai basis hitungan)
+            double nilaiPotongan = _originalBasePrice * (selectedPromo.percentage / 100);
+            double hargaSetelahDiskon = _originalBasePrice - nilaiPotongan;
+
+            // 4. Update form harga jual di layar dengan harga baru
+            FormHargaJual.Text = hargaSetelahDiskon.ToString("N0", new CultureInfo("id-ID"));
+
+            // 5. Hitung ulang total harga (Qty x Harga Baru)
+            HitungTotalHarga();
+        }
     }
 }
 

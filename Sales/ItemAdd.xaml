@@ -67,7 +67,7 @@
                     <StackLayout>
                         <Label Text="Promo" FontAttributes="Bold" TranslationX="2"></Label>
                         <StackLayout Orientation="Horizontal">
-                            <Picker x:Name="PickerPromo" SelectedIndexChanged="PickerPromo_SelectedIndexChanged" HorizontalOptions="FillAndExpand" Title="Pilih Promo"  />
+                            <Picker x:Name="PickerPromo" ItemDisplayBinding="{Binding DisplayPromo}" SelectedIndexChanged="PickerPromo_SelectedIndexChanged" HorizontalOptions="FillAndExpand" Title="Pilih Promo"  />
                             <Image Source="search32.png" HeightRequest="20" Opacity="0.5"></Image>
                         </StackLayout>
                     </StackLayout>
