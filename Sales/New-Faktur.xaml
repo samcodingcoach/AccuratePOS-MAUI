@@ -23,7 +23,13 @@
                             <!--cari api konsumen-->
                             <StackLayout Orientation="Horizontal">
                                 <Picker x:Name="PickerKonsumen" HorizontalOptions="FillAndExpand" Title="Pilih Konsumen / Pelanggan"  ItemDisplayBinding="{Binding Text}" SelectedIndexChanged="OnKonsumenSelected" />
-                                <Image Source="search32.png" HeightRequest="18" Opacity="0.5"></Image>
+                                <Image Source="search32.png" HeightRequest="18" Opacity="0.5" IsVisible="True" x:Name="ImageSearchKonsumen"></Image>
+                                <Image Source="cancel1.png" HeightRequest="18" IsVisible="False" x:Name="ImageCancelKonsumen">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer x:Name="TapCancelKonsumen" NumberOfTapsRequired="1" Tapped="TapCancelKonsumen_Tapped"></TapGestureRecognizer>
+                                    </Image.GestureRecognizers>
+                                </Image>
+                                
                             </StackLayout>
                             <!--cari api konsumen-->
                         </Border>

@@ -476,7 +476,13 @@ public partial class New_Faktur : ContentPage
         if (picker?.SelectedItem is KonsumenOption selected)
         {
             SelectedKonsumenValue = selected.Value;
-           // DisplayAlertAsync("Tes", SelectedKonsumenValue, "OK");
+
+            // 1. Kunci Picker agar tidak bisa diklik/diubah secara langsung lagi
+            PickerKonsumen.IsEnabled = false;
+
+            // 2. Sembunyikan ikon pencarian, munculkan ikon cancel (silang merah)
+            ImageSearchKonsumen.IsVisible = false;
+            ImageCancelKonsumen.IsVisible = true;
         }
     }
 
@@ -718,6 +724,42 @@ public partial class New_Faktur : ContentPage
         }
 
         // Panggil fungsi master kalkulasi ke bawah
+        KalkulasiSemuaTotal();
+    }
+
+    private async void TapCancelKonsumen_Tapped(object sender, TappedEventArgs e)
+    {
+        // 1. Jika ada barang di keranjang, beri peringatan terlebih dahulu
+        if (CartItems.Count > 0)
+        {
+            bool confirm = await DisplayAlertAsync("Konfirmasi", "Membatalkan Konsumen akan menghapus seluruh barang di keranjang belanja Anda. Lanjutkan?", "Ya, Hapus Semua", "Batal");
+
+            // Jika user memilih Batal, hentikan proses pembatalan
+            if (!confirm) return;
+
+            // 2. Jika lanjut, kembalikan (cancel) semua kuota promo yang sedang menempel di keranjang
+            foreach (var item in CartItems.ToList())
+            {
+                if (item.id_promo > 0)
+                {
+                    await CancelPromoKuotaAsync(item.id_promo, item.quantity);
+                }
+            }
+
+            // Bersihkan isi keranjang
+            CartItems.Clear();
+        }
+
+        // 3. Reset Picker, buka kembali kuncinya agar user bisa memilih konsumen baru
+        PickerKonsumen.SelectedItem = null;
+        SelectedKonsumenValue = null;
+        PickerKonsumen.IsEnabled = true;
+
+        // 4. Kembalikan posisi ikon seperti semula
+        ImageSearchKonsumen.IsVisible = true;
+        ImageCancelKonsumen.IsVisible = false;
+
+        // 5. Kalkulasi ulang untuk mereset seluruh angka uang kembali ke Rp 0
         KalkulasiSemuaTotal();
     }
 
