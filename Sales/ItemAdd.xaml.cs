@@ -300,7 +300,6 @@ public partial class ItemAdd : ContentPage
         public string expiredDate { get; set; }
     }
 
-  
     public class AddedSerialModel
     {
         public string SerialNumber { get; set; }
@@ -311,21 +310,21 @@ public partial class ItemAdd : ContentPage
     }
     private async void BSimpan_Clicked(object sender, EventArgs e)
     {
-        // 1. Validasi Qty
+        // 1. Validasi Qty (Kuantitas)
         if (!int.TryParse(FormQty.Text, out int qty) || qty <= 0)
         {
             await DisplayAlertAsync("Peringatan", "Kuantitas tidak valid.", "OK");
             return;
         }
 
-        // 2. Validasi Serial Number
+        // 2. Validasi Serial Number (Jika barang memerlukan SN)
         if (GridNoSeri.IsVisible && AddedSerialNumbers.Count < qty)
         {
             await DisplayAlertAsync("Peringatan", $"Barang ini butuh {qty} Serial Number, Anda baru memasukkan {AddedSerialNumbers.Count}.", "OK");
             return;
         }
 
-        // 3. Ambil Nilai Harga Bersih
+        // 3. Ambil Nilai Harga Bersih (Harga Jual setelah diskon jika ada)
         string cleanHarga = FormHargaJual.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
         if (!double.TryParse(cleanHarga, out double harga))
         {
@@ -347,11 +346,21 @@ public partial class ItemAdd : ContentPage
             return;
         }
 
-       
+        // ==========================================================
+        // 5.5 AMBIL DATA PERSENTASE DISKON & ID PROMO
+        // ==========================================================
         double persenDiskon = 0;
+        int idPromoTerpilih = 0;
+
         // Pastikan checkbox diskon tercentang dan field diskon muncul
         if (FormCheckDiskonItem.IsChecked == true && FormInputDiskonItem.IsVisible)
         {
+            // Tangkap ID Promo dari objek yang dipilih di Picker
+            if (PickerPromo.SelectedItem is PromoModel selectedPromo)
+            {
+                idPromoTerpilih = selectedPromo.id_promo;
+            }
+
             // Ambil teks diskon, hilangkan tanda '%' agar menjadi angka murni
             string cleanPercent = FormPersenDiskon.Text?.Replace("%", "")?.Trim() ?? "0";
             if (double.TryParse(cleanPercent, out double parsedPercent))
@@ -360,7 +369,9 @@ public partial class ItemAdd : ContentPage
             }
         }
 
-        // 6. SUSUN JSON / DATA OBJECT 
+        // ==========================================================
+        // 6. SUSUN JSON / DATA OBJECT UNTUK KERANJANG
+        // ==========================================================
         var cartItem = new CartItemModel
         {
             itemNo = FormNoItem.Text,
@@ -371,7 +382,7 @@ public partial class ItemAdd : ContentPage
             salesmanListNumber = SelectedSalesNumber,
             imagePath = ItemImagePath,
 
-            // MASUKKAN PERSENTASE DISKON KE DALAM MODEL
+            // Masukkan persentase diskon yang berhasil diekstrak
             itemDiscPercent = persenDiskon,
 
             detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
@@ -384,7 +395,16 @@ public partial class ItemAdd : ContentPage
         // 7. TEMBAKKAN DATA KE HALAMAN NEW-FAKTUR
         OnItemSaved?.Invoke(this, cartItem);
 
-        // 8. TUTUP HALAMAN ADD ITEM
+        // ==========================================================
+        // 8. EKSEKUSI API UPDATE KUOTA PROMO (JIKA MENGGUNAKAN PROMO)
+        // ==========================================================
+        if (idPromoTerpilih > 0)
+        {
+            // Kirim ID Promo dan jumlah barang (qty) sebagai pengurang kuota di database
+            await UpdatePromoKuotaAsync(idPromoTerpilih, qty);
+        }
+
+        // 9. TUTUP HALAMAN ADD ITEM
         await Navigation.PopAsync();
     }
     private void PickerSales_SelectedIndexChanged(object sender, EventArgs e)
@@ -652,6 +672,49 @@ public partial class ItemAdd : ContentPage
 
             // 5. Hitung ulang total harga (Qty x Harga Baru)
             HitungTotalHarga();
+        }
+    }
+
+    // =========================================================
+    // FUNGSI UPDATE KUOTA PROMO KE DATABASE
+    // =========================================================
+    private async Task UpdatePromoKuotaAsync(int idPromo, int usedKuota)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            string apiUrl = $"{App.API_HOST}promo/update-kuota.php";
+
+            // Susun body/payload JSON sesuai format yang Anda minta
+            var payload = new
+            {
+                kuota = usedKuota,
+                id_promo = idPromo
+            };
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                // Tembakkan POST API
+                var response = await client.PostAsync(apiUrl, content);
+                string responseString = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    System.Diagnostics.Debug.WriteLine($"API Promo Error: {responseString}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Sukses memotong kuota Promo ID: {idPromo}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Koneksi Update Promo Gagal: {ex.Message}");
         }
     }
 }

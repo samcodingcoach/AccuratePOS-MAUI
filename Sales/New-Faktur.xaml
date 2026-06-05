@@ -148,8 +148,14 @@
                         <Entry HeightRequest="100" x:Name="EntryAlamat" VerticalTextAlignment="Start" Placeholder="Alamat Pengiriman"></Entry>
                     </Border>
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" Margin="0,0,0,10">
-                        <Entry x:Name="EntryNoPO" VerticalTextAlignment="Start" Placeholder="Nomor PO (Opsional)"></Entry>
+                        <StackLayout>
+                            <Entry x:Name="EntryNoPO" VerticalTextAlignment="Start" Placeholder="Nomor PO (Opsional)"></Entry>
+
+                            <Entry HeightRequest="120" x:Name="EntryKeterangan" VerticalTextAlignment="Start" Placeholder="Keterangan"></Entry>
+                        </StackLayout>
                     </Border>
+                    
+                    
                 </StackLayout>
                 <!--Pajak ViewBiaya-->
                 <StackLayout Grid.Row="0" x:Name="ViewBiaya" IsVisible="False" Spacing="10">
@@ -211,7 +217,7 @@
                     </HorizontalStackLayout>
 
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                        <Entry Placeholder="Diskon Nominal Ex. 10.000" x:Name="EntryDiskonNominal" Keyboard="Numeric"></Entry>
+                        <Entry Placeholder="Diskon Nominal Ex. 10.000" x:Name="EntryDiskonNominal" TextChanged="EntryDiskonNominal_TextChanged" Keyboard="Numeric"></Entry>
                     </Border>
 
                     <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
@@ -222,6 +228,8 @@
                         <Button Text="Hapus" x:Name="BHapusDiskon" Clicked="BHapusDiskon_Clicked" BackgroundColor="OrangeRed" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
                         <Button Text="Tambah" x:Name="BTambahkanDiskon" Clicked="BTambahkanDiskon_Clicked" BackgroundColor="DodgerBlue" FontAttributes="Bold" FontSize="16" HorizontalOptions="End"></Button>
                     </HorizontalStackLayout>
+
+                    <Label Text="" x:Name="KeteranganDiskon" TextColor="DeepPink"></Label>
                 </StackLayout>
                 
                 <!--Close Button-->
