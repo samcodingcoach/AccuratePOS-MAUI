@@ -384,6 +384,7 @@ public partial class ItemAdd : ContentPage
 
             // Masukkan persentase diskon yang berhasil diekstrak
             itemDiscPercent = persenDiskon,
+            id_promo = idPromoTerpilih,
 
             detailSerialNumber = AddedSerialNumbers.Select(sn => new DetailSerialNumber
             {

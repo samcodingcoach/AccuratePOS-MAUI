@@ -129,6 +129,7 @@ public partial class New_Faktur : ContentPage
     public class CartItemModel
     {
         public string itemNo { get; set; }
+        public int id_promo { get; set; }
         public string itemName { get; set; }
         public double unitPrice { get; set; }
         public int quantity { get; set; }
@@ -624,15 +625,66 @@ public partial class New_Faktur : ContentPage
 
     private void CheckBoxPPN_CheckedChanged(object sender, CheckedChangedEventArgs e) => KalkulasiSemuaTotal();
 
-    private void HapusCartItem_Tapped(object sender, TappedEventArgs e)
+    private async void HapusCartItem_Tapped(object sender, TappedEventArgs e)
     {
         if (sender is Label label && label.BindingContext is CartItemModel cartItem)
         {
+            // Cek apakah barang yang dihapus dari keranjang memiliki ID Promo
+            if (cartItem.id_promo > 0)
+            {
+                // Eksekusi API cancel kuota sejumlah qty barang yang dihapus
+                await CancelPromoKuotaAsync(cartItem.id_promo, cartItem.quantity);
+            }
+
             // Hapus dari koleksi, UI akan otomatis hilang
             CartItems.Remove(cartItem);
 
+            // Hitung ulang semua total yang ada di bawah
             KalkulasiSemuaTotal();
+        }
+    }
 
+    // =========================================================
+    // FUNGSI API UNTUK MEMBATALKAN & MENGEMBALIKAN KUOTA PROMO
+    // =========================================================
+    private async Task CancelPromoKuotaAsync(int idPromo, int canceledKuota)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+
+            // Menggunakan endpoint baru khusus untuk pembatalan
+            string apiUrl = $"{App.API_HOST}promo/cancel-kuota.php";
+
+            // Susun payload menggunakan angka murni (positif) dari qty
+            var payload = new
+            {
+                kuota = canceledKuota,
+                id_promo = idPromo
+            };
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                // Eksekusi POST
+                var response = await client.PostAsync(apiUrl, content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Gagal membatalkan Kuota Promo ID: {idPromo}");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine($"Sukses membatalkan Kuota Promo ID: {idPromo} sejumlah {canceledKuota}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Koneksi Cancel Promo Gagal: {ex.Message}");
         }
     }
 
