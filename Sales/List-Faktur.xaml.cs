@@ -12,18 +12,18 @@ public partial class List_Faktur : ContentPage
 {
     public ObservableCollection<InvoiceData> InvoiceList { get; set; } = new ObservableCollection<InvoiceData>();
 
-    // Variabel state untuk akumulasi Grand Total & Paginasi
+    
     private double _grandTotalAmount = 0;
     private int _currentPage = 1;
     private bool _isFetching = false;
     private bool _hasMoreData = true;
 
-    // Menyimpan state filter agar paginasi ke halaman berikutnya tetap sinkron
+  
     private string _activeStartDate = "";
     private string _activeEndDate = "";
     private string _activeSearch = "";
 
-    // Properti ini dibinding ke UI Label Total Transaksi
+   
     public string FormattedGrandTotal => $"Rp {_grandTotalAmount:N0}";
 
     public List_Faktur()
@@ -64,34 +64,13 @@ public partial class List_Faktur : ContentPage
     }
 
     
-    private async void B_Filter_Clicked(object sender, EventArgs e)
-    {
-        // Mengambil nilai dari x:Name XAML Anda
-        // Menggunakan String Interpolation untuk menghindari error ToString()
-        _activeStartDate = $"{DP_startdate.Date:yyyy-MM-dd}";
-        _activeEndDate = $"{DP_enddate.Date:yyyy-MM-dd}";
-
-        _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
-
-        // Tarik data dengan mode Refresh (kembali ke page 1)
-        await LoadDataFromServer(isRefresh: true);
-    }
-
-    // EVENT HANDLER: Tombol Reset Ditekan
-    private async void B_Reset_Clicked(object sender, EventArgs e)
-    {
-        ResetFilterState();
-        await LoadDataFromServer(isRefresh: true);
-    }
-
-    // EVENT HANDLER: Scroll bawah pada CollectionView
     private async void OnLoadMoreItems(object sender, EventArgs e)
     {
         // Tarik data mode Load More (lanjut ke page berikutnya)
         await LoadDataFromServer(isRefresh: false);
     }
 
-    // Core Logic Pemanggilan API dengan HttpClient
+  
     private async Task LoadDataFromServer(bool isRefresh)
     {
         // Cegah pemanggilan ganda / cegah load jika data sudah habis
@@ -200,9 +179,6 @@ public partial class List_Faktur : ContentPage
         }
     }
 
-    // =========================================================
-    // CLASS MODEL MAPPING JSON -> C#
-    // =========================================================
     public class InvoiceListResponse
     {
         public string status { get; set; }
@@ -241,7 +217,23 @@ public partial class List_Faktur : ContentPage
         public string customerNo { get; set; }
     }
 
-    private async void B_NewFak_Clicked(object sender, EventArgs e)
+    
+
+    private async void TapFilter_Tapped(object sender, TappedEventArgs e)
+    {
+        _activeStartDate = $"{DP_startdate.Date:yyyy-MM-dd}";
+        _activeEndDate = $"{DP_enddate.Date:yyyy-MM-dd}";
+        _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
+        await LoadDataFromServer(isRefresh: true);
+    }
+
+    private async void TapReset_Tapped(object sender, TappedEventArgs e)
+    {
+        ResetFilterState();
+        await LoadDataFromServer(isRefresh: true);
+    }
+
+    private async void TapNewFak_Tapped(object sender, TappedEventArgs e)
     {
         await Navigation.PushAsync(new Sales.New_Faktur());
     }

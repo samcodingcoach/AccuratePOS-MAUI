@@ -1,65 +1,84 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MyPosAccurate2026.Sales.List_Faktur" BackgroundColor="#d2dae2" 
+             x:Class="MyPosAccurate2026.Sales.List_Faktur" BackgroundColor="GhostWhite" 
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              NavigationPage.HasNavigationBar="False"
-             Title="List_Faktur">
+             >
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="10" ColumnDefinitions="*" ColumnSpacing="10" Padding="15,15,15,15">
-        <!--gemini kerjakan ini bagian filter dan search-->
-        <Border Grid.Row="0" Padding="20,20,20,10" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
+    <Grid RowDefinitions="Auto,*,Auto" RowSpacing="0" ColumnDefinitions="*" ColumnSpacing="10" Padding="0">
+        <!--search dan filter-->
+        <Border Grid.Row="0" Padding="10" StrokeShape="RoundRectangle 10" Margin="10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
             <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
                     <StackLayout Orientation="Horizontal">
                         <Label Text="Pencarian" HorizontalOptions="FillAndExpand" FontSize="Large" FontAttributes="Bold"  Padding="5"/>
-                        <Image Source="chevron24.png" TranslationY="-3"></Image>
+                        <Image Source="chevron100.png"  HeightRequest="20" TranslationX="-8"></Image>
                     </StackLayout>
                 </toolkit:Expander.Header>
 
-                <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto"  RowSpacing="10"   ColumnSpacing="10"  Padding="5,10,5,5">
-                    <StackLayout Grid.Column="0" Grid.Row="0">
-                        <Label Text="Tanggal Mulai" FontAttributes="Bold" />
-                        <DatePicker FontSize="Large" x:Name="DP_startdate"/>
-                    </StackLayout>
+                <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="5"  Padding="5,10,5,5">
 
-                    <StackLayout Grid.Column="1" Grid.Row="0">
-                        <Label Text="Tanggal Selesai" FontAttributes="Bold"/>
-                        <DatePicker FontSize="Large" x:Name="DP_enddate"/>
-                    </StackLayout>
 
-                    <StackLayout Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2">
-                        <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                            <Entry Placeholder="No. Faktur / Kode Konsumen" x:Name="Search_FakturKonsumen" ClearButtonVisibility="WhileEditing"/>
+                    <Border Padding="12,0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Tanggal Awal" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                            <DatePicker FontSize="Large" x:Name="DP_startdate" Grid.Column="1"/>
+                        </Grid>
+                    </Border>
+                    <Border Padding="12,0" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Tanggal Selesai" FontAttributes="Bold" VerticalTextAlignment="Center"></Label>
+                            <DatePicker FontSize="Large" x:Name="DP_enddate" Grid.Column="1"/>
+                        </Grid>
+                    </Border>
+                    <StackLayout Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2">
+                        <Border Padding="10,0" Grid.Column="0" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Entry Grid.Column="0" Placeholder="No. Faktur / Kode Konsumen" x:Name="Search_FakturKonsumen" ClearButtonVisibility="WhileEditing"/>
+                                <Image Grid.Column="1" Source="search100.png" HeightRequest="20" TranslationX="-2">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer x:Name="TapFilter" Tapped="TapFilter_Tapped"></TapGestureRecognizer>
+                                    </Image.GestureRecognizers>
+                                </Image>
+                            </Grid>
                         </Border>
+
                     </StackLayout>
 
-                    <StackLayout Grid.Column="0" Grid.Row="2" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="10" Margin="0,10,0,5">
-                        <Button Text="Reset" x:Name="B_Reset" Clicked="B_Reset_Clicked" BackgroundColor="White" TextColor="Grey" BorderColor="Grey" BorderWidth="0.5" HorizontalOptions="FillAndExpand"/>
-                        <Button Text="Filter" x:Name="B_Filter" Clicked="B_Filter_Clicked" HorizontalOptions="FillAndExpand" FontAttributes="Bold"/>
+                    <StackLayout Orientation="Horizontal" Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2"  Spacing="10" Margin="0,10,0,5">
+
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="TapReset" Tapped="TapReset_Tapped"></TapGestureRecognizer>
+                        </StackLayout.GestureRecognizers>
+
+                        <Image Source="reset100.png" HeightRequest="14"></Image>
+                        <Label Text="Reset pencarian dan filter" TextColor="#3F3B60"></Label>
+
+
+
                     </StackLayout>
                 </Grid>
             </toolkit:Expander>
         </Border>
-        <!--gemini kerjakan ini bagian filter dan search-->
-        <Border Grid.Row="1" Padding="15,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" BackgroundColor="DarkCyan">
-            <StackLayout Orientation="Horizontal" Spacing="5" >
-                <Image Source="grandtotal100.png" HeightRequest="14" HorizontalOptions="Start"></Image>
-                <Label Text="Total Transaksi" HorizontalOptions="FillAndExpand"  FontAttributes="Bold" FontSize="16" VerticalOptions="Center"/>
-                <Label Text="{Binding FormattedGrandTotal}" HorizontalTextAlignment="End" HorizontalOptions="End" TextColor="#f1c40f" FontAttributes="Bold" VerticalOptions="Center"/>
-            </StackLayout>
-        </Border>
-
-        <CollectionView Grid.Row="2" x:Name="InvoiceCollectionView"
+        <!--data invoice-->
+        <CollectionView Grid.Row="1" x:Name="InvoiceCollectionView" Margin="10,0,10,5"
                         RemainingItemsThreshold="3" 
                         RemainingItemsThresholdReached="OnLoadMoreItems">
             <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10" />
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="5" />
             </CollectionView.ItemsLayout>
+            <CollectionView.EmptyView>
+                <StackLayout Spacing="10" VerticalOptions="CenterAndExpand">
+                    <Image Source="notfound.png"></Image>
+                    <Label Text="Data tidak ditemukan." HorizontalTextAlignment="Center" FontSize="Large" TextColor="Grey"></Label>
+                </StackLayout>
+            </CollectionView.EmptyView>
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <Border Padding="10,10,15,10" VerticalOptions="Start" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
-                        <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto,Auto, Auto"  RowSpacing="2"   ColumnSpacing="10"  Padding="5,10,5,5">
+                    <Border Padding="10,5,15,5" VerticalOptions="Start" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
+                        <Grid ColumnDefinitions="*,*"  RowDefinitions="Auto,Auto,Auto,Auto, Auto"  RowSpacing="0" ColumnSpacing="10"  
+                              Padding="5,10,5,5">
 
                             <HorizontalStackLayout Grid.Row="0" Grid.Column="0" Spacing="5">
                                 <Image Source="date24.png" HeightRequest="15" TranslationY="1"></Image>
@@ -79,7 +98,7 @@
                                 <Label Text="{Binding CustomerDisplay}" VerticalTextAlignment="Center" TranslationY="2" TextColor="#636363"></Label>
                             </HorizontalStackLayout>
 
-                            <BoxView HeightRequest="0.4" Margin="0,10,0,10" Opacity="0.5" Color="#CCCCCC" HorizontalOptions="Fill" Grid.Row="3" Grid.ColumnSpan="2"/>
+                            <BoxView HeightRequest="0.5" Margin="0,10,0,5" Opacity="1" Color="LightGrey" HorizontalOptions="Fill" Grid.Row="3" Grid.ColumnSpan="2"/>
 
                             <Label Text="Nilai Faktur" Grid.Column="0" Grid.Row="4" VerticalTextAlignment="Center"></Label>
 
@@ -92,8 +111,25 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
+        <!--total dan new-->
+        <Grid Grid.Row="2" ColumnDefinitions="Auto,*" Padding="0">
 
-        <Button Grid.Row="3" Text="New Faktur Penjualan" x:Name="B_NewFak" Clicked="B_NewFak_Clicked" FontAttributes="Bold" FontSize="Large"></Button>
+            <StackLayout BackgroundColor="DarkCyan" Padding="15">
+                <Image Grid.Column="0" Source="newinvoice.png" HeightRequest="28">
+                    <Image.GestureRecognizers>
+                        <TapGestureRecognizer x:Name="TapNewFak" Tapped="TapNewFak_Tapped"></TapGestureRecognizer>
+                    </Image.GestureRecognizers>
+                </Image>
+            </StackLayout>
+            
+            <StackLayout Orientation="Horizontal" Grid.Column="1" BackgroundColor="DarkOrange" Padding="15"  Spacing="10">
+                <Image Source="totalwhite.png" HeightRequest="28"></Image>
+                <Label Text="{Binding FormattedGrandTotal}" TextColor="White" 
+                       HorizontalTextAlignment="End" HorizontalOptions="EndAndExpand" FontSize="28" FontAttributes="Bold" VerticalOptions="Center"/>
+            </StackLayout>
+        </Grid>
+        
+        
 
     </Grid>
 </ContentPage>
