@@ -392,7 +392,7 @@ public partial class New_Faktur : ContentPage
             // Tangkap Data yang dikirim dari BSimpan_Clicked
             itemAddPage.OnItemSaved += (s, cartItem) =>
             {
-                CartItems.Add(cartItem);
+                CartItems.Insert(0, cartItem);
                 KalkulasiSemuaTotal();
 
             };

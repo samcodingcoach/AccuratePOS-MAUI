@@ -43,12 +43,8 @@ public partial class List_Faktur : ContentPage
     {
         base.OnAppearing();
 
-        // Membaca data pertama kali halaman dibuka (Otomatis Filter Hari Ini)
-        if (InvoiceList.Count == 0)
-        {
-            ResetFilterState();
-            await LoadDataFromServer(isRefresh: true);
-        }
+        ResetFilterState();
+        await LoadDataFromServer(isRefresh: true);
     }
 
     
@@ -364,5 +360,21 @@ public partial class List_Faktur : ContentPage
                 }
             }
         }
+    }
+
+    private async void DP_enddate_DateSelected(object sender, DateChangedEventArgs e)
+    {
+        _activeStartDate = $"{DP_startdate.Date:yyyy-MM-dd}";
+        _activeEndDate = $"{DP_enddate.Date:yyyy-MM-dd}";
+        _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
+        await LoadDataFromServer(isRefresh: true);
+    }
+
+    private async void DP_startdate_DateSelected(object sender, DateChangedEventArgs e)
+    {
+        _activeStartDate = $"{DP_startdate.Date:yyyy-MM-dd}";
+        _activeEndDate = $"{DP_enddate.Date:yyyy-MM-dd}";
+        _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
+        await LoadDataFromServer(isRefresh: true);
     }
 }
