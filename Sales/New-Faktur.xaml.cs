@@ -387,8 +387,12 @@ public partial class New_Faktur : ContentPage
 
             System.Diagnostics.Debug.WriteLine($"Barang Dipilih: {selectedItem.name} - Harga: {selectedItem.price}");
 
-            var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue, selectedItem.image);
+            // 1. Hitung promo saat ini
+            int currentPromoCount = CartItems.Count(x => x.id_promo > 0);
 
+            // 2. Buka halaman ItemAdd dengan menyisipkan currentPromoCount di paling belakang
+            var itemAddPage = new ItemAdd(selectedItem.item_no, selectedItem.name, selectedItem.balance, SelectedKonsumenValue, selectedItem.image, currentPromoCount);
+            
             // Tangkap Data yang dikirim dari BSimpan_Clicked
             itemAddPage.OnItemSaved += (s, cartItem) =>
             {
@@ -449,9 +453,20 @@ public partial class New_Faktur : ContentPage
         string cleanDiskon = EntryTotalDiskon.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
         if (!double.TryParse(cleanDiskon, out double totalDiskon)) totalDiskon = 0;
 
-        int num1 = CartItems.Count > 0 ? CartItems[0].id_promo : 0;
-        int num2 = CartItems.Count > 1 ? CartItems[1].id_promo : 0;
-        int num3 = CartItems.Count > 2 ? CartItems[2].id_promo : 0;
+        // CARA CERDAS MENGAMBIL ID PROMO
+        var promoItems = CartItems.Where(x => x.id_promo > 0).ToList();
+
+        if (promoItems.Count > 3)
+        {
+            await DisplayAlertAsync("Peringatan", "Maksimal hanya 3 promo yang diizinkan dalam 1 faktur.", "OK");
+            return;
+        }
+
+        int num1 = promoItems.Count > 0 ? promoItems[0].id_promo : 0;
+        int num2 = promoItems.Count > 1 ? promoItems[1].id_promo : 0;
+        int num3 = promoItems.Count > 2 ? promoItems[2].id_promo : 0;
+
+       
 
         var payload = new
         {

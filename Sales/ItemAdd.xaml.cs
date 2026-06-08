@@ -23,13 +23,13 @@ public partial class ItemAdd : ContentPage
     public ObservableCollection<AddedSerialModel> AddedSerialNumbers { get; set; } = new ObservableCollection<AddedSerialModel>();
 
     public event EventHandler<CartItemModel> OnItemSaved;
-
-    public ItemAdd(string itemNo, string name, double balance, string konsumenValue, string imagePath = null)
+    private int _currentPromoCount = 0;
+    public ItemAdd(string itemNo, string name, double balance, string konsumenValue, string imagePath = null, int currentPromoCount = 0)
     {
         InitializeComponent();
 
-        cek_token();
-        
+        //cek_token();
+        _currentPromoCount = currentPromoCount;
         CustomerCode = konsumenValue;
         ItemBalance = balance;
         FormNoItem.Text = itemNo;
@@ -104,7 +104,6 @@ public partial class ItemAdd : ContentPage
             System.Diagnostics.Debug.WriteLine($"Gagal memuat Promo: {ex.Message}");
         }
     }
-
 
     private async Task LoadItemStockPrice(string itemNo, string customerCode)
     {
@@ -261,7 +260,6 @@ public partial class ItemAdd : ContentPage
         // Properti khusus untuk digabungkan dan ditampilkan ke Picker (ItemDisplayBinding)
         public string DisplayName => $"{number} - {name}";
     }
-
 
     public class SerialResponse
     {
@@ -655,23 +653,29 @@ public partial class ItemAdd : ContentPage
             HitungTotalHarga();
         }
     }
-
     private void PickerPromo_SelectedIndexChanged(object sender, EventArgs e)
     {
-        // 1. Pastikan ada promo yang dipilih
+        // 1. PENGAMAN: Blokir jika kuota 3 promo di keranjang sudah penuh
+        if (PickerPromo.SelectedItem != null && _currentPromoCount >= 3)
+        {
+            Dispatcher.Dispatch(async () =>
+            {
+                await DisplayAlertAsync("Peringatan", "Batas maksimal 3 promo per faktur telah tercapai. Anda tidak dapat menggunakan promo lagi pada barang ini.", "OK");
+            });
+            PickerPromo.SelectedItem = null;
+            return;
+        }
+
+        // 2. Lanjutkan diskon jika kuota aman
         if (PickerPromo.SelectedItem is PromoModel selectedPromo)
         {
-            // 2. Ubah label persentase diskon
             FormPersenDiskon.Text = $"{selectedPromo.percentage}%";
 
-            // 3. Hitung harga baru setelah diskon (Gunakan Harga Asli sebagai basis hitungan)
             double nilaiPotongan = _originalBasePrice * (selectedPromo.percentage / 100);
             double hargaSetelahDiskon = _originalBasePrice - nilaiPotongan;
 
-            // 4. Update form harga jual di layar dengan harga baru
             FormHargaJual.Text = hargaSetelahDiskon.ToString("N0", new CultureInfo("id-ID"));
 
-            // 5. Hitung ulang total harga (Qty x Harga Baru)
             HitungTotalHarga();
         }
     }
