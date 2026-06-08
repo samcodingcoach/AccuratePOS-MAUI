@@ -247,20 +247,19 @@ public partial class New_Faktur : ContentPage
 
         public List<DetailSerialNumber> detailSerialNumber { get; set; }
 
-        // Properti Khusus UI (Sesuai Gambar Desain Baru)
+        // 1. Hitung nilai asli (Harga x Qty) dikurangi persentase diskon
+        public double TotalPriceAfterDiscount => (unitPrice * quantity) - ((unitPrice * quantity) * (itemDiscPercent / 100.0));
+
+        // 2. Format ke rupiah berdasarkan nilai yang sudah didiskon
+        public string FormattedTotalPrice => $"Rp {TotalPriceAfterDiscount.ToString("N0", new CultureInfo("id-ID"))}";
+
         public string FormattedUnitPrice => $"Rp {unitPrice.ToString("N0", new CultureInfo("id-ID"))}";
-        public string FormattedTotalPrice => $"Rp {(unitPrice * quantity).ToString("N0", new CultureInfo("id-ID"))}";
         public string DisplayQty => $"x {quantity}";
         public bool HasSerialNumbers => detailSerialNumber != null && detailSerialNumber.Count > 0;
         public string SerialNumbersDisplay => HasSerialNumbers ? "SN: " + string.Join(", ", detailSerialNumber.Select(x => x.serialNumberNo)) : "";
 
-        // GABUNGAN INFO (Baris ke-2)
-        public string ItemInfoDisplay => $"{itemNo} | Gudang: {warehouseName} | Sales: {salesmanListNumber}";
-
-        // GABUNGAN HARGA & QTY (Baris ke-3)
+        public string ItemInfoDisplay => $"{itemNo} | {warehouseName} | Sales: {salesmanListNumber}";
         public string PriceAndQtyDisplay => $"{FormattedUnitPrice} {DisplayQty}";
-
-        // LOGIKA MUNCULNYA TEKS DISKON (Baris ke-5)
         public string TotalHargaLabel => itemDiscPercent > 0 ? $"Total Harga - Diskon {itemDiscPercent}% :" : "Total Harga :";
     }
 
@@ -867,8 +866,10 @@ public partial class New_Faktur : ContentPage
         // PENGAMAN CRASH: Hentikan fungsi jika layar UI belum selesai dibuat
         if (EntrySubtotal == null || EntryGrandTotal == null) return;
 
+        double subtotal = CartItems.Sum(x => x.TotalPriceAfterDiscount);
+
         // 1. HITUNG SUBTOTAL (Langsung dari keranjang memori, sangat aman)
-        double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
+        
         EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";
 
         // 2. HITUNG DISKON (Aman dari inputan ngawur seperti simbol % atau titik)
