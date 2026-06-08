@@ -356,6 +356,59 @@ public partial class List_Faktur : ContentPage
                 }
                 else if (action == "Hapus")
                 {
+                    // 1. Berikan peringatan konfirmasi sebelum menghapus
+                    bool confirm = await DisplayAlertAsync("Konfirmasi Hapus", $"Apakah Anda yakin ingin menghapus faktur {invoice.number}?", "Ya, Hapus", "Batal");
+                    if (!confirm) return;
+
+                    try
+                    {
+                        string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+                        string apiUrl = $"{App.API_HOST}penjualan/delete-invoice.php";
+
+                        // 2. Susun Payload JSON sesuai permintaan endpoint
+                        var payload = new
+                        {
+                            number = invoice.number
+                        };
+
+                        using (var client = new HttpClient())
+                        {
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                            string jsonPayload = JsonConvert.SerializeObject(payload);
+
+                            // 3. Gunakan HttpRequestMessage untuk mengirim Body JSON pada method DELETE
+                            var request = new HttpRequestMessage(HttpMethod.Delete, apiUrl)
+                            {
+                                Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+                            };
+
+                            // Eksekusi API
+                            var response = await client.SendAsync(request);
+                            string responseString = await response.Content.ReadAsStringAsync();
+
+                            // 4. Proses Hasil (Gunakan MainThread untuk menghindari Crash UI)
+                            MainThread.BeginInvokeOnMainThread(async () =>
+                            {
+                                if (response.IsSuccessStatusCode)
+                                {
+                                    await DisplayAlertAsync("Sukses", $"Faktur {invoice.number} berhasil dihapus dari sistem.", "OK");
+
+                                    // Refresh layar secara otomatis setelah berhasil dihapus
+                                    await LoadDataFromServer(isRefresh: true);
+                                }
+                                else
+                                {
+                                    await DisplayAlertAsync("Gagal Menghapus", $"Sistem merespons: {responseString}", "OK");
+                                }
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MainThread.BeginInvokeOnMainThread(async () =>
+                            await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan saat menghapus: {ex.Message}", "OK"));
+                    }
                     System.Diagnostics.Debug.WriteLine($"Menghapus Faktur: {invoice.number}");
                 }
             }
