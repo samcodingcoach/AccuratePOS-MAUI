@@ -119,9 +119,103 @@ public partial class New_Faktur : ContentPage
         public string Name { get; set; }
         public double Nominal { get; set; }
         public string FormattedNominal => $"Rp {Nominal:N0}";
+        public int? id { get; set; }
     }
 
 
+    // Variabel penanda jika masuk mode edit faktur
+    private int _editInvoiceId = 0;
+    private string _editInvoiceNumber = "";
+
+    // Fungsi pemeta data dari API ke Element UI
+    public void LoadEditData(List_Faktur.DetailInvoiceData data)
+    {
+        _editInvoiceId = data.id;
+        _editInvoiceNumber = data.number;
+
+        B_NewFaktur.Text = "UPDATE FAKTUR";
+
+        EntryNoPO.Text = data.poNumber;
+        EntryKeterangan.Text = data.description;
+        EntryAlamat.Text = data.toAddress;
+
+        if (data.cashDiscount > 0) EntryDiskonNominal.Text = data.cashDiscount.ToString();
+
+        CheckBoxPPN.IsChecked = data.tax1Amount > 0;
+
+        if (data.shipment != null && !string.IsNullOrEmpty(data.shipment.name))
+            PickerPengirim.SelectedItem = data.shipment.name;
+
+        if (data.customer != null && !string.IsNullOrEmpty(data.customer.customerNo))
+        {
+            foreach (KonsumenOption opt in PickerKonsumen.ItemsSource)
+            {
+                if (opt.Text.Contains($"- {data.customer.customerNo}"))
+                {
+                    PickerKonsumen.SelectedItem = opt;
+                    break;
+                }
+            }
+        }
+
+        SelectedBiayaList.Clear();
+        if (data.detailExpense != null)
+        {
+            foreach (var exp in data.detailExpense)
+            {
+                SelectedBiayaList.Add(new SelectedBiayaModel
+                {
+                    id = exp.id,
+                    No = exp.account?.no,
+                    Name = exp.detailName,
+                    Nominal = exp.expenseAmount
+                });
+            }
+        }
+
+        CartItems.Clear();
+        if (data.detailItem != null)
+        {
+            for (int i = 0; i < data.detailItem.Count; i++)
+            {
+                var itm = data.detailItem[i];
+                string currentItemNo = itm.item?.no ?? "N/A";
+
+                int currentIdPromo = 0;
+                if (i == 0) currentIdPromo = data.numericField1;
+                else if (i == 1) currentIdPromo = data.numericField2;
+                else if (i == 2) currentIdPromo = data.numericField3;
+
+                var cartItem = new CartItemModel
+                {
+                    id = itm.id,
+                    itemNo = currentItemNo,
+                    id_promo = currentIdPromo,
+                    itemName = itm.detailName,
+                    unitPrice = itm.unitPrice,
+                    quantity = (int)itm.quantity,
+                    itemDiscPercent = itm.itemDiscPercent,
+                    warehouseName = itm.warehouse?.name ?? "Gudang Utama",
+                    salesmanListNumber = itm.salesmanList?.FirstOrDefault()?.number,
+                    imagePath = currentItemNo != "N/A" ? $"{currentItemNo}.jpg" : ""
+                };
+
+                if (itm.detailSerialNumber != null && itm.detailSerialNumber.Count > 0)
+                {
+                    cartItem.detailSerialNumber = itm.detailSerialNumber.Select(sn => new DetailSerialNumber
+                    {
+                        id = sn.id,
+                        serialNumberNo = sn.serialNumber?.number,
+                        quantity = sn.quantity
+                    }).ToList();
+                }
+
+                CartItems.Add(cartItem);
+            }
+        }
+
+        KalkulasiSemuaTotal();
+    }
 
     // =========================================================
     // MODEL KERANJANG BELANJA (CART ITEM)
@@ -129,6 +223,7 @@ public partial class New_Faktur : ContentPage
     public class CartItemModel
     {
         public string itemNo { get; set; }
+        public int? id { get; set; } 
         public int id_promo { get; set; }
         public string itemName { get; set; }
         public double unitPrice { get; set; }
@@ -173,6 +268,7 @@ public partial class New_Faktur : ContentPage
     {
         public string serialNumberNo { get; set; }
         public int quantity { get; set; }
+        public int? id { get; set; } // <--- TAMBAHAN
     }
 
     private async void SearchBar_Item_TextChanged(object sender, TextChangedEventArgs e)
@@ -328,34 +424,22 @@ public partial class New_Faktur : ContentPage
 
     private async void B_NewFaktur_Clicked(object sender, EventArgs e)
     {
-        // 1. Validasi Data Wajib
         if (CartItems.Count == 0)
         {
             await DisplayAlertAsync("Peringatan", "Keranjang belanja masih kosong. Tambahkan barang terlebih dahulu.", "OK");
             return;
         }
 
-        // ======================================================================
-        // 2. AMBIL TEKS LANGSUNG DARI PICKER DAN POTONG STRING
-        // ======================================================================
         string finalCustomerCode = "";
-
-        // Tarik objek yang sedang dipilih secara langsung dari elemen Picker UI Anda
         if (PickerKonsumen.SelectedItem is KonsumenOption selectedOption)
         {
-            // Ambil parameter "Text" yang tampil di layar (Isinya: "Membership - MB002")
             string teksYangTampil = selectedOption.Text;
-
-            // Lakukan pemotongan dengan spesifik strip dan spasi "- "
             if (teksYangTampil.Contains("- "))
             {
                 var splitArray = teksYangTampil.Split(new string[] { "- " }, StringSplitOptions.None);
-                finalCustomerCode = splitArray.Last().Trim(); // Hasil akhir murni: "MB002"
+                finalCustomerCode = splitArray.Last().Trim();
             }
-            else
-            {
-                finalCustomerCode = teksYangTampil.Trim();
-            }
+            else finalCustomerCode = teksYangTampil.Trim();
         }
         else
         {
@@ -363,49 +447,54 @@ public partial class New_Faktur : ContentPage
             return;
         }
 
-        // 3. Bersihkan dan Ambil Nilai Total Diskon
         string cleanDiskon = EntryTotalDiskon.Text?.Replace("Rp", "")?.Replace(".", "")?.Trim() ?? "0";
         if (!double.TryParse(cleanDiskon, out double totalDiskon)) totalDiskon = 0;
 
-        // 4. Susun Payload JSON sesuai struktur save-invoice.php
+        int num1 = CartItems.Count > 0 ? CartItems[0].id_promo : 0;
+        int num2 = CartItems.Count > 1 ? CartItems[1].id_promo : 0;
+        int num3 = CartItems.Count > 2 ? CartItems[2].id_promo : 0;
+
         var payload = new
         {
-            customerNo = finalCustomerCode, // <--- SEKARANG PASTI BERISI KODE PELANGGAN
-            transDate = DateTime.Now.ToString("yyyy-MM-dd"), // Tanggal sekarang
+            id = _editInvoiceId > 0 ? (int?)_editInvoiceId : null,
+            number = !string.IsNullOrEmpty(_editInvoiceNumber) ? _editInvoiceNumber : null,
+            customerNo = finalCustomerCode,
+            transDate = DateTime.Now.ToString("yyyy-MM-dd"),
             cashDiscount = totalDiskon,
             taxable = CheckBoxPPN.IsChecked == true,
             shipmentName = PickerPengirim.SelectedItem?.ToString() ?? "",
             toAddress = EntryAlamat.Text ?? "",
             description = EntryKeterangan.Text ?? "",
             poNumber = EntryNoPO.Text ?? "",
+            numericField1 = num1,
+            numericField2 = num2,
+            numericField3 = num3,
 
-            // Susun array barang (detailItem)
             detailItem = CartItems.Select(item => new
             {
+                id = item.id > 0 ? (int?)item.id : null,
                 itemNo = item.itemNo,
                 unitPrice = item.unitPrice,
                 quantity = item.quantity,
                 warehouseName = item.warehouseName,
                 salesmanListNumber = item.salesmanListNumber,
                 itemDiscPercent = item.itemDiscPercent,
-
-                // Susun array serial number jika ada
                 detailSerialNumber = item.detailSerialNumber?.Select(sn => new
                 {
+                    id = sn.id > 0 ? (int?)sn.id : null,
                     serialNumberNo = sn.serialNumberNo,
                     quantity = sn.quantity
                 }).ToList()
             }).ToList(),
 
-            // Susun array biaya tambahan (detailExpense)
             detailExpense = SelectedBiayaList.Select(biaya => new
             {
+                id = biaya.id > 0 ? (int?)biaya.id : null,
                 accountNo = biaya.No,
                 expenseAmount = biaya.Nominal
             }).ToList()
         };
 
-        // 5. Proses Pengiriman via HTTP POST
         try
         {
             B_NewFaktur.IsEnabled = false;
@@ -418,34 +507,44 @@ public partial class New_Faktur : ContentPage
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
 
-                string jsonPayload = JsonConvert.SerializeObject(payload);
+                string jsonPayload = JsonConvert.SerializeObject(payload, new JsonSerializerSettings
+                {
+                    NullValueHandling = NullValueHandling.Ignore
+                });
+
                 var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
 
+                // Mulai tembak API (Masuk Background Thread)
                 var response = await client.PostAsync(apiUrl, content);
                 string responseString = await response.Content.ReadAsStringAsync();
 
-                if (response.IsSuccessStatusCode)
+                // KEMBALI KE UI THREAD UNTUK ALERT & NAVIGASI
+                MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    await DisplayAlertAsync("Sukses", "Faktur Penjualan berhasil disimpan ke sistem.", "OK");
-
-                    // Kembali ke halaman sebelumnya (List-Faktur)
-                    await Navigation.PushAsync(new List_Faktur());
-                }
-                else
-                {
-                    await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
-                    System.Diagnostics.Debug.WriteLine($"Payload yang dikirim: {jsonPayload}");
-                }
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await DisplayAlertAsync("Sukses", "Faktur Penjualan berhasil disimpan ke sistem.", "OK");
+                        await Navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
+                    }
+                });
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan saat menghubungi server: {ex.Message}", "OK");
+            MainThread.BeginInvokeOnMainThread(async () =>
+                await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan: {ex.Message}", "OK"));
         }
         finally
         {
-            B_NewFaktur.IsEnabled = true;
-            B_NewFaktur.Text = "BUAT FAKTUR";
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                B_NewFaktur.IsEnabled = true;
+                B_NewFaktur.Text = _editInvoiceId > 0 ? "UPDATE FAKTUR" : "BUAT FAKTUR";
+            });
         }
     }
 
@@ -765,6 +864,9 @@ public partial class New_Faktur : ContentPage
 
     private void KalkulasiSemuaTotal()
     {
+        // PENGAMAN CRASH: Hentikan fungsi jika layar UI belum selesai dibuat
+        if (EntrySubtotal == null || EntryGrandTotal == null) return;
+
         // 1. HITUNG SUBTOTAL (Langsung dari keranjang memori, sangat aman)
         double subtotal = CartItems.Sum(x => x.unitPrice * x.quantity);
         EntrySubtotal.Text = $"Rp {subtotal.ToString("N0", new CultureInfo("id-ID"))}";

@@ -237,4 +237,132 @@ public partial class List_Faktur : ContentPage
     {
         await Navigation.PushAsync(new Sales.New_Faktur());
     }
+
+    // =========================================================
+    // MODEL DATA PENANGKAP JSON DETAIL INVOICE API
+    // =========================================================
+    public class DetailInvoiceResponse
+    {
+        public string status { get; set; }
+        public DetailInvoiceData data { get; set; }
+    }
+
+    public class DetailInvoiceData
+    {
+        public int id { get; set; }
+        public double tax1Amount { get; set; }
+        public int numericField1 { get; set; }
+        public int numericField2 { get; set; }
+        public int numericField3 { get; set; }
+        public string poNumber { get; set; }
+        public string toAddress { get; set; }
+        public ShipmentInfo shipment { get; set; }
+        public string description { get; set; }
+        public string transDate { get; set; }
+        public double cashDiscount { get; set; }
+        public string number { get; set; }
+        public CustomerInfo customer { get; set; }
+        public List<DetailExpenseInfo> detailExpense { get; set; }
+        public List<DetailItemInfo> detailItem { get; set; }
+    }
+
+    public class ShipmentInfo { public string name { get; set; } }
+    public class CustomerInfo { public string name { get; set; } public string customerNo { get; set; } }
+
+    public class DetailExpenseInfo
+    {
+        public int id { get; set; }
+        public string detailName { get; set; }
+        public double expenseAmount { get; set; }
+        public AccountInfo account { get; set; }
+    }
+    public class AccountInfo { public string no { get; set; } }
+
+    public class DetailItemInfo
+    {
+        public int id { get; set; }
+        public ItemDetailNo item { get; set; }
+        public string detailName { get; set; }
+        public double unitPrice { get; set; }
+        public double quantity { get; set; }
+        public double itemDiscPercent { get; set; }
+        public WarehouseInfo warehouse { get; set; }
+        public List<SalesmanInfo> salesmanList { get; set; }
+        public List<DetailSnInfo> detailSerialNumber { get; set; }
+    }
+
+    public class ItemDetailNo { public string no { get; set; } }
+    public class WarehouseInfo { public string name { get; set; } }
+    public class SalesmanInfo { public string number { get; set; } }
+
+    public class DetailSnInfo
+    {
+        public int id { get; set; }
+        public int quantity { get; set; }
+        public SnNumberInfo serialNumber { get; set; }
+    }
+    public class SnNumberInfo { public string number { get; set; } }
+
+    private async void InvoiceItem_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Border border && border.BindingContext is InvoiceData invoice)
+        {
+            if (invoice.statusName?.Trim().Equals("Belum Lunas", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                string action = await DisplayActionSheetAsync($"Pilih action invoice: {invoice.number} ?", "Cancel", null, "Edit", "Hapus");
+
+                if (action == "Edit")
+                {
+                    try
+                    {
+                        string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+                        string apiUrl = $"{App.API_HOST}penjualan/detail-invoice.php?number={invoice.number}";
+
+                        using (var client = new HttpClient())
+                        {
+                            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                            var response = await client.GetAsync(apiUrl);
+                            string responseContent = await response.Content.ReadAsStringAsync();
+
+                            if (response.IsSuccessStatusCode)
+                            {
+                                var apiResult = JsonConvert.DeserializeObject<DetailInvoiceResponse>(responseContent);
+
+                                if (apiResult != null && apiResult.status == "success" && apiResult.data != null)
+                                {
+                                    // PENTING: Paksa pindah ke UI Thread agar tidak crash di Windows Machine!
+                                    MainThread.BeginInvokeOnMainThread(async () =>
+                                    {
+                                        var editPage = new Sales.New_Faktur();
+                                        editPage.LoadEditData(apiResult.data);
+                                        await Navigation.PushAsync(editPage);
+                                    });
+                                }
+                                else
+                                {
+                                    MainThread.BeginInvokeOnMainThread(async () =>
+                                        await DisplayAlertAsync("Gagal", "Format data detail faktur tidak valid.", "OK"));
+                                }
+                            }
+                            else
+                            {
+                                MainThread.BeginInvokeOnMainThread(async () =>
+                                    await DisplayAlertAsync("Gagal", $"Gagal mengambil detail: {response.StatusCode}", "OK"));
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MainThread.BeginInvokeOnMainThread(async () =>
+                            await DisplayAlertAsync("Error", $"Koneksi gagal: {ex.Message}", "OK"));
+                    }
+                }
+                else if (action == "Hapus")
+                {
+                    System.Diagnostics.Debug.WriteLine($"Menghapus Faktur: {invoice.number}");
+                }
+            }
+        }
+    }
 }
