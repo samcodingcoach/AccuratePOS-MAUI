@@ -281,7 +281,7 @@ public partial class List_Faktur : ContentPage
         public string detailName { get; set; }
         public double unitPrice { get; set; }
         public double quantity { get; set; }
-        public double itemDiscPercent { get; set; }
+        public double? itemDiscPercent { get; set; }
         public WarehouseInfo warehouse { get; set; }
         public List<SalesmanInfo> salesmanList { get; set; }
         public List<DetailSnInfo> detailSerialNumber { get; set; }

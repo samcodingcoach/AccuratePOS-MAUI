@@ -11,6 +11,9 @@ namespace MyPosAccurate2026.Sales;
 
 public partial class New_Faktur : ContentPage
 {
+    // Variabel penanda jika masuk mode edit faktur
+    private int _editInvoiceId = 0;
+    private string _editInvoiceNumber = "";
     public string? SelectedKonsumenValue { get; private set; }
 
     private bool _isFormattingDiskonNominal = false;
@@ -25,6 +28,9 @@ public partial class New_Faktur : ContentPage
     private readonly HttpClient _httpClient;
 
     private bool _isFormattingBiaya = false;
+
+    private List<CartItemModel> _deletedCartItems = new List<CartItemModel>();
+    private List<SelectedBiayaModel> _deletedBiayaList = new List<SelectedBiayaModel>();
 
     public New_Faktur()
 	{
@@ -123,15 +129,17 @@ public partial class New_Faktur : ContentPage
     }
 
 
-    // Variabel penanda jika masuk mode edit faktur
-    private int _editInvoiceId = 0;
-    private string _editInvoiceNumber = "";
+    
 
     // Fungsi pemeta data dari API ke Element UI
     public void LoadEditData(List_Faktur.DetailInvoiceData data)
     {
         _editInvoiceId = data.id;
         _editInvoiceNumber = data.number;
+
+       
+        _deletedCartItems.Clear();
+        _deletedBiayaList.Clear();
 
         B_NewFaktur.Text = "UPDATE FAKTUR";
 
@@ -194,7 +202,7 @@ public partial class New_Faktur : ContentPage
                     itemName = itm.detailName,
                     unitPrice = itm.unitPrice,
                     quantity = (int)itm.quantity,
-                    itemDiscPercent = itm.itemDiscPercent,
+                    itemDiscPercent = itm.itemDiscPercent ?? 0,
                     warehouseName = itm.warehouse?.name ?? "Gudang Utama",
                     salesmanListNumber = itm.salesmanList?.FirstOrDefault()?.number,
                     imagePath = currentItemNo != "N/A" ? $"{currentItemNo}.jpg" : ""
@@ -466,8 +474,69 @@ public partial class New_Faktur : ContentPage
         int num2 = promoItems.Count > 1 ? promoItems[1].id_promo : 0;
         int num3 = promoItems.Count > 2 ? promoItems[2].id_promo : 0;
 
-       
+        // =========================================================
+        // SUSUN LIST DETAIL ITEM (AKTIF + HAPUS)
+        // =========================================================
+        var finalDetailItems = new List<object>();
 
+        // 1. Masukkan semua barang yang aktif di layar
+        finalDetailItems.AddRange(CartItems.Select(item => new
+        {
+            id = item.id > 0 ? (int?)item.id : null,
+            itemNo = item.itemNo,
+            unitPrice = item.unitPrice,
+            quantity = item.quantity,
+            warehouseName = item.warehouseName,
+            salesmanListNumber = item.salesmanListNumber,
+            itemDiscPercent = item.itemDiscPercent,
+            detailSerialNumber = item.detailSerialNumber?.Select(sn => new
+            {
+                id = sn.id > 0 ? (int?)sn.id : null,
+                serialNumberNo = sn.serialNumberNo,
+                quantity = sn.quantity
+            }).ToList()
+        }));
+
+        // 2. Masukkan barang yang dihapus (KHUSUS MODE EDIT)
+        if (_editInvoiceId > 0 && _deletedCartItems.Count > 0)
+        {
+            finalDetailItems.AddRange(_deletedCartItems.Select(item => new
+            {
+                id = item.id,
+                itemNo = item.itemNo,
+                unitPrice = item.unitPrice,
+                _status = "delete" // Flag hapus untuk Accurate
+            }));
+        }
+
+        // =========================================================
+        // SUSUN LIST DETAIL BIAYA (AKTIF + HAPUS)
+        // =========================================================
+        var finalDetailExpenses = new List<object>();
+
+        // 1. Masukkan semua biaya yang aktif di layar
+        finalDetailExpenses.AddRange(SelectedBiayaList.Select(biaya => new
+        {
+            id = biaya.id > 0 ? (int?)biaya.id : null,
+            accountNo = biaya.No,
+            expenseAmount = biaya.Nominal
+        }));
+
+        // 2. Masukkan biaya yang dihapus (KHUSUS MODE EDIT)
+        if (_editInvoiceId > 0 && _deletedBiayaList.Count > 0)
+        {
+            finalDetailExpenses.AddRange(_deletedBiayaList.Select(biaya => new
+            {
+                id = biaya.id,
+                accountNo = biaya.No,
+                expenseAmount = biaya.Nominal,
+                _status = "delete" // Flag hapus untuk Accurate
+            }));
+        }
+
+        // =========================================================
+        // SUSUN PAYLOAD AKHIR
+        // =========================================================
         var payload = new
         {
             id = _editInvoiceId > 0 ? (int?)_editInvoiceId : null,
@@ -484,29 +553,8 @@ public partial class New_Faktur : ContentPage
             numericField2 = num2,
             numericField3 = num3,
 
-            detailItem = CartItems.Select(item => new
-            {
-                id = item.id > 0 ? (int?)item.id : null,
-                itemNo = item.itemNo,
-                unitPrice = item.unitPrice,
-                quantity = item.quantity,
-                warehouseName = item.warehouseName,
-                salesmanListNumber = item.salesmanListNumber,
-                itemDiscPercent = item.itemDiscPercent,
-                detailSerialNumber = item.detailSerialNumber?.Select(sn => new
-                {
-                    id = sn.id > 0 ? (int?)sn.id : null,
-                    serialNumberNo = sn.serialNumberNo,
-                    quantity = sn.quantity
-                }).ToList()
-            }).ToList(),
-
-            detailExpense = SelectedBiayaList.Select(biaya => new
-            {
-                id = biaya.id > 0 ? (int?)biaya.id : null,
-                accountNo = biaya.No,
-                expenseAmount = biaya.Nominal
-            }).ToList()
+            detailItem = finalDetailItems,      // Masukkan gabungan item
+            detailExpense = finalDetailExpenses // Masukkan gabungan biaya
         };
 
         try
@@ -718,10 +766,17 @@ public partial class New_Faktur : ContentPage
     {
         if (sender is Label label && label.BindingContext is SelectedBiayaModel biayaData)
         {
+            // =========================================================
+            // JIKA BIAYA DARI DATABASE (PUNYA ID), MASUKKAN KE TONG SAMPAH
+            // =========================================================
+            if (biayaData.id != null && biayaData.id > 0)
+            {
+                _deletedBiayaList.Add(biayaData);
+            }
+
+            // Hapus dari koleksi layar UI
             SelectedBiayaList.Remove(biayaData);
             KalkulasiSemuaTotal();
-
-
         }
     }
 
@@ -755,10 +810,16 @@ public partial class New_Faktur : ContentPage
                 await CancelPromoKuotaAsync(cartItem.id_promo, cartItem.quantity);
             }
 
-            // Hapus dari koleksi, UI akan otomatis hilang
-            CartItems.Remove(cartItem);
+            // =========================================================
+            // JIKA BARANG DARI DATABASE (PUNYA ID), MASUKKAN KE TONG SAMPAH
+            // =========================================================
+            if (cartItem.id != null && cartItem.id > 0)
+            {
+                _deletedCartItems.Add(cartItem);
+            }
 
-            // Hitung ulang semua total yang ada di bawah
+            // Hapus dari koleksi layar UI
+            CartItems.Remove(cartItem);
             KalkulasiSemuaTotal();
         }
     }
