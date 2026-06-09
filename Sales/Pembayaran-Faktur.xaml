@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyPosAccurate2026.Sales.Pembayaran_Faktur" BackgroundColor="#d2dae2"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              NavigationPage.HasNavigationBar="False"
              >
     <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="0">
@@ -69,65 +70,72 @@
 
         <!--Detail Barang-->
         <Border Grid.Row="2" Padding="0" Margin="10,0,10,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" StrokeThickness="0.5"
-                BackgroundColor="White">
-            <Grid RowDefinitions="Auto,Auto,Auto,*,Auto,Auto" RowSpacing="0">
+                BackgroundColor="White" VerticalOptions="Start">
+            <toolkit:Expander IsExpanded="False">
+                <toolkit:Expander.Header>
+                    <Grid ColumnDefinitions="*,Auto" Padding="15,12">
+                        <Label Text="Detail Barang (10 items)" Grid.Column="0"
+                               TextColor="#444" FontSize="15" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                        <Image Source="chevron100.png" Grid.Column="1" HeightRequest="22" VerticalOptions="Center" />
+                    </Grid>
+                </toolkit:Expander.Header>
 
-                <!--Judul-->
-                <Label Text="Detail Barang (10 items)" Grid.Row="0" Padding="15,12,15,8"
-                       TextColor="#444" FontSize="15" FontAttributes="Bold" />
-                <BoxView HeightRequest="0.5" Grid.Row="1" Color="#E0E0E0" HorizontalOptions="Fill" />
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="0">
 
-                <!--Header kolom-->
-                <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,8">
-                    <Label Text="Nama &amp; Jumlah" Grid.Column="0" TextColor="Grey" FontSize="12" />
-                    <Label Text="Diskon" Grid.Column="1" TextColor="Grey" FontSize="12" WidthRequest="80"
-                           HorizontalTextAlignment="End" />
-                    <Label Text="Total Harga" Grid.Column="2" TextColor="Grey" FontSize="12" WidthRequest="110"
-                           HorizontalTextAlignment="End" />
-                </Grid>
+                    <BoxView HeightRequest="0.5" Grid.Row="0" Color="#E0E0E0" HorizontalOptions="Fill" />
 
-                <!--Daftar item-->
-                <ScrollView Grid.Row="3">
-                    <VerticalStackLayout Spacing="0">
+                    <!--Header kolom-->
+                    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,8">
+                        <Label Text="Nama &amp; Jumlah" Grid.Column="0" TextColor="Grey" FontSize="12" />
+                        <Label Text="Diskon" Grid.Column="1" TextColor="Grey" FontSize="12" WidthRequest="80"
+                               HorizontalTextAlignment="End" />
+                        <Label Text="Total Harga" Grid.Column="2" TextColor="Grey" FontSize="12" WidthRequest="110"
+                               HorizontalTextAlignment="End" />
+                    </Grid>
 
-                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,10">
-                            <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                <Label Text="POCO M7 (8GB/256GB) - Black" FontSize="14" TextColor="#222" />
-                                <Label Text="3 x Rp 35.000" FontSize="12" TextColor="Grey" />
-                            </VerticalStackLayout>
-                            <Label Text="Rp 0" Grid.Column="1" WidthRequest="80" FontSize="13" TextColor="#E74C3C"
-                                   HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
-                            <Label Text="Rp 105.000.000" Grid.Column="2" WidthRequest="110" FontSize="14" FontAttributes="Bold"
-                                   TextColor="DarkCyan" HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                    <!--Daftar item-->
+                    <ScrollView Grid.Row="2" MaximumHeightRequest="280">
+                        <VerticalStackLayout Spacing="0">
+
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,10">
+                                <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                    <Label Text="POCO M7 (8GB/256GB) - Black" FontSize="14" TextColor="#222" />
+                                    <Label Text="3 x Rp 35.000" FontSize="12" TextColor="Grey" />
+                                </VerticalStackLayout>
+                                <Label Text="Rp 0" Grid.Column="1" WidthRequest="80" FontSize="13" TextColor="#E74C3C"
+                                       HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                                <Label Text="Rp 105.000.000" Grid.Column="2" WidthRequest="110" FontSize="14" FontAttributes="Bold"
+                                       TextColor="DarkCyan" HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                            </Grid>
+                            <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
+
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <!--Ringkasan total-->
+                    <BoxView HeightRequest="0.5" Grid.Row="3" Color="#E0E0E0" HorizontalOptions="Fill" />
+                    <VerticalStackLayout Grid.Row="4" Padding="15,10,15,12" Spacing="6">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Jumlah Item" Grid.Column="0" TextColor="Grey" FontSize="13" />
+                            <Label Text="10 item" Grid.Column="1" TextColor="#222" FontSize="13"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Total Diskon" Grid.Column="0" TextColor="Grey" FontSize="13" />
+                            <Label Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"
+                                   HorizontalTextAlignment="End" />
                         </Grid>
                         <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
-
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Total" Grid.Column="0" TextColor="#222" FontSize="15" FontAttributes="Bold"
+                                   VerticalTextAlignment="Center" />
+                            <Label Text="Rp 105.000.000" Grid.Column="1" TextColor="DarkCyan" FontSize="17" FontAttributes="Bold"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
                     </VerticalStackLayout>
-                </ScrollView>
 
-                <!--Ringkasan total-->
-                <BoxView HeightRequest="0.5" Grid.Row="4" Color="#E0E0E0" HorizontalOptions="Fill" />
-                <VerticalStackLayout Grid.Row="5" Padding="15,10,15,12" Spacing="6">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="Jumlah Item" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                        <Label Text="10 item" Grid.Column="1" TextColor="#222" FontSize="13"
-                               HorizontalTextAlignment="End" />
-                    </Grid>
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="Total Diskon" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                        <Label Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"
-                               HorizontalTextAlignment="End" />
-                    </Grid>
-                    <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label Text="Total" Grid.Column="0" TextColor="#222" FontSize="15" FontAttributes="Bold"
-                               VerticalTextAlignment="Center" />
-                        <Label Text="Rp 105.000.000" Grid.Column="1" TextColor="DarkCyan" FontSize="17" FontAttributes="Bold"
-                               HorizontalTextAlignment="End" />
-                    </Grid>
-                </VerticalStackLayout>
-
-            </Grid>
+                </Grid>
+            </toolkit:Expander>
         </Border>
     </Grid>
 </ContentPage>
