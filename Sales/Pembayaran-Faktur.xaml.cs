@@ -92,4 +92,34 @@ public partial class Pembayaran_Faktur : ContentPage
     {
 
     }
+
+    private void TapViewDiskon_Tapped(object sender, TappedEventArgs e)
+    {
+        ViewNominalPembayaran.IsVisible = false;
+        ViewDiskon.IsVisible = true;
+
+    }
+
+    private void EntryDiskonNominal_TextChanged(object sender, TextChangedEventArgs e)
+    {
+
+    }
+
+    private void TapCloseDiskon_Tapped(object sender, TappedEventArgs e)
+    {
+        ViewNominalPembayaran.IsVisible = true;
+        ViewDiskon.IsVisible = false;
+    }
+
+    private void TapViewKeterangan_Tapped(object sender, TappedEventArgs e)
+    {
+        ViewKeterangan.IsVisible = false;
+        ViewNominalPembayaran.IsVisible = true;
+    }
+
+    private void TapViewKet_Tapped(object sender, TappedEventArgs e)
+    {
+        ViewKeterangan.IsVisible = true;
+        ViewNominalPembayaran.IsVisible = false;
+    }
 }

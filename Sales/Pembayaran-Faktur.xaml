@@ -153,9 +153,10 @@
                 </Grid>
             </toolkit:Expander>
         </Border>
-
-        <Border Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
+        <!--nominal pembayaran dan kembalian-->
+        <Border x:Name="ViewNominalPembayaran" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
             BackgroundColor="White">
+           
             <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="0" Padding="0">
                 <StackLayout Orientation="Horizontal" Grid.Row="0" Padding="15,0" >
                     <Label Text="Nominal Pembayaran :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
@@ -177,17 +178,67 @@
 
                 </StackLayout>
             </Grid>
+            
+        </Border>
+        <!--nominal pembayaran dan kembalian-->
+        <Border x:Name="ViewDiskon" IsVisible="False" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
+                BackgroundColor="White">
+            <StackLayout Padding="10">
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                    <Image Source="diskon100.png" HeightRequest="16"></Image>
+                    <Label Text="Diskon Akhir" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" 
+                           TextColor="Grey"></Label>
+                    <Image Source="close100.png" HeightRequest="22" HorizontalOptions="EndAndExpand">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="TapCloseDiskon" Tapped="TapCloseDiskon_Tapped"></TapGestureRecognizer>
+                        </Image.GestureRecognizers>
+                    </Image>
+                </StackLayout>
+
+                <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
+                    <Entry Placeholder="Ex. 10.000" x:Name="EntryDiskonNominal" TextChanged="EntryDiskonNominal_TextChanged"></Entry>
+                </Border>
+
+            </StackLayout>
         </Border>
 
+        <Border x:Name="ViewKeterangan" IsVisible="False" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
+                BackgroundColor="White">
+            <StackLayout Padding="10">
+                <StackLayout Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+                    <Image Source="propertiesgrey100.png" HeightRequest="16"></Image>
+                    <Label Text="Keterangan" FontSize="16" FontAttributes="Bold" VerticalTextAlignment="Center" 
+                           TextColor="Grey"></Label>
+                    <Image Source="close100.png" HeightRequest="22" HorizontalOptions="EndAndExpand">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="TapViewKeterangan" Tapped="TapViewKeterangan_Tapped"></TapGestureRecognizer>
+                        </Image.GestureRecognizers>
+                    </Image>
+                </StackLayout>
+                <Border Padding="10,5" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" 
+                    StrokeThickness="0.5" BackgroundColor="WhiteSmoke" Margin="0,0,0,10">
+                    <StackLayout>
+                        <Entry x:Name="EntryNoBukti" VerticalTextAlignment="Start" Placeholder="Nomor Bukti Pembayaran"></Entry>
+                        <BoxView HeightRequest="0.5" Grid.Row="0" Color="#E0E0E0" HorizontalOptions="Fill" />
+                        <Entry HeightRequest="120" x:Name="EntryKeterangan" VerticalTextAlignment="Start" Placeholder="Keterangan"></Entry>
+                    </StackLayout>
+                </Border>
+            </StackLayout>
+
+        </Border>
         <!--Tombol-Tombol-->
         <Grid ColumnDefinitions="0.25*,0.25*,*" Grid.Row="5">
             <StackLayout BackgroundColor="DodgerBlue" Grid.Column="0">
-                
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="TapViewKet" Tapped="TapViewKet_Tapped"></TapGestureRecognizer>
+                </StackLayout.GestureRecognizers>
                 <Image Source="propertieswhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
             </StackLayout>
 
             <StackLayout BackgroundColor="DeepPink" Grid.Column="1">
-                
+                <StackLayout.GestureRecognizers>
+                    <TapGestureRecognizer x:Name="TapViewDiskon" Tapped="TapViewDiskon_Tapped"></TapGestureRecognizer>
+                </StackLayout.GestureRecognizers>
                 <Image Source="diskonwhite100.png" TranslationY="5" HeightRequest="32" VerticalOptions="Center"></Image>
             </StackLayout>
 
