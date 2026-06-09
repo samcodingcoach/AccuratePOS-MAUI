@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPosAccurate2026.Sales.Pembayaran_Faktur" BackgroundColor="#d2dae2"
+             NavigationPage.HasNavigationBar="False"
+             >
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="0">
+        <!--No-Faktur, Konsumen, Tanggal bayar-->
+        <Border Grid.Row="0" Padding="0,10" Margin="10,10,10,0" StrokeShape="RoundRectangle 10"  Stroke="Transparent" StrokeThickness="0.5" 
+                BackgroundColor="White">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="0" Padding="0">
+                <StackLayout Orientation="Horizontal" Grid.Row="0" Padding="15,5" >
+                    <Label Text="Nomor Faktur :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+                    <Label Text="Ex. SI.2026.06.00002" HorizontalOptions="EndAndExpand" 
+                       TextColor="DarkCyan" FontSize="16" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
+
+                </StackLayout>
+                <BoxView HeightRequest="0.5" Grid.Row="1" Margin="0,5,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
+
+                <StackLayout Orientation="Horizontal" Grid.Row="2" Padding="15,5" >
+                    <Label Text="Konsumen :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+                    <Label Text="Ex. Membership" HorizontalOptions="EndAndExpand" 
+                       FontSize="16" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
+
+                </StackLayout>
+                <BoxView HeightRequest="0.5" Grid.Row="3" Margin="0,5,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
+
+                <StackLayout Orientation="Horizontal" Grid.Row="4" Padding="15,0" >
+                    <Label Text="Tanggal Bayar :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+
+                    <DatePicker HorizontalOptions="EndAndExpand" FontAttributes="Bold" Format="dd/MM/yyyy"></DatePicker>
+                </StackLayout>
+
+            </Grid>
+        </Border>
+        <!--Bank, jumlah pembayaran-->
+        <Border Grid.Row="1" Padding="0,10" Margin="10" StrokeShape="RoundRectangle 10"  Stroke="Transparent" StrokeThickness="0.5" 
+                BackgroundColor="White">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="0" Padding="0">
+                <StackLayout Orientation="Horizontal" Grid.Row="0" Padding="15,2" >
+                    <Label Text="Bank :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+                    <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200"
+                            Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
+                       
+                        <StackLayout Orientation="Horizontal" >
+                            <Picker x:Name="PickerBank" Title="Pilih Metode Bayar" SelectedIndexChanged="PickerBank_SelectedIndexChanged" />
+                            <Image Source="search32.png" HorizontalOptions="EndAndExpand" HeightRequest="18" Opacity="0.5" IsVisible="True"></Image>
+                        </StackLayout>
+                       
+                    </Border>
+
+                </StackLayout>
+                <BoxView HeightRequest="0.5" Grid.Row="1" Margin="0,5,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
+                
+                
+                <StackLayout Orientation="Horizontal" Grid.Row="2" Padding="15,0" >
+                    <Label Text="Jumlah Pembayaran :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+                    <Border Padding="10,0" StrokeShape="RoundRectangle 5" 
+                            Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
+
+                        <Entry Text="0" Placeholder="Jumlah Bayar" HorizontalTextAlignment="End" FontAttributes="Bold" 
+                               TextColor="DarkCyan"></Entry>
+                    </Border>
+
+                </StackLayout>
+                
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
