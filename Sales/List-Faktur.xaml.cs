@@ -305,7 +305,7 @@ public partial class List_Faktur : ContentPage
         {
             if (invoice.statusName?.Trim().Equals("Belum Lunas", StringComparison.OrdinalIgnoreCase) == true)
             {
-                string action = await DisplayActionSheetAsync($"Pilih action invoice: {invoice.number} ?", "Cancel", null, "Edit", "Hapus");
+                string action = await DisplayActionSheetAsync($"Pilih action invoice: {invoice.number} ?", "Cancel", null, "Edit", "Hapus","Bayar");
 
                 if (action == "Edit")
                 {
@@ -410,6 +410,12 @@ public partial class List_Faktur : ContentPage
                             await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan saat menghapus: {ex.Message}", "OK"));
                     }
                     System.Diagnostics.Debug.WriteLine($"Menghapus Faktur: {invoice.number}");
+                }
+
+                else if(action == "Bayar")
+                {
+                    bool confirm = await DisplayAlertAsync("Konfirmasi Bayar", $"Apakah Anda yakin ingin bayar {invoice.number}?", "Ya, Hapus", "Batal");
+                    if (!confirm) return;
                 }
             }
         }
