@@ -12,15 +12,15 @@
             <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="0" Padding="0">
                 <StackLayout Orientation="Horizontal" Grid.Row="0" Padding="15,5" >
                     <Label Text="Nomor Faktur :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
-                    <Label Text="Ex. SI.2026.06.00002" HorizontalOptions="EndAndExpand" 
-                       TextColor="DarkCyan" FontSize="16" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
+                    <Label Text="" HorizontalOptions="EndAndExpand" 
+                       TextColor="DarkCyan" FontSize="16" x:Name="FormNumber" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
 
                 </StackLayout>
                 <BoxView HeightRequest="0.5" Grid.Row="1" Margin="0,5,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
 
                 <StackLayout Orientation="Horizontal" Grid.Row="2" Padding="15,5" >
                     <Label Text="Konsumen :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
-                    <Label Text="Ex. Membership" HorizontalOptions="EndAndExpand" 
+                    <Label Text="" HorizontalOptions="EndAndExpand" x:Name="FormName-CustomerNo"
                        FontSize="16" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
 
                 </StackLayout>
@@ -59,7 +59,7 @@
                     <Border Padding="10,0" StrokeShape="RoundRectangle 5" 
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
 
-                        <Entry Text="0" Placeholder="Jumlah Bayar" HorizontalTextAlignment="End" FontAttributes="Bold" 
+                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="FormtotalAmount" HorizontalTextAlignment="End" FontAttributes="Bold" 
                                TextColor="DarkCyan"></Entry>
                     </Border>
 
