@@ -87,4 +87,9 @@ public partial class Pembayaran_Faktur : ContentPage
         public string name { get; set; }
         public int id { get; set; }
     }
+
+    private void B_SimpanPembayaran_Clicked(object sender, EventArgs e)
+    {
+
+    }
 }
