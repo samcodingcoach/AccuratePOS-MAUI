@@ -12,10 +12,13 @@ namespace MyPosAccurate2026.Sales;
 public partial class Pembayaran_Faktur : ContentPage
 {
     string bankNo { get; set; }
-
-	public Pembayaran_Faktur()
+    string nomor_faktur { get; set; }
+	public Pembayaran_Faktur(string nomorFaktur)
 	{
 		InitializeComponent();
+
+        // Simpan nomor faktur yang dikirim dari List-Faktur
+        nomor_faktur = nomorFaktur;
 
         // Atur tanggal default = hari ini dan izinkan memilih tanggal ke depan (mis. besok)
         PickerTanggalBayar.MinimumDate = new DateTime(2000, 1, 1);
@@ -26,6 +29,10 @@ public partial class Pembayaran_Faktur : ContentPage
 
         // Panggil fungsi pengambilan data saat halaman dibuka
         _ = LoadKasBankData();
+
+        // Tampilkan nomor faktur pada form
+        FormNumber.Text = nomor_faktur;
+
     }
 
     private void PickerBank_SelectedIndexChanged(object sender, EventArgs e)

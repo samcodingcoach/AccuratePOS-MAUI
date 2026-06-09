@@ -414,8 +414,11 @@ public partial class List_Faktur : ContentPage
 
                 else if(action == "Bayar")
                 {
-                    bool confirm = await DisplayAlertAsync("Konfirmasi Bayar", $"Apakah Anda yakin ingin bayar {invoice.number}?", "Ya, Hapus", "Batal");
+                    bool confirm = await DisplayAlertAsync("Konfirmasi Bayar", $"Apakah Anda yakin ingin bayar {invoice.number}?", "Ya, Bayar", "Batal");
                     if (!confirm) return;
+
+                    MainThread.BeginInvokeOnMainThread(async () =>
+                        await Navigation.PushAsync(new Sales.Pembayaran_Faktur(invoice.number)));
                 }
             }
         }

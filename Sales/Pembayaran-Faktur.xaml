@@ -20,7 +20,7 @@
 
                 <StackLayout Orientation="Horizontal" Grid.Row="2" Padding="15,5" >
                     <Label Text="Konsumen :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
-                    <Label Text="" HorizontalOptions="EndAndExpand" x:Name="FormName-CustomerNo"
+                    <Label Text="" HorizontalOptions="EndAndExpand" x:Name="FormNameCustomerNo"
                        FontSize="16" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
 
                 </StackLayout>
