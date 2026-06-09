@@ -17,6 +17,11 @@ public partial class Pembayaran_Faktur : ContentPage
 	{
 		InitializeComponent();
 
+        // Atur tanggal default = hari ini dan izinkan memilih tanggal ke depan (mis. besok)
+        PickerTanggalBayar.MinimumDate = new DateTime(2000, 1, 1);
+        PickerTanggalBayar.MaximumDate = DateTime.Today.AddYears(5);
+        PickerTanggalBayar.Date = DateTime.Today;
+
         PickerBank.ItemDisplayBinding = new Binding("name");
 
         // Panggil fungsi pengambilan data saat halaman dibuka
