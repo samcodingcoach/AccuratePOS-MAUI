@@ -252,9 +252,111 @@ public partial class Pembayaran_Faktur : ContentPage
         public int id { get; set; }
     }
 
-    private void B_SimpanPembayaran_Clicked(object sender, EventArgs e)
+    private async void B_SimpanPembayaran_Clicked(object sender, EventArgs e)
     {
+        // ===== Validasi =====
+        if (_totalAmountFaktur <= 0)
+        {
+            await DisplayAlertAsync("Peringatan", "Data faktur belum dimuat. Mohon tunggu sejenak.", "OK");
+            return;
+        }
 
+        if (string.IsNullOrEmpty(bankNo))
+        {
+            await DisplayAlertAsync("Peringatan", "Silakan pilih Metode Bayar (Bank) terlebih dahulu.", "OK");
+            return;
+        }
+
+        // Nilai setelah diskon pembayaran (= LabelGrandTotal)
+        double chequeAmount = _totalAmountFaktur - _diskonPembayaran;
+        if (chequeAmount < 0) chequeAmount = 0;
+
+        // Tanggal bayar (default hari ini, mengikuti pilihan DatePicker)
+        string tanggal = PickerTanggalBayar.Date.GetValueOrDefault(DateTime.Today).ToString("yyyy-MM-dd");
+
+        // ===== Susun detailDiscount (hanya bila ada diskon) =====
+        var detailDiscount = new List<object>();
+        if (_diskonPembayaran > 0)
+        {
+            detailDiscount.Add(new
+            {
+                accountNo = int.Parse(DiskonAccountNo), // kirim sebagai angka
+                amount = _diskonPembayaran
+            });
+        }
+
+        // ===== Susun detailInvoice =====
+        var detailInvoice = new List<object>
+        {
+            new
+            {
+                invoiceNo = nomor_faktur,
+                paymentAmount = _totalAmountFaktur, // total faktur sebelum diskon
+                detailDiscount = detailDiscount
+            }
+        };
+
+        // ===== Payload akhir =====
+        var payload = new
+        {
+            bankNo = bankNo,
+            number = string.IsNullOrWhiteSpace(EntryNoBukti.Text) ? "" : EntryNoBukti.Text.Trim(),
+            chequeAmount = chequeAmount,
+            customerNo = nomor_pelanggan,
+            transDate = tanggal,
+            chequeDate = tanggal,
+            paymentMethod = paymentMethodVal,
+            description = EntryKeterangan.Text ?? "",
+            charField1 = "", // QRIS_ID menyusul
+            charField2 = charFieldString2,
+            detailInvoice = detailInvoice
+        };
+
+        try
+        {
+            B_SimpanPembayaran.IsEnabled = false;
+            B_SimpanPembayaran.Text = "MENYIMPAN...";
+
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            string apiUrl = $"{App.API_HOST}penjualan/save-receipt.php";
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(apiUrl, content);
+                string responseString = await response.Content.ReadAsStringAsync();
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await DisplayAlertAsync("Sukses", "Pembayaran faktur berhasil disimpan ke sistem.", "OK");
+                        await Navigation.PopAsync();
+                    }
+                    else
+                    {
+                        await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
+                    }
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(async () =>
+                await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan: {ex.Message}", "OK"));
+        }
+        finally
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                B_SimpanPembayaran.IsEnabled = true;
+                B_SimpanPembayaran.Text = "BAYAR";
+            });
+        }
     }
 
     private void TapViewDiskon_Tapped(object sender, TappedEventArgs e)
@@ -330,9 +432,10 @@ public partial class Pembayaran_Faktur : ContentPage
         // Diskon pembayaran tampil dinamis
         LabelDiskonPembayaran.Text = $"Rp {_diskonPembayaran.ToString("N0", culture)}";
 
-        // Grand total & nilai faktur menyesuaikan diskon
+        // Grand total menyesuaikan diskon.
+        // Catatan: FormtotalAmount (Nilai Faktur) sengaja TIDAK diubah —
+        // tetap berisi total faktur sebelum diskon (dipakai sebagai paymentAmount saat simpan).
         LabelGrandTotal.Text = $"Rp {grandTotal.ToString("N0", culture)}";
-        FormtotalAmount.Text = grandTotal.ToString("N0", culture);
 
         // Pembulatan ke bawah (kelipatan ratusan)
         double pembulatan = Math.Floor(grandTotal / 100) * 100;
