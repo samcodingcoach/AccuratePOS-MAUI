@@ -169,7 +169,8 @@
                     <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200" 
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
 
-                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="NominalKonsumen" HorizontalTextAlignment="End" FontAttributes="Bold" 
+                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="NominalBayarKonsumen" Keyboard="Numeric"
+                               TextChanged="NominalBayarKonsumen_TextChanged" HorizontalTextAlignment="End" FontAttributes="Bold"
                                TextColor="DarkCyan"></Entry>
                     </Border>
 

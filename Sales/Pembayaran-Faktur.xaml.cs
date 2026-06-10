@@ -29,6 +29,13 @@ public partial class Pembayaran_Faktur : ContentPage
     // Guard agar TextChanged tidak infinite-loop saat menyisipkan pemisah ribuan
     bool _isFormattingDiskon = false;
 
+    // Total yang harus dibayar konsumen (setelah diskon & pembulatan) — acuan kembalian
+    double _totalTagihan = 0;
+    // Nominal yang dibayarkan konsumen
+    double _nominalBayarKonsumen = 0;
+    // Guard format ribuan untuk nominal bayar konsumen
+    bool _isFormattingBayar = false;
+
     public Pembayaran_Faktur(string nomorFaktur)
 	{
 		InitializeComponent();
@@ -330,6 +337,65 @@ public partial class Pembayaran_Faktur : ContentPage
         // Pembulatan ke bawah (kelipatan ratusan)
         double pembulatan = Math.Floor(grandTotal / 100) * 100;
         LabelPembulatan.Text = $"Rp {pembulatan.ToString("N0", culture)}";
+
+        // Total tagihan akhir = nilai setelah pembulatan; jadi acuan kembalian
+        _totalTagihan = pembulatan;
+        HitungKembalian();
+    }
+
+    // Kembalian = nominal bayar konsumen - total tagihan akhir
+    private void HitungKembalian()
+    {
+        var culture = new CultureInfo("id-ID");
+
+        double kembalian = _nominalBayarKonsumen - _totalTagihan;
+        if (kembalian < 0) kembalian = 0; // belum/kurang bayar → tidak ada kembalian
+
+        KembalianKonsumen.Text = $"Rp {kembalian.ToString("N0", culture)}";
+    }
+
+    private void NominalBayarKonsumen_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        // Cegah infinite-loop saat menulis ulang .Text dengan pemisah ribuan
+        if (_isFormattingBayar) return;
+
+        var culture = new CultureInfo("id-ID");
+
+        // Ambil angka murni: buang pemisah ribuan, "Rp", "%", dan spasi
+        string raw = (e.NewTextValue ?? "")
+            .Replace(".", "")
+            .Replace("Rp", "")
+            .Replace("%", "")
+            .Trim();
+
+        // Kosong → nominal 0
+        if (string.IsNullOrEmpty(raw))
+        {
+            _nominalBayarKonsumen = 0;
+            HitungKembalian();
+            return;
+        }
+
+        if (!double.TryParse(raw, out double nominal) || nominal < 0)
+            return;
+
+        _nominalBayarKonsumen = nominal;
+
+        // Tampilkan ulang dengan pemisah ribuan; tunda agar Android tidak crash
+        string formatted = nominal.ToString("N0", culture);
+        if (formatted != (e.NewTextValue ?? ""))
+        {
+            Dispatcher.Dispatch(() =>
+            {
+                _isFormattingBayar = true;
+                NominalBayarKonsumen.Text = formatted;
+                NominalBayarKonsumen.CursorPosition = formatted.Length;
+                _isFormattingBayar = false;
+            });
+        }
+
+        // Hitung ulang kembalian
+        HitungKembalian();
     }
 
     private void TapCloseDiskon_Tapped(object sender, TappedEventArgs e)
