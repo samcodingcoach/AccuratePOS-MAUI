@@ -74,7 +74,7 @@
             <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
                     <Grid ColumnDefinitions="*,Auto" Padding="15,12">
-                        <Label Text="Detail Barang (10 items)" Grid.Column="0"
+                        <Label Text="Detail Barang (0 items)" Grid.Column="0" x:Name="LabelHeaderDetail"
                                TextColor="#444" FontSize="15" FontAttributes="Bold" VerticalTextAlignment="Center" />
                         <Image Source="chevron100.png" Grid.Column="1" HeightRequest="22" VerticalOptions="Center" />
                     </Grid>
@@ -94,58 +94,64 @@
                     </Grid>
 
                     <!--Daftar item-->
-                    <ScrollView Grid.Row="2" MaximumHeightRequest="280">
-                        <VerticalStackLayout Spacing="0">
-
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,10">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label Text="POCO M7 (8GB/256GB) - Black" FontSize="14" TextColor="#222" />
-                                    <Label Text="3 x Rp 35.000" FontSize="12" TextColor="Grey" />
+                    <CollectionView x:Name="ListBarangContainer" Grid.Row="2" MaximumHeightRequest="280">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout>
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="10" Padding="15,10">
+                                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                                            <Label Text="{Binding item.name}" FontSize="14" TextColor="#222" />
+                                            <Label Text="{Binding QtyAndPrice}" FontSize="12" TextColor="Grey" />
+                                        </VerticalStackLayout>
+                                        <Label Text="{Binding FormattedItemDiscount}" Grid.Column="1" WidthRequest="80" FontSize="13" TextColor="#E74C3C" HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                                        <Label Text="{Binding FormattedTotalPrice}" Grid.Column="2" WidthRequest="110" FontSize="14" FontAttributes="Bold" TextColor="DarkCyan" HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
+                                    </Grid>
+                                    <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
                                 </VerticalStackLayout>
-                                <Label Text="Rp 0" Grid.Column="1" WidthRequest="80" FontSize="13" TextColor="#E74C3C"
-                                       HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
-                                <Label Text="Rp 105.000.000" Grid.Column="2" WidthRequest="110" FontSize="14" FontAttributes="Bold"
-                                       TextColor="DarkCyan" HorizontalTextAlignment="End" VerticalTextAlignment="Center" />
-                            </Grid>
-                            <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
-
-                        </VerticalStackLayout>
-                    </ScrollView>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
 
                     <!--Ringkasan total-->
                     <BoxView HeightRequest="0.5" Grid.Row="3" Color="#E0E0E0" HorizontalOptions="Fill" />
                     <VerticalStackLayout Grid.Row="4" Padding="15,10,15,12" Spacing="6">
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Jumlah Item" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                            <Label Text="10 item" Grid.Column="1" TextColor="#222" FontSize="13"
+                            <Label x:Name="LabelItemCount" Text="0 item" Grid.Column="1" TextColor="#222" FontSize="13"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Total Diskon" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                            <Label Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"
+                            <Label Text="Diskon Faktur" Grid.Column="0" TextColor="Grey" FontSize="13" />
+                            <Label x:Name="LabelTotalDiskon" Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"
+                                   HorizontalTextAlignment="End" />
+                        </Grid>
+                        <!--diskon akhir-->
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Diskon Pembayaran" Grid.Column="0" TextColor="Grey" FontSize="13" />
+                            <Label x:Name="LabelDiskonPembayaran" Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Total Biaya" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                            <Label Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="13"
+                            <Label x:Name="LabelTotalBiaya" Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="13"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Total Pajak (PPN)" Grid.Column="0" TextColor="Grey" FontSize="13" />
-                            <Label Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="13"
+                            <Label x:Name="LabelTotalPajak" Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="13"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <BoxView HeightRequest="0.5" Color="#EEEEEE" HorizontalOptions="Fill" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Grand Total" Grid.Column="0" TextColor="#222" FontSize="14" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-                            <Label Text="Rp 105.000.000" Grid.Column="1" TextColor="#222" FontSize="14" FontAttributes="Bold"
+                            <Label x:Name="LabelGrandTotal" Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="14" FontAttributes="Bold"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Pembulatan" Grid.Column="0" TextColor="#575757" FontSize="15" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
-                            <Label Text="Rp 105.000.000" Grid.Column="1" TextColor="DarkCyan" FontSize="18" FontAttributes="Bold"
+                            <Label x:Name="LabelPembulatan" Text="Rp 0" Grid.Column="1" TextColor="DarkCyan" FontSize="18" FontAttributes="Bold"
                                    HorizontalTextAlignment="End" />
                         </Grid>
                     </VerticalStackLayout>
@@ -153,7 +159,7 @@
                 </Grid>
             </toolkit:Expander>
         </Border>
-        <!--nominal pembayaran dan kembalian-->
+        <!--nominal diskon-->
         <Border x:Name="ViewNominalPembayaran" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
             BackgroundColor="White">
            
@@ -163,7 +169,7 @@
                     <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200" 
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
 
-                        <Entry Text="0" Placeholder="Jumlah Bayar" HorizontalTextAlignment="End" FontAttributes="Bold" 
+                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="NominalKonsumen" HorizontalTextAlignment="End" FontAttributes="Bold" 
                                TextColor="DarkCyan"></Entry>
                     </Border>
 
@@ -172,7 +178,7 @@
                 <StackLayout Orientation="Horizontal"  Grid.Row="2" Padding="15,0" >
                     <Label Text="Kembalian :" TextColor="Goldenrod" VerticalTextAlignment="Center" ></Label>
 
-                    <Label Text="Rp 20.500" HorizontalTextAlignment="End" 
+                    <Label Text="Rp 0" HorizontalTextAlignment="End" x:Name="KembalianKonsumen"
                            FontAttributes="Bold" FontSize="18" TextColor="Goldenrod" CharacterSpacing="1"
                            HorizontalOptions="EndAndExpand"></Label>
 
@@ -201,7 +207,7 @@
 
             </StackLayout>
         </Border>
-
+        <!--keterangan dan nomor bukti-->
         <Border x:Name="ViewKeterangan" IsVisible="False" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
                 BackgroundColor="White">
             <StackLayout Padding="10">
