@@ -474,6 +474,10 @@ public partial class New_Faktur : ContentPage
         int num2 = promoItems.Count > 1 ? promoItems[1].id_promo : 0;
         int num3 = promoItems.Count > 2 ? promoItems[2].id_promo : 0;
 
+        string idUser = Preferences.Get("ID_USER", "");
+        string userName = Preferences.Get("USERNAME", "");
+        string charFieldString = $"{idUser} - {userName}";
+
         // =========================================================
         // SUSUN LIST DETAIL ITEM (AKTIF + HAPUS)
         // =========================================================
@@ -552,6 +556,7 @@ public partial class New_Faktur : ContentPage
             numericField1 = num1,
             numericField2 = num2,
             numericField3 = num3,
+            charField1 = charFieldString,
 
             detailItem = finalDetailItems,      // Masukkan gabungan item
             detailExpense = finalDetailExpenses // Masukkan gabungan biaya
