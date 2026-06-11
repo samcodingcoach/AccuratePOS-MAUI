@@ -10,7 +10,8 @@ public partial class App : Application
 {
     public static string API_HOST { get; set; }
     public static string API_LOGIN { get; set; }
-
+    public static string API_MIDTRANS { get; set; }
+    
     [Obsolete]
     public App()
 	{
@@ -21,10 +22,11 @@ public partial class App : Application
         API_HOST = publik + "api/";
         
         API_LOGIN = publik + "config/mobile-login-api.php";
+        API_MIDTRANS = publik + "midtrans/";
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new NavigationPage(new Sales.List_Faktur());
+        MainPage = new NavigationPage(new Sales.QRIS());
 
     }
 

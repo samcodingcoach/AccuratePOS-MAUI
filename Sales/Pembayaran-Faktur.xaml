@@ -67,7 +67,7 @@
                 
             </Grid>
         </Border>
-
+        
         <!--Detail Barang-->
         <Border Grid.Row="2" Padding="0" Margin="10,0,10,10" StrokeShape="RoundRectangle 10" Stroke="Transparent" StrokeThickness="0.5"
                 BackgroundColor="White" VerticalOptions="Start">
