@@ -51,7 +51,7 @@
                         <VerticalStackLayout Padding="20,18,20,14" Spacing="4" HorizontalOptions="Center">
                             <Label Text="Total Pembayaran" TextColor="Grey" FontSize="13"
                                    HorizontalTextAlignment="Center" />
-                            <Label x:Name="LabelTotalPembayaran" Text="Rp 0" TextColor="DarkCyan" FontSize="30"
+                            <Label x:Name="LabelTotalPembayaran" Text="Rp 0"  TextColor="DarkCyan" FontSize="30"
                                    FontAttributes="Bold" HorizontalTextAlignment="Center" />
                         </VerticalStackLayout>
 

@@ -9,15 +9,22 @@ namespace MyPosAccurate2026.Sales;
 public partial class QRIS : ContentPage
 {
     private IDispatcherTimer _countdownTimer;
+    private IDispatcherTimer _statusTimer;
     private TimeSpan _sisaWaktu = TimeSpan.FromMinutes(10);
     private bool _isExpired = false;
+    private bool _isPaid = false;
+    private bool _isCheckingStatus = false;
 
-    private string _orderId = "POS26-0001";
-    private double _grossAmount = 10000;
+    private static readonly CultureInfo IdCulture = new CultureInfo("id-ID");
+
+    private string _orderId = "POS26-0002";
+    private double _grossAmount = 10020;
 
     public QRIS()
     {
         InitializeComponent();
+        LabelOrderId.Text = _orderId;
+        LabelTotalPembayaran.Text = FormatRupiah(_grossAmount);
     }
 
     // Konstruktor terima data transaksi dari halaman pembayaran
@@ -32,14 +39,23 @@ public partial class QRIS : ContentPage
         _grossAmount = grossAmount;
 
         LabelOrderId.Text = orderId;
-
-        var ci = new CultureInfo("id-ID");
-        LabelTotalPembayaran.Text = $"Rp {grossAmount.ToString("N0", ci)}";
+        LabelTotalPembayaran.Text = FormatRupiah(grossAmount);
     }
+
+    private static string FormatRupiah(double nilai) => $"Rp {nilai.ToString("N0", IdCulture)}";
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+
+        if (_grossAmount <= 0)
+        {
+            await DisplayAlertAsync("QRIS Gagal",
+                "Nilai pembayaran tidak valid. Total harus lebih dari Rp 0.", "OK");
+            await Navigation.PopAsync();
+            return;
+        }
+
         StartCountdown();
         await CreateQrisAsync();
     }
@@ -48,6 +64,7 @@ public partial class QRIS : ContentPage
     {
         base.OnDisappearing();
         StopCountdown();
+        StopStatusPolling();
     }
 
     // === Generate QRIS via Midtrans (create_qris.php) ===
@@ -91,6 +108,8 @@ public partial class QRIS : ContentPage
                     QrLoading.IsRunning = false;
                     QrLoading.IsVisible = false;
                 });
+
+                StartStatusPolling();
             }
             else
             {
@@ -161,6 +180,7 @@ public partial class QRIS : ContentPage
     private void OnExpired()
     {
         _isExpired = true;
+        StopStatusPolling();
         MainThread.BeginInvokeOnMainThread(() =>
         {
             LabelCountdown.Text = "00:00";
@@ -173,18 +193,107 @@ public partial class QRIS : ContentPage
         });
     }
 
-    private async void B_CekStatus_Clicked(object sender, EventArgs e)
+    // === Polling cek status pembayaran tiap 5 detik ===
+    private void StartStatusPolling()
     {
-        if (_isExpired)
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            StopStatusPolling();
+
+            _statusTimer = Dispatcher.CreateTimer();
+            _statusTimer.Interval = TimeSpan.FromSeconds(5);
+            _statusTimer.Tick += async (s, e) => await CekStatusPembayaranAsync();
+            _statusTimer.Start();
+        });
+    }
+
+    private void StopStatusPolling()
+    {
+        if (_statusTimer != null)
+        {
+            _statusTimer.Stop();
+            _statusTimer = null;
+        }
+    }
+
+    private async Task CekStatusPembayaranAsync()
+    {
+        if (_isExpired || _isPaid || _isCheckingStatus)
             return;
 
-        // TODO: panggil endpoint cek status pembayaran QRIS ke backend
-        await DisplayAlert("Cek Status", "Pembayaran masih menunggu. Silakan selesaikan scan QRIS.", "OK");
+        _isCheckingStatus = true;
+        try
+        {
+            using var client = new HttpClient();
+            string url = App.API_MIDTRANS + "midtrans_status.php?order_id=" + Uri.EscapeDataString(_orderId);
+
+            var response = await client.GetAsync(url);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent) || responseContent.TrimStart().StartsWith("<"))
+                return;
+
+            var list = JsonConvert.DeserializeObject<List<StatusResponse>>(responseContent);
+            if (list == null || list.Count == 0)
+                return;
+
+            string status = (list[0].transaction_status ?? "").ToLowerInvariant();
+
+            if (status == "settlement" || status == "capture")
+            {
+                OnPaid();
+            }
+            else if (status == "expire" || status == "deny" || status == "cancel" || status == "failure")
+            {
+                StopStatusPolling();
+                StopCountdown();
+                OnExpired();
+            }
+            // "pending" => tetap menunggu, polling lanjut
+        }
+        catch
+        {
+            // abaikan error sementara, polling lanjut di tick berikutnya
+        }
+        finally
+        {
+            _isCheckingStatus = false;
+        }
+    }
+
+    private void OnPaid()
+    {
+        _isPaid = true;
+        StopStatusPolling();
+        StopCountdown();
+
+        MainThread.BeginInvokeOnMainThread(async () =>
+        {
+            LabelStatus.Text = "Pembayaran Berhasil";
+            LabelStatus.TextColor = Color.FromArgb("#27AE60");
+            B_CekStatus.IsEnabled = false;
+            B_CekStatus.Text = "PEMBAYARAN BERHASIL";
+            B_CekStatus.BackgroundColor = Color.FromArgb("#27AE60");
+
+            await DisplayAlertAsync("Berhasil", "Pembayaran QRIS telah diterima.", "OK");
+            await Navigation.PopAsync();
+        });
+    }
+
+    private async void B_CekStatus_Clicked(object sender, EventArgs e)
+    {
+        if (_isExpired || _isPaid)
+            return;
+
+        await CekStatusPembayaranAsync();
+
+        if (!_isPaid)
+            await DisplayAlertAsync("Cek Status", "Pembayaran masih menunggu. Silakan selesaikan scan QRIS.", "OK");
     }
 
     private async void TapTutup_Tapped(object sender, TappedEventArgs e)
     {
-        bool konfirmasi = await DisplayAlert("Batalkan QRIS",
+        bool konfirmasi = await DisplayAlertAsync("Batalkan QRIS",
             "Tutup halaman pembayaran QRIS?", "Ya", "Tidak");
         if (konfirmasi)
         {
@@ -199,5 +308,14 @@ public partial class QRIS : ContentPage
         public string status { get; set; }
         public string qris_url { get; set; }
         public string message { get; set; }
+    }
+
+    // Response midtrans_status.php (berupa array JSON)
+    private class StatusResponse
+    {
+        public string order_id { get; set; }
+        public string gross_amount { get; set; }
+        public string transaction_status { get; set; }
+        public string settlement_time { get; set; }
     }
 }
