@@ -274,6 +274,36 @@ public partial class Pembayaran_Faktur : ContentPage
         // Tanggal bayar (default hari ini, mengikuti pilihan DatePicker)
         string tanggal = PickerTanggalBayar.Date.GetValueOrDefault(DateTime.Today).ToString("yyyy-MM-dd");
 
+        // ===== Khusus QRIS: alihkan ke halaman QRIS =====
+        // Simpan pembayaran baru dieksekusi di halaman QRIS setelah status settlement.
+        if (paymentMethodVal == "QRIS")
+        {
+            // Parsing LabelGrandTotal.Text (mis. "Rp 10.000") menjadi double
+            string rawGrand = (LabelGrandTotal.Text ?? "")
+                .Replace("Rp", "").Replace(".", "").Replace(" ", "").Trim();
+            double.TryParse(rawGrand, out double grossAmount);
+
+            // Bawa seluruh data yang dibutuhkan untuk save-receipt.php
+            var receiptData = new QRIS.PaymentReceiptData
+            {
+                BankNo = bankNo,
+                Number = string.IsNullOrWhiteSpace(EntryNoBukti.Text) ? "" : EntryNoBukti.Text.Trim(),
+                ChequeAmount = chequeAmount,
+                CustomerNo = nomor_pelanggan,
+                TransDate = tanggal,
+                PaymentMethod = paymentMethodVal,
+                Description = EntryKeterangan.Text ?? "",
+                CharField2 = charFieldString2,
+                InvoiceNo = nomor_faktur,
+                PaymentAmount = _totalAmountFaktur,
+                DiskonPembayaran = _diskonPembayaran,
+                DiskonAccountNo = DiskonAccountNo
+            };
+
+            await Navigation.PushAsync(new QRIS(nomor_faktur, grossAmount, receiptData));
+            return;
+        }
+
         // ===== Susun detailDiscount (hanya bila ada diskon) =====
         var detailDiscount = new List<object>();
         if (_diskonPembayaran > 0)

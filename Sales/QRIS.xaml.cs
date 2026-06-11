@@ -17,8 +17,11 @@ public partial class QRIS : ContentPage
 
     private static readonly CultureInfo IdCulture = new CultureInfo("id-ID");
 
-    private string _orderId = "POS26-0002";
-    private double _grossAmount = 10020;
+    private string _orderId = ""; // nantinya diambil dari pembayaran-faktur
+    private double _grossAmount = 0; //nantinya diambil dari pembayaran-faktur
+
+    // Data pembayaran yang dieksekusi (save-receipt.php) saat status settlement
+    private PaymentReceiptData _receiptData;
 
     public QRIS()
     {
@@ -31,6 +34,13 @@ public partial class QRIS : ContentPage
     public QRIS(string orderId, double grossAmount) : this()
     {
         SetDataTransaksi(orderId, grossAmount);
+    }
+
+    // Konstruktor lengkap: bawa juga data untuk simpan pembayaran setelah settlement
+    public QRIS(string orderId, double grossAmount, PaymentReceiptData receiptData) : this()
+    {
+        SetDataTransaksi(orderId, grossAmount);
+        _receiptData = receiptData;
     }
 
     public void SetDataTransaksi(string orderId, double grossAmount)
@@ -272,12 +282,93 @@ public partial class QRIS : ContentPage
             LabelStatus.Text = "Pembayaran Berhasil";
             LabelStatus.TextColor = Color.FromArgb("#27AE60");
             B_CekStatus.IsEnabled = false;
-            B_CekStatus.Text = "PEMBAYARAN BERHASIL";
+            B_CekStatus.Text = "MENYIMPAN PEMBAYARAN...";
             B_CekStatus.BackgroundColor = Color.FromArgb("#27AE60");
 
-            await DisplayAlertAsync("Berhasil", "Pembayaran QRIS telah diterima.", "OK");
-            await Navigation.PopAsync();
+            // Eksekusi simpan pembayaran (persis seperti B_SimpanPembayaran_Clicked)
+            bool tersimpan = await SimpanPembayaranAsync();
+
+            if (tersimpan)
+            {
+                await DisplayAlertAsync("Sukses",
+                    "Pembayaran QRIS berhasil dan tersimpan ke sistem.", "OK");
+
+                // Kembali ke List-Faktur (instance baru agar status faktur ter-refresh)
+                Application.Current.MainPage = new NavigationPage(new List_Faktur());
+            }
+            else
+            {
+                B_CekStatus.Text = "PEMBAYARAN BERHASIL";
+            }
         });
+    }
+
+    // Simpan pembayaran ke save-receipt.php — payload identik dengan B_SimpanPembayaran_Clicked
+    private async Task<bool> SimpanPembayaranAsync()
+    {
+        if (_receiptData == null)
+            return false;
+
+        var detailDiscount = new List<object>();
+        if (_receiptData.DiskonPembayaran > 0)
+        {
+            detailDiscount.Add(new
+            {
+                accountNo = int.Parse(_receiptData.DiskonAccountNo),
+                amount = _receiptData.DiskonPembayaran
+            });
+        }
+
+        var detailInvoice = new List<object>
+        {
+            new
+            {
+                invoiceNo = _receiptData.InvoiceNo,
+                paymentAmount = _receiptData.PaymentAmount,
+                detailDiscount = detailDiscount
+            }
+        };
+
+        var payload = new
+        {
+            bankNo = _receiptData.BankNo,
+            number = _receiptData.Number ?? "",
+            chequeAmount = _receiptData.ChequeAmount,
+            customerNo = _receiptData.CustomerNo,
+            transDate = _receiptData.TransDate,
+            chequeDate = _receiptData.TransDate,
+            paymentMethod = _receiptData.PaymentMethod,
+            description = _receiptData.Description ?? "",
+            charField1 = _orderId, // referensi order QRIS
+            charField2 = _receiptData.CharField2,
+            detailInvoice = detailInvoice
+        };
+
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            string apiUrl = $"{App.API_HOST}penjualan/save-receipt.php";
+
+            using var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+            string jsonPayload = JsonConvert.SerializeObject(payload);
+            var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(apiUrl, content);
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+                return true;
+
+            await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
+            return false;
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error Koneksi", $"Terjadi kesalahan: {ex.Message}", "OK");
+            return false;
+        }
     }
 
     private async void B_CekStatus_Clicked(object sender, EventArgs e)
@@ -317,5 +408,22 @@ public partial class QRIS : ContentPage
         public string gross_amount { get; set; }
         public string transaction_status { get; set; }
         public string settlement_time { get; set; }
+    }
+
+    // Data pembayaran yang dibawa dari Pembayaran-Faktur untuk disimpan saat settlement
+    public class PaymentReceiptData
+    {
+        public string BankNo { get; set; }
+        public string Number { get; set; }            // nomor bukti pembayaran
+        public double ChequeAmount { get; set; }      // grand total (setelah diskon)
+        public string CustomerNo { get; set; }
+        public string TransDate { get; set; }         // format yyyy-MM-dd
+        public string PaymentMethod { get; set; }
+        public string Description { get; set; }
+        public string CharField2 { get; set; }
+        public string InvoiceNo { get; set; }
+        public double PaymentAmount { get; set; }     // total faktur sebelum diskon
+        public double DiskonPembayaran { get; set; }
+        public string DiskonAccountNo { get; set; }
     }
 }
