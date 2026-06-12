@@ -15,6 +15,10 @@ public partial class Pembayaran_Faktur : ContentPage
     string nomor_faktur { get; set; }
 
     string DiskonAccountNo = "400004";
+    string bebanQrisNo = "7203"; // gunakan jika paymentMethodVal = QRIS
+    string pembulatanNo = "720008"; //gunakan jika ditemukan lebih dari 0 ada Pembulatan pada Grand Total LabelGrandTotal
+
+    double nilai_pembulatan { get; set; }
 
     string nomor_pelanggan { get; set; }
 
@@ -187,12 +191,18 @@ public partial class Pembayaran_Faktur : ContentPage
 
             // Tentukan metode pembayaran berdasarkan nama Kas/Bank
             string namaBank = selectedBank.name ?? "";
+            bool isTunai = namaBank.IndexOf("Tunai", StringComparison.OrdinalIgnoreCase) >= 0;
+
             if (namaBank.IndexOf("QRIS", StringComparison.OrdinalIgnoreCase) >= 0)
                 paymentMethodVal = "QRIS";
-            else if (namaBank.IndexOf("Tunai", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (isTunai)
                 paymentMethodVal = "CASH_OTHER";
             else if (namaBank.IndexOf("BANK", StringComparison.OrdinalIgnoreCase) >= 0)
                 paymentMethodVal = "BANK_TRANSFER";
+
+            // Pembulatan, Nominal Pembayaran, dan Kembalian hanya relevan untuk Tunai
+            RowPembulatan.IsVisible = isTunai;
+            ViewNominalPembayaran.IsVisible = isTunai;
 
             System.Diagnostics.Debug.WriteLine($"paymentMethodVal: {paymentMethodVal}");
         }

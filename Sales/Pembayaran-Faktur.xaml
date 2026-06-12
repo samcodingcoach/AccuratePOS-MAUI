@@ -81,7 +81,7 @@
                 </toolkit:Expander.Header>
 
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="0">
-
+                    
                     <BoxView HeightRequest="0.5" Grid.Row="0" Color="#E0E0E0" HorizontalOptions="Fill" />
 
                     <!--Header kolom-->
@@ -148,7 +148,7 @@
                             <Label x:Name="LabelGrandTotal" Text="Rp 0" Grid.Column="1" TextColor="#222" FontSize="14" FontAttributes="Bold"
                                    HorizontalTextAlignment="End" />
                         </Grid>
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid x:Name="RowPembulatan" ColumnDefinitions="*,Auto">
                             <Label Text="Pembulatan" Grid.Column="0" TextColor="#575757" FontSize="15" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
                             <Label x:Name="LabelPembulatan" Text="Rp 0" Grid.Column="1" TextColor="DarkCyan" FontSize="18" FontAttributes="Bold"
@@ -169,7 +169,7 @@
                     <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200" 
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
 
-                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="NominalBayarKonsumen" Keyboard="Numeric"
+                        <Entry Placeholder="Jumlah Bayar" x:Name="NominalBayarKonsumen" Keyboard="Numeric"
                                TextChanged="NominalBayarKonsumen_TextChanged" HorizontalTextAlignment="End" FontAttributes="Bold"
                                TextColor="DarkCyan"></Entry>
                     </Border>
