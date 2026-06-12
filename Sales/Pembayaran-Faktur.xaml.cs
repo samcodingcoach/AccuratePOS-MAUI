@@ -294,8 +294,8 @@ public partial class Pembayaran_Faktur : ContentPage
             return;
         }
 
-        // Nilai setelah diskon pembayaran (= LabelGrandTotal)
-        double chequeAmount = _totalAmountFaktur - _diskonPembayaran;
+        // Nilai yang dibayar = nilai setelah pembulatan (nilai_pembulatan)
+        double chequeAmount = nilai_pembulatan;
         if (chequeAmount < 0) chequeAmount = 0;
 
         // Tanggal bayar (default hari ini, mengikuti pilihan DatePicker)
@@ -341,8 +341,8 @@ public partial class Pembayaran_Faktur : ContentPage
                 amount = _diskonPembayaran
             });
         }
-        // Selisih pembulatan dimasukkan sebagai diskon ke akun pembulatan
-        if (nilai_selisih_pembulatan > 0)
+        // Selisih pembulatan: hanya untuk Tunai (CASH_OTHER) dan bila selisih > 0
+        if (paymentMethodVal == "CASH_OTHER" && nilai_selisih_pembulatan > 0)
         {
             detailDiscount.Add(new
             {
@@ -352,12 +352,17 @@ public partial class Pembayaran_Faktur : ContentPage
         }
 
         // ===== Susun detailInvoice =====
+        // paymentAmount = grand total (dari LabelGrandTotal.Text)
+        string rawPaymentAmount = (LabelGrandTotal.Text ?? "")
+            .Replace("Rp", "").Replace(".", "").Replace(" ", "").Trim();
+        double.TryParse(rawPaymentAmount, out double paymentAmount);
+
         var detailInvoice = new List<object>
         {
             new
             {
-                invoiceNo = nomor_faktur,
-                paymentAmount = _totalAmountFaktur, // total faktur sebelum diskon
+                invoiceNo = FormNumber.Text,
+                paymentAmount = paymentAmount,
                 detailDiscount = detailDiscount
             }
         };
