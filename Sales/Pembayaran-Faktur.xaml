@@ -115,11 +115,11 @@
                     <!--Ringkasan total-->
                     <BoxView HeightRequest="0.5" Grid.Row="3" Color="#E0E0E0" HorizontalOptions="Fill" />
                     <VerticalStackLayout Grid.Row="4" Padding="15,10,15,12" Spacing="6">
-                        <Grid ColumnDefinitions="*,Auto">
+                        <!--<Grid ColumnDefinitions="*,Auto">
                             <Label Text="Jumlah Item" Grid.Column="0" TextColor="Grey" FontSize="13" />
                             <Label x:Name="LabelItemCount" Text="0 item" Grid.Column="1" TextColor="#222" FontSize="13"
                                    HorizontalTextAlignment="End" />
-                        </Grid>
+                        </Grid>-->
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Diskon Faktur" Grid.Column="0" TextColor="Grey" FontSize="13" />
                             <Label x:Name="LabelTotalDiskon" Text="Rp 0" Grid.Column="1" TextColor="#E74C3C" FontSize="13"

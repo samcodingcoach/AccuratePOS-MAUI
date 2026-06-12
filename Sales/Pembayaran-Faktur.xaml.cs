@@ -14,7 +14,7 @@ public partial class Pembayaran_Faktur : ContentPage
     string bankNo { get; set; }
     string nomor_faktur { get; set; }
 
-    string DiskonAccountNo = "400004";
+    string DiskonAccountNo = "720009";
    
     string pembulatanNo = "720008"; 
 
@@ -160,7 +160,7 @@ public partial class Pembayaran_Faktur : ContentPage
                             // 4. Hitung jumlah item
                             double totalQty = inv.detailItem?.Sum(x => x.quantity) ?? 0;
                             LabelHeaderDetail.Text = $"Detail Barang ({totalQty} items)";
-                            LabelItemCount.Text = $"{totalQty} item";
+                           // LabelItemCount.Text = $"{totalQty} item";
 
                             // 5. Mapping Ringkasan Uang
                             LabelTotalDiskon.Text = $"Rp {inv.cashDiscount.ToString("N0", new CultureInfo("id-ID"))}";
@@ -352,8 +352,8 @@ public partial class Pembayaran_Faktur : ContentPage
         }
 
         // ===== Susun detailInvoice =====
-        // paymentAmount = grand total (dari LabelGrandTotal.Text)
-        string rawPaymentAmount = (LabelGrandTotal.Text ?? "")
+        // paymentAmount = total faktur (dari FormtotalAmount.Text)
+        string rawPaymentAmount = (FormtotalAmount.Text ?? "")
             .Replace("Rp", "").Replace(".", "").Replace(" ", "").Trim();
         double.TryParse(rawPaymentAmount, out double paymentAmount);
 
