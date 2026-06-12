@@ -170,6 +170,9 @@ public partial class Pembayaran_Faktur : ContentPage
                             // 6. Hitung Pembulatan ke Bawah (Kelipatan Ratusan)
                             double pembulatan = Math.Floor(inv.totalAmount / 100) * 100;
                             LabelPembulatan.Text = $"Rp {pembulatan.ToString("N0", new CultureInfo("id-ID"))}";
+
+                            // Set total tagihan awal sebagai acuan kembalian (sebelum ada diskon)
+                            _totalTagihan = pembulatan;
                         });
                     }
                 }
@@ -274,6 +277,14 @@ public partial class Pembayaran_Faktur : ContentPage
         if (string.IsNullOrEmpty(bankNo))
         {
             await DisplayAlertAsync("Peringatan", "Silakan pilih Metode Bayar (Bank) terlebih dahulu.", "OK");
+            return;
+        }
+
+        // Khusus Tunai: nominal bayar konsumen harus mencukupi total tagihan
+        if (paymentMethodVal == "CASH_OTHER" && _nominalBayarKonsumen < _totalTagihan)
+        {
+            await DisplayAlertAsync("Peringatan",
+                "Nominal pembayaran kurang dari total tagihan. Mohon lengkapi nominal pembayaran.", "OK");
             return;
         }
 
