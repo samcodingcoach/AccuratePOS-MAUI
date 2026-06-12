@@ -23,6 +23,8 @@ public partial class QRIS : ContentPage
     // Data pembayaran yang dieksekusi (save-receipt.php) saat status settlement
     private PaymentReceiptData _receiptData;
 
+    string bebanQrisNo = "7203";
+    double nilaiBebanQris = 0.07; //0.7% dari nilai total grossAmount
     public QRIS()
     {
         InitializeComponent();

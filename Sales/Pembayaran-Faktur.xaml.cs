@@ -15,10 +15,11 @@ public partial class Pembayaran_Faktur : ContentPage
     string nomor_faktur { get; set; }
 
     string DiskonAccountNo = "400004";
-    string bebanQrisNo = "7203"; // gunakan jika paymentMethodVal = QRIS
-    string pembulatanNo = "720008"; //gunakan jika ditemukan lebih dari 0 ada Pembulatan pada Grand Total LabelGrandTotal
+   
+    string pembulatanNo = "720008"; 
 
     double nilai_pembulatan { get; set; }
+    double nilai_selisih_pembulatan { get; set; }
 
     string nomor_pelanggan { get; set; }
 
@@ -169,7 +170,12 @@ public partial class Pembayaran_Faktur : ContentPage
 
                             // 6. Hitung Pembulatan ke Bawah (Kelipatan Ratusan)
                             double pembulatan = Math.Floor(inv.totalAmount / 100) * 100;
+                            nilai_pembulatan = pembulatan;
                             LabelPembulatan.Text = $"Rp {pembulatan.ToString("N0", new CultureInfo("id-ID"))}";
+
+                            // Selisih pembulatan (mis. 1021 -> 21), tampung & tampilkan
+                            nilai_selisih_pembulatan = inv.totalAmount - pembulatan;
+                            TampilkanSelisihPembulatan();
 
                             // Set total tagihan awal sebagai acuan kembalian (sebelum ada diskon)
                             _totalTagihan = pembulatan;
@@ -325,7 +331,7 @@ public partial class Pembayaran_Faktur : ContentPage
             return;
         }
 
-        // ===== Susun detailDiscount (hanya bila ada diskon) =====
+        // ===== Susun detailDiscount =====
         var detailDiscount = new List<object>();
         if (_diskonPembayaran > 0)
         {
@@ -333,6 +339,15 @@ public partial class Pembayaran_Faktur : ContentPage
             {
                 accountNo = int.Parse(DiskonAccountNo), // kirim sebagai angka
                 amount = _diskonPembayaran
+            });
+        }
+        // Selisih pembulatan dimasukkan sebagai diskon ke akun pembulatan
+        if (nilai_selisih_pembulatan > 0)
+        {
+            detailDiscount.Add(new
+            {
+                accountNo = int.Parse(pembulatanNo),
+                amount = nilai_selisih_pembulatan
             });
         }
 
@@ -490,11 +505,26 @@ public partial class Pembayaran_Faktur : ContentPage
 
         // Pembulatan ke bawah (kelipatan ratusan)
         double pembulatan = Math.Floor(grandTotal / 100) * 100;
+        nilai_pembulatan = pembulatan;
         LabelPembulatan.Text = $"Rp {pembulatan.ToString("N0", culture)}";
+
+        // Selisih pembulatan (mis. 1021 -> 21), tampung & tampilkan
+        nilai_selisih_pembulatan = grandTotal - pembulatan;
+        TampilkanSelisihPembulatan();
 
         // Total tagihan akhir = nilai setelah pembulatan; jadi acuan kembalian
         _totalTagihan = pembulatan;
         HitungKembalian();
+    }
+
+    // Tampilkan teks selisih pembulatan pada caption, mis. "Pembulatan (- Rp 21)"
+    private void TampilkanSelisihPembulatan()
+    {
+        var culture = new CultureInfo("id-ID");
+        if (nilai_selisih_pembulatan > 0)
+            LabelSelisihPembulatan.Text = $"Pembulatan (- Rp {nilai_selisih_pembulatan.ToString("N0", culture)})";
+        else
+            LabelSelisihPembulatan.Text = "Pembulatan";
     }
 
     // Kembalian = nominal bayar konsumen - total tagihan akhir

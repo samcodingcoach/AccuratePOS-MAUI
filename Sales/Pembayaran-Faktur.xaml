@@ -149,7 +149,7 @@
                                    HorizontalTextAlignment="End" />
                         </Grid>
                         <Grid x:Name="RowPembulatan" ColumnDefinitions="*,Auto">
-                            <Label Text="Pembulatan" Grid.Column="0" TextColor="#575757" FontSize="15" FontAttributes="Bold"
+                            <Label Text="Pembulatan" x:Name="LabelSelisihPembulatan" Grid.Column="0" TextColor="#575757" FontSize="15" FontAttributes="Bold"
                                    VerticalTextAlignment="Center" />
                             <Label x:Name="LabelPembulatan" Text="Rp 0" Grid.Column="1" TextColor="DarkCyan" FontSize="18" FontAttributes="Bold"
                                    HorizontalTextAlignment="End" />
