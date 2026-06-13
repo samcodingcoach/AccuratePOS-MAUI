@@ -305,24 +305,22 @@ public partial class Pembayaran_Faktur : ContentPage
         // Simpan pembayaran baru dieksekusi di halaman QRIS setelah status settlement.
         if (paymentMethodVal == "QRIS")
         {
-            // Parsing LabelGrandTotal.Text (mis. "Rp 10.000") menjadi double
-            string rawGrand = (LabelGrandTotal.Text ?? "")
-                .Replace("Rp", "").Replace(".", "").Replace(" ", "").Trim();
-            double.TryParse(rawGrand, out double grossAmount);
+            // Gross amount ke Midtrans = total faktur tanpa pembulatan, dikurangi diskon
+            double grossAmount = _totalAmountFaktur - _diskonPembayaran;
+            if (grossAmount < 0) grossAmount = 0;
 
-            // Bawa seluruh data yang dibutuhkan untuk save-receipt.php
+            // Bawa data yang dibutuhkan untuk save-receipt.php (chequeAmount & beban dihitung di QRIS)
             var receiptData = new QRIS.PaymentReceiptData
             {
                 BankNo = bankNo,
                 Number = string.IsNullOrWhiteSpace(EntryNoBukti.Text) ? "" : EntryNoBukti.Text.Trim(),
-                ChequeAmount = chequeAmount,
                 CustomerNo = nomor_pelanggan,
                 TransDate = tanggal,
                 PaymentMethod = paymentMethodVal,
                 Description = EntryKeterangan.Text ?? "",
                 CharField2 = charFieldString2,
                 InvoiceNo = nomor_faktur,
-                PaymentAmount = _totalAmountFaktur,
+                PaymentAmount = _totalAmountFaktur, // gross sebelum diskon & beban
                 DiskonPembayaran = _diskonPembayaran,
                 DiskonAccountNo = DiskonAccountNo
             };

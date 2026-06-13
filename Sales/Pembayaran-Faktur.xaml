@@ -159,7 +159,7 @@
                 </Grid>
             </toolkit:Expander>
         </Border>
-        <!--nominal diskon-->
+      
         <Border x:Name="ViewNominalPembayaran" Grid.Row="3" Padding="0,10" Margin="0,10,0,0" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" StrokeThickness="0.5" 
             BackgroundColor="White">
            

@@ -19,12 +19,13 @@ public partial class QRIS : ContentPage
 
     private string _orderId = ""; // nantinya diambil dari pembayaran-faktur
     private double _grossAmount = 0; //nantinya diambil dari pembayaran-faktur
+    private string _transaction_id = "";
 
     // Data pembayaran yang dieksekusi (save-receipt.php) saat status settlement
     private PaymentReceiptData _receiptData;
 
     string bebanQrisNo = "7203";
-    double nilaiBebanQris = 0.07; //0.7% dari nilai total grossAmount
+    double nilaiBebanQris = 0.007; //0.7% dari nilai total grossAmount
     public QRIS()
     {
         InitializeComponent();
@@ -253,7 +254,9 @@ public partial class QRIS : ContentPage
 
             if (status == "settlement" || status == "capture")
             {
+                _transaction_id = list[0].transaction_id;
                 OnPaid();
+                
             }
             else if (status == "expire" || status == "deny" || status == "cancel" || status == "failure")
             {
@@ -311,7 +314,16 @@ public partial class QRIS : ContentPage
         if (_receiptData == null)
             return false;
 
+        // Beban QRIS = 0.7% dari gross amount (sudah dikurangi diskon), tanpa pembulatan
+        double bebanQris = _grossAmount * nilaiBebanQris;
+
+        // chequeAmount = gross setelah diskon, dipotong beban QRIS
+        double chequeAmount = _grossAmount - bebanQris;
+        if (chequeAmount < 0) chequeAmount = 0;
+
         var detailDiscount = new List<object>();
+
+        // 1. Diskon pembayaran (jika ada)
         if (_receiptData.DiskonPembayaran > 0)
         {
             detailDiscount.Add(new
@@ -321,12 +333,19 @@ public partial class QRIS : ContentPage
             });
         }
 
+        // 2. Beban QRIS = 0.7% dari gross setelah diskon — khusus pembayaran QRIS
+        detailDiscount.Add(new
+        {
+            accountNo = int.Parse(bebanQrisNo),
+            amount = bebanQris
+        });
+
         var detailInvoice = new List<object>
         {
             new
             {
                 invoiceNo = _receiptData.InvoiceNo,
-                paymentAmount = _receiptData.PaymentAmount,
+                paymentAmount = _receiptData.PaymentAmount, // gross sebelum diskon & beban
                 detailDiscount = detailDiscount
             }
         };
@@ -335,13 +354,13 @@ public partial class QRIS : ContentPage
         {
             bankNo = _receiptData.BankNo,
             number = _receiptData.Number ?? "",
-            chequeAmount = _receiptData.ChequeAmount,
+            chequeAmount = chequeAmount,
             customerNo = _receiptData.CustomerNo,
             transDate = _receiptData.TransDate,
             chequeDate = _receiptData.TransDate,
             paymentMethod = _receiptData.PaymentMethod,
             description = _receiptData.Description ?? "",
-            charField1 = _orderId, // referensi order QRIS
+            charField1 = _transaction_id, // referensi order QRIS
             charField2 = _receiptData.CharField2,
             detailInvoice = detailInvoice
         };
@@ -410,6 +429,8 @@ public partial class QRIS : ContentPage
         public string gross_amount { get; set; }
         public string transaction_status { get; set; }
         public string settlement_time { get; set; }
+
+        public string transaction_id { get; set; }
     }
 
     // Data pembayaran yang dibawa dari Pembayaran-Faktur untuk disimpan saat settlement
@@ -417,14 +438,13 @@ public partial class QRIS : ContentPage
     {
         public string BankNo { get; set; }
         public string Number { get; set; }            // nomor bukti pembayaran
-        public double ChequeAmount { get; set; }      // grand total (setelah diskon)
         public string CustomerNo { get; set; }
         public string TransDate { get; set; }         // format yyyy-MM-dd
         public string PaymentMethod { get; set; }
         public string Description { get; set; }
         public string CharField2 { get; set; }
         public string InvoiceNo { get; set; }
-        public double PaymentAmount { get; set; }     // total faktur sebelum diskon
+        public double PaymentAmount { get; set; }     // gross sebelum diskon & beban QRIS
         public double DiskonPembayaran { get; set; }
         public string DiskonAccountNo { get; set; }
     }
