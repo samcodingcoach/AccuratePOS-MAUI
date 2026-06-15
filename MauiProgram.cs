@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
+using Microsoft.Extensions.DependencyInjection;
 namespace MyPosAccurate2026;
 
 public static class MauiProgram
@@ -20,7 +21,11 @@ public static class MauiProgram
 #if DEBUG
 		builder.Logging.AddDebug();
 #endif
+#if ANDROID
+            // Registrasi khusus untuk Android
+            builder.Services.AddSingleton<IBluetoothService, MyPosAccurate2026.Platforms.Android.AndroidBlueToothService>();
+#endif
 
-		return builder.Build();
+        return builder.Build();
 	}
 }
