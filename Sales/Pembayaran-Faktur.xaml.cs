@@ -442,12 +442,15 @@ public partial class Pembayaran_Faktur : ContentPage
                 var response = await client.PostAsync(apiUrl, content);
                 string responseString = await response.Content.ReadAsStringAsync();
 
+                // Ambil nomor struk dari respon (untuk preview di halaman Print)
+                string receiptNo = ExtractReceiptNumber(responseString);
+
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        await DisplayAlertAsync("Sukses", "Pembayaran faktur berhasil disimpan ke sistem.", "OK");
-                        await Navigation.PopAsync();
+                        // Lanjut ke pratinjau struk
+                        await Navigation.PushAsync(new Print(receiptNo, nomor_faktur));
                     }
                     else
                     {
@@ -646,5 +649,21 @@ public partial class Pembayaran_Faktur : ContentPage
     {
         ViewKeterangan.IsVisible = true;
         ViewNominalPembayaran.IsVisible = false;
+    }
+
+    // Ambil nomor struk dari respon save-receipt.php (mendukung bentuk data.number atau number di root)
+    private static string ExtractReceiptNumber(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json) || json.TrimStart().StartsWith("<"))
+            return "";
+        try
+        {
+            var jo = Newtonsoft.Json.Linq.JObject.Parse(json);
+            return (string)(jo["data"]?["number"] ?? jo["number"]) ?? "";
+        }
+        catch
+        {
+            return "";
+        }
     }
 }

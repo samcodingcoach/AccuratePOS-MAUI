@@ -22,6 +22,7 @@ public partial class VirtualAccount : ContentPage
     private string _vaNumber = "";      // nomor virtual account
     private string _bankName = "Virtual Account";
     private string _transaction_id = "";
+    private string _receiptNumber = "";                 // nomor struk hasil save-receipt (untuk halaman Print)
     private double _potonganVA = 4400;                  // beban VA: nilai potongan statis (fix)
     private string _accountNo_BebanVA = "600025";       // akun beban khusus Virtual Account
    
@@ -358,11 +359,9 @@ public partial class VirtualAccount : ContentPage
 
             if (tersimpan)
             {
-                await DisplayAlertAsync("Sukses",
-                    "Pembayaran Virtual Account berhasil dan tersimpan ke sistem.", "OK");
-
-                // Kembali ke List-Faktur (instance baru agar status faktur ter-refresh)
-                Application.Current.MainPage = new NavigationPage(new List_Faktur());
+                // Lanjut ke pratinjau struk (instance baru agar stack bersih)
+                Application.Current.MainPage = new NavigationPage(
+                    new Print(_receiptNumber, _receiptData?.InvoiceNo));
             }
             else
             {
@@ -440,7 +439,11 @@ public partial class VirtualAccount : ContentPage
             string responseString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
+            {
+                // Simpan nomor struk untuk ditampilkan di halaman Print
+                _receiptNumber = ExtractReceiptNumber(responseString);
                 return true;
+            }
 
             await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
             return false;
@@ -472,6 +475,22 @@ public partial class VirtualAccount : ContentPage
             StopCountdown();
             StopStatusPolling();
             await Navigation.PopAsync();
+        }
+    }
+
+    // Ambil nomor struk dari respon save-receipt.php (mendukung bentuk data.number atau number di root)
+    private static string ExtractReceiptNumber(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json) || json.TrimStart().StartsWith("<"))
+            return "";
+        try
+        {
+            var jo = Newtonsoft.Json.Linq.JObject.Parse(json);
+            return (string)(jo["data"]?["number"] ?? jo["number"]) ?? "";
+        }
+        catch
+        {
+            return "";
         }
     }
 

@@ -20,6 +20,7 @@ public partial class QRIS : ContentPage
     private string _orderId = ""; // nantinya diambil dari pembayaran-faktur
     private double _grossAmount = 0; //nantinya diambil dari pembayaran-faktur
     private string _transaction_id = "";
+    private string _receiptNumber = ""; // nomor struk hasil save-receipt (untuk halaman Print)
 
     // Data pembayaran yang dieksekusi (save-receipt.php) saat status settlement
     private PaymentReceiptData _receiptData;
@@ -295,11 +296,9 @@ public partial class QRIS : ContentPage
 
             if (tersimpan)
             {
-                await DisplayAlertAsync("Sukses",
-                    "Pembayaran QRIS berhasil dan tersimpan ke sistem.", "OK");
-
-                // Kembali ke List-Faktur (instance baru agar status faktur ter-refresh)
-                Application.Current.MainPage = new NavigationPage(new List_Faktur());
+                // Lanjut ke pratinjau struk (instance baru agar stack bersih)
+                Application.Current.MainPage = new NavigationPage(
+                    new Print(_receiptNumber, _receiptData?.InvoiceNo));
             }
             else
             {
@@ -380,7 +379,11 @@ public partial class QRIS : ContentPage
             string responseString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
+            {
+                // Simpan nomor struk untuk ditampilkan di halaman Print
+                _receiptNumber = ExtractReceiptNumber(responseString);
                 return true;
+            }
 
             await DisplayAlertAsync("Gagal Menyimpan", $"Sistem merespons: {responseString}", "OK");
             return false;
@@ -411,6 +414,22 @@ public partial class QRIS : ContentPage
         {
             StopCountdown();
             await Navigation.PopAsync();
+        }
+    }
+
+    // Ambil nomor struk dari respon save-receipt.php (mendukung bentuk data.number atau number di root)
+    private static string ExtractReceiptNumber(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json) || json.TrimStart().StartsWith("<"))
+            return "";
+        try
+        {
+            var jo = Newtonsoft.Json.Linq.JObject.Parse(json);
+            return (string)(jo["data"]?["number"] ?? jo["number"]) ?? "";
+        }
+        catch
+        {
+            return "";
         }
     }
 
