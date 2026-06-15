@@ -129,6 +129,9 @@
 	  <MauiXaml Update="Sales\Pembayaran-Faktur.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Sales\Print.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Sales\QRIS.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
