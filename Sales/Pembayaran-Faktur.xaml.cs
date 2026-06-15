@@ -201,17 +201,23 @@ public partial class Pembayaran_Faktur : ContentPage
             // Tentukan metode pembayaran berdasarkan nama Kas/Bank
             string namaBank = selectedBank.name ?? "";
             bool isTunai = namaBank.IndexOf("Tunai", StringComparison.OrdinalIgnoreCase) >= 0;
+            bool isBank = namaBank.IndexOf("BANK", StringComparison.OrdinalIgnoreCase) >= 0;
 
             if (namaBank.IndexOf("QRIS", StringComparison.OrdinalIgnoreCase) >= 0)
                 paymentMethodVal = "QRIS";
             else if (isTunai)
                 paymentMethodVal = "CASH_OTHER";
-            else if (namaBank.IndexOf("BANK", StringComparison.OrdinalIgnoreCase) >= 0)
+            else if (isBank)
                 paymentMethodVal = "BANK_TRANSFER";
 
             // Pembulatan, Nominal Pembayaran, dan Kembalian hanya relevan untuk Tunai
             RowPembulatan.IsVisible = isTunai;
             ViewNominalPembayaran.IsVisible = isTunai;
+
+            // Input Nomor Virtual Account muncul saat memilih Transfer Bank
+            bool isBankTransfer = paymentMethodVal == "BANK_TRANSFER";
+            RowNoVA.IsVisible = isBankTransfer;
+            LineNoVA.IsVisible = isBankTransfer;
 
             System.Diagnostics.Debug.WriteLine($"paymentMethodVal: {paymentMethodVal}");
         }
@@ -326,6 +332,43 @@ public partial class Pembayaran_Faktur : ContentPage
             };
 
             await Navigation.PushAsync(new QRIS(nomor_faktur, grossAmount, receiptData));
+            return;
+        }
+
+        // ===== Khusus Transfer Bank: alihkan ke halaman Virtual Account =====
+        // Simpan pembayaran baru dieksekusi di halaman VA setelah status settlement.
+        if (paymentMethodVal == "BANK_TRANSFER")
+        {
+            string vaNumber = (EntryNoVA.Text ?? "").Trim();
+            if (string.IsNullOrWhiteSpace(vaNumber))
+            {
+                await DisplayAlertAsync("Peringatan", "Nomor Virtual Account wajib diisi.", "OK");
+                return;
+            }
+
+            // Gross amount ke Midtrans = total faktur dikurangi diskon (nilai asli, tanpa pembulatan)
+            double grossAmount = _totalAmountFaktur - _diskonPembayaran;
+            if (grossAmount < 0) grossAmount = 0;
+
+            var receiptData = new QRIS.PaymentReceiptData
+            {
+                BankNo = bankNo,
+                Number = string.IsNullOrWhiteSpace(EntryNoBukti.Text) ? "" : EntryNoBukti.Text.Trim(),
+                CustomerNo = nomor_pelanggan,
+                TransDate = tanggal,
+                PaymentMethod = paymentMethodVal,
+                Description = EntryKeterangan.Text ?? "",
+                CharField2 = charFieldString2,
+                InvoiceNo = nomor_faktur,
+                PaymentAmount = _totalAmountFaktur, // gross sebelum diskon
+                DiskonPembayaran = _diskonPembayaran,
+                DiskonAccountNo = DiskonAccountNo
+            };
+
+            // Nama bank untuk ditampilkan di halaman VA
+            string namaBank = (PickerBank.SelectedItem as KasBankData)?.name ?? "Virtual Account";
+
+            await Navigation.PushAsync(new VirtualAccount(nomor_faktur, grossAmount, vaNumber, namaBank, receiptData));
             return;
         }
 
@@ -587,14 +630,16 @@ public partial class Pembayaran_Faktur : ContentPage
 
     private void TapCloseDiskon_Tapped(object sender, TappedEventArgs e)
     {
-        ViewNominalPembayaran.IsVisible = true;
+        // Nominal Pembayaran & Kembalian hanya untuk Tunai
+        ViewNominalPembayaran.IsVisible = paymentMethodVal == "CASH_OTHER";
         ViewDiskon.IsVisible = false;
     }
 
     private void TapViewKeterangan_Tapped(object sender, TappedEventArgs e)
     {
         ViewKeterangan.IsVisible = false;
-        ViewNominalPembayaran.IsVisible = true;
+        // Nominal Pembayaran & Kembalian hanya untuk Tunai
+        ViewNominalPembayaran.IsVisible = paymentMethodVal == "CASH_OTHER";
     }
 
     private void TapViewKet_Tapped(object sender, TappedEventArgs e)

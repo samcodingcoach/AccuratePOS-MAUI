@@ -37,34 +37,47 @@
         <!--Bank, jumlah pembayaran-->
         <Border Grid.Row="1" Padding="0,10" Margin="10" StrokeShape="RoundRectangle 10"  Stroke="Transparent" StrokeThickness="0.5" 
                 BackgroundColor="White">
-            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="0" Padding="0">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="0" Padding="0">
                 <StackLayout Orientation="Horizontal" Grid.Row="0" Padding="15,2" >
                     <Label Text="Bank :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
                     <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200"
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
-                       
+
                         <StackLayout Orientation="Horizontal" >
                             <Picker x:Name="PickerBank" Title="Pilih Metode Bayar" SelectedIndexChanged="PickerBank_SelectedIndexChanged" />
                             <Image Source="search32.png" HorizontalOptions="EndAndExpand" HeightRequest="18" Opacity="0.5" IsVisible="True"></Image>
                         </StackLayout>
-                       
+
                     </Border>
 
                 </StackLayout>
                 <BoxView HeightRequest="0.5" Grid.Row="1" Margin="0,5,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
-                
-                
+
+
                 <StackLayout Orientation="Horizontal" Grid.Row="2" Padding="15,0" >
                     <Label Text="Nilai Faktur :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
-                    <Border Padding="10,0" StrokeShape="RoundRectangle 5" 
+                    <Border Padding="10,0" StrokeShape="RoundRectangle 5"
                             Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
 
-                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="FormtotalAmount" HorizontalTextAlignment="End" FontAttributes="Bold" 
+                        <Entry Text="0" Placeholder="Jumlah Bayar" x:Name="FormtotalAmount" HorizontalTextAlignment="End" FontAttributes="Bold"
                                TextColor="DarkCyan"></Entry>
                     </Border>
 
                 </StackLayout>
-                
+
+                <!--Nomor Virtual Account (muncul saat memilih Transfer Bank)-->
+                <BoxView x:Name="LineNoVA" IsVisible="False" HeightRequest="0.5" Grid.Row="3" Margin="0,10,0,10" Color="#E0E0E0" HorizontalOptions="Fill" />
+                <StackLayout x:Name="RowNoVA" IsVisible="False" Orientation="Horizontal" Grid.Row="4" Padding="15,0" >
+                    <Label Text="No. VA :" VerticalTextAlignment="Center" TextColor="Grey"></Label>
+                    <Border Padding="10,0" StrokeShape="RoundRectangle 5" WidthRequest="200"
+                            Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke" HorizontalOptions="EndAndExpand">
+
+                        <Entry Placeholder="Nomor Virtual Account" x:Name="EntryNoVA" Keyboard="Numeric" MaxLength="20"
+                               HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="DarkCyan"></Entry>
+                    </Border>
+
+                </StackLayout>
+
             </Grid>
         </Border>
         
@@ -230,6 +243,7 @@
                         <Entry HeightRequest="120" x:Name="EntryKeterangan" VerticalTextAlignment="Start" Placeholder="Keterangan"></Entry>
                     </StackLayout>
                 </Border>
+                
             </StackLayout>
 
         </Border>
