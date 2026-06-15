@@ -449,8 +449,8 @@ public partial class Pembayaran_Faktur : ContentPage
                 {
                     if (response.IsSuccessStatusCode)
                     {
-                        // Lanjut ke pratinjau struk
-                        await Navigation.PushAsync(new Print(receiptNo, nomor_faktur));
+                        // Lanjut ke pratinjau struk (kirim nominal bayar konsumen untuk struk tunai)
+                        await Navigation.PushAsync(new Print(receiptNo, nomor_faktur, _nominalBayarKonsumen));
                     }
                     else
                     {

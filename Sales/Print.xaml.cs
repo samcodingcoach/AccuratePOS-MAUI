@@ -11,17 +11,20 @@ public partial class Print : ContentPage
 
     private string _receiptNumber = "";   // nomor struk (110103.2026.06.xxxxx)
     private string _invoiceNumber = "";   // nomor faktur SI (fallback untuk detail-invoice)
+    private double _nominalBayar = 0;     // khusus tunai: nominal uang yang dibayarkan konsumen
 
     public Print()
     {
         InitializeComponent();
     }
 
-    // Dipanggil dari alur pembayaran (Tunai/QRIS/VA) setelah save-receipt sukses
-    public Print(string receiptNumber, string invoiceNumber) : this()
+    // Dipanggil dari alur pembayaran (Tunai/QRIS/VA) setelah save-receipt sukses.
+    // nominalBayar hanya relevan untuk Tunai (uang yang diserahkan konsumen); 0 untuk QRIS/VA.
+    public Print(string receiptNumber, string invoiceNumber, double nominalBayar = 0) : this()
     {
         _receiptNumber = receiptNumber ?? "";
         _invoiceNumber = invoiceNumber ?? "";
+        _nominalBayar = nominalBayar;
     }
 
     protected override async void OnAppearing()
@@ -168,18 +171,33 @@ public partial class Print : ContentPage
 
         // ===== Pajak & total =====
         LabelPajak.Text = FormatRupiah(invoice?.tax1AmountBase ?? 0);
-        LabelTotal.Text = FormatRupiah(invoice?.totalAmount ?? receipt?.totalPayment ?? 0);
+        double total = invoice?.totalAmount ?? receipt?.totalPayment ?? 0;
+        LabelTotal.Text = FormatRupiah(total);
 
-        // ===== Metode & kembalian =====
+        // ===== Metode =====
         string metode = invoice?.receiptHistory?.FirstOrDefault()?.historyPaymentName;
         if (string.IsNullOrWhiteSpace(metode))
             metode = LabelMetodeFromCode(receipt?.paymentMethod);
         LabelMetode.Text = metode;
 
+        // ===== Khusus Tunai: nominal dibayar & kembalian =====
         bool isTunai = string.Equals(receipt?.paymentMethod, "CASH_OTHER", StringComparison.OrdinalIgnoreCase);
-        RowKembalian.IsVisible = isTunai;
+        BoxTunai.IsVisible = isTunai;
         if (isTunai)
-            LabelKembalian.Text = FormatRupiah(receipt?.numericField1 ?? 0);
+        {
+            // Dasar tagihan = nilai yang diterima (pembulatan) bila ada, jika tidak pakai total faktur
+            double tagihan = receipt?.totalPayment > 0 ? receipt.totalPayment : total;
+
+            // Nominal dibayar: utamakan yang dibawa dari halaman pembayaran;
+            // fallback ke kembalian tersimpan (numericField1) + tagihan
+            double bayar = _nominalBayar > 0 ? _nominalBayar : tagihan + (receipt?.numericField1 ?? 0);
+
+            double kembalian = bayar - tagihan;
+            if (kembalian < 0) kembalian = 0;
+
+            LabelBayar.Text = FormatRupiah(bayar);
+            LabelKembalian.Text = FormatRupiah(kembalian);
+        }
 
         // ===== Catatan =====
         string catatan = receipt?.description;
