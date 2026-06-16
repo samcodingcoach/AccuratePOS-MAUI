@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
+using UXDivers.Popups.Maui.Controls;
 
 namespace MyPosAccurate2026.Sales;
 
@@ -446,9 +447,11 @@ public partial class List_Faktur : ContentPage
         {
             await image.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
             await image.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+            
+            if (image.BindingContext is InvoiceData invoice)
+            {
+                await Navigation.PushAsync(new Sales.Detail_Faktur2(invoice.number));
+            }
         }
-
-       //kode eksekusi ke halaman muncul modal / pop dialog 
-
     }
 }

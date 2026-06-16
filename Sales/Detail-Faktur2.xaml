@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyPosAccurate2026.Sales.Detail_Faktur2"
+             Title="Detail Pembayaran"
+             BackgroundColor="#F8F9FA">
+    
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="20">
+            <!-- Header Section -->
+            <Border StrokeShape="RoundRectangle 12" Stroke="#E0E0E0" StrokeThickness="0.5" BackgroundColor="White" Padding="20">
+                <VerticalStackLayout Spacing="10" HorizontalOptions="Center">
+                    <Label Text="Total Pembayaran" TextColor="#6C757D" FontSize="14" HorizontalTextAlignment="Center" />
+                    <Label x:Name="LblTotal" Text="-" FontSize="28" FontAttributes="Bold" TextColor="#0D6EFD" HorizontalTextAlignment="Center" />
+                    <ActivityIndicator x:Name="LoadingIndicator" IsRunning="True" IsVisible="True" Color="#0D6EFD" HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Details Section -->
+            <Border x:Name="DetailContainer" StrokeShape="RoundRectangle 12" Stroke="#E0E0E0" StrokeThickness="0.5" BackgroundColor="White" Padding="20" IsVisible="False">
+                <Grid ColumnDefinitions="*, *" RowDefinitions="Auto, Auto, Auto, Auto, Auto" RowSpacing="15">
+                    
+                    <!-- Waktu -->
+                    <Label Text="Waktu Transaksi" Grid.Row="0" Grid.Column="0" TextColor="#6C757D" FontSize="14" VerticalOptions="Center"/>
+                    <Label x:Name="LblTanggal" Text="-" Grid.Row="0" Grid.Column="1" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#212529" FontSize="14" VerticalOptions="Center" />
+
+                    <!-- No Pembayaran -->
+                    <Label Text="No. Pembayaran" Grid.Row="1" Grid.Column="0" TextColor="#6C757D" FontSize="14" VerticalOptions="Center"/>
+                    <Label x:Name="LblNoPembayaran" Text="-" Grid.Row="1" Grid.Column="1" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#212529" FontSize="14" VerticalOptions="Center" />
+
+                    <!-- Kasir -->
+                    <Label Text="Kasir" Grid.Row="2" Grid.Column="0" TextColor="#6C757D" FontSize="14" VerticalOptions="Center"/>
+                    <Label x:Name="LblKasir" Text="-" Grid.Row="2" Grid.Column="1" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#212529" FontSize="14" VerticalOptions="Center" />
+
+                    <!-- Metode -->
+                    <Label Text="Metode" Grid.Row="3" Grid.Column="0" TextColor="#6C757D" FontSize="14" VerticalOptions="Center"/>
+                    <Label x:Name="LblMetode" Text="-" Grid.Row="3" Grid.Column="1" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#212529" FontSize="14" VerticalOptions="Center" />
+
+                    <!-- Bank -->
+                    <Label Text="Bank" Grid.Row="4" Grid.Column="0" TextColor="#6C757D" FontSize="14" VerticalOptions="Center"/>
+                    <Label x:Name="LblBank" Text="-" Grid.Row="4" Grid.Column="1" HorizontalTextAlignment="End" FontAttributes="Bold" TextColor="#212529" FontSize="14" VerticalOptions="Center" />
+
+                </Grid>
+            </Border>
+            
+            <Button Text="Kembali" BackgroundColor="#E9ECEF" TextColor="#495057" CornerRadius="8" FontAttributes="Bold" HeightRequest="50" Margin="0,10,0,0" Clicked="BtnKembali_Clicked" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
