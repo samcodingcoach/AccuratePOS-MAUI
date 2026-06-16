@@ -15,6 +15,29 @@ public partial class Login : ContentPage
         InitializeComponent();
     }
 
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+
+        if (Preferences.ContainsKey("SavedEmail") && Preferences.ContainsKey("SavedPassword"))
+        {
+            EmailEntry.Text = Preferences.Get("SavedEmail", "");
+            PasswordEntry.Text = Preferences.Get("SavedPassword", "");
+            RememberMeCheckBox.IsChecked = true;
+        }
+    }
+
+    private void TogglePasswordBtn_Clicked(object sender, EventArgs e)
+    {
+        PasswordEntry.IsPassword = !PasswordEntry.IsPassword;
+        TogglePasswordBtn.Text = PasswordEntry.IsPassword ? "Show" : "Hide";
+    }
+
+    private void RememberMeLabel_Tapped(object sender, EventArgs e)
+    {
+        RememberMeCheckBox.IsChecked = !RememberMeCheckBox.IsChecked;
+    }
+
     public class LoginResponse
     {
         public string status { get; set; }
@@ -169,6 +192,16 @@ public partial class Login : ContentPage
                 Preferences.Set("NAMA_LENGKAP", responseObject.data.nama_lengkap);
                 Preferences.Set("TOKEN_KEY", responseObject.data.token_key);
 
+                if (RememberMeCheckBox.IsChecked)
+                {
+                    Preferences.Set("SavedEmail", EmailEntry.Text?.Trim());
+                    Preferences.Set("SavedPassword", PasswordEntry.Text);
+                }
+                else
+                {
+                    Preferences.Remove("SavedEmail");
+                    Preferences.Remove("SavedPassword");
+                }
                
                 
                 //Direct setelah login

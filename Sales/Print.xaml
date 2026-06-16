@@ -7,25 +7,22 @@
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!--Header-->
-        <Border Grid.Row="0" Padding="20,22" StrokeShape="Rectangle" Stroke="Transparent"
+        <Border Grid.Row="0" Padding="20" StrokeShape="Rectangle" Stroke="Transparent"
                 BackgroundColor="DarkCyan">
-            <VerticalStackLayout Spacing="8" VerticalOptions="Center" HorizontalOptions="Center">
-                <!--Badge centang-->
-                <Border WidthRequest="54" HeightRequest="54" StrokeShape="RoundRectangle 27"
-                        Stroke="Transparent" BackgroundColor="#FFFFFF" HorizontalOptions="Center">
-                    <Label Text="&#10004;" TextColor="DarkCyan" FontSize="28" FontAttributes="Bold"
-                           HorizontalOptions="Center" VerticalOptions="Center" />
+            <!--Badge centang-->
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" HorizontalOptions="Center">
+                <Border Grid.Column="0" WidthRequest="24" HeightRequest="24" StrokeShape="RoundRectangle 24"
+                         Stroke="Transparent" BackgroundColor="#FFFFFF" HorizontalOptions="Center">
+                    <Label Text="&#10004;" TextColor="DarkCyan" FontSize="22" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
-                <Label Text="Pembayaran Berhasil" TextColor="White" FontSize="22" FontAttributes="Bold"
-                       HorizontalTextAlignment="Center" />
-                <Label Text="Pratinjau struk pembayaran" TextColor="#CFEAEA" FontSize="14"
-                       HorizontalTextAlignment="Center" />
-            </VerticalStackLayout>
+                <Label Text="Pembayaran Berhasil" Grid.Column="1" TextColor="White" FontSize="22" FontAttributes="Bold"
+                            VerticalTextAlignment="Center" />
+            </Grid>
         </Border>
 
         <!--Konten struk-->
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16,18" Spacing="14" HorizontalOptions="Center" WidthRequest="370">
+            <VerticalStackLayout Padding="15" Spacing="10" HorizontalOptions="Center" WidthRequest="390">
 
                 <!--Kartu struk-->
                 <Border Padding="0" StrokeShape="RoundRectangle 18" Stroke="Transparent" BackgroundColor="White">
@@ -38,7 +35,7 @@
                         <!--Judul-->
                         <Label Text="STRUK PEMBAYARAN" TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold"
                                CharacterSpacing="1.5" HorizontalTextAlignment="Center" />
-                        <Label Text="MPos Accurate" TextColor="Grey" FontSize="14"
+                        <Label x:Name="LabelHeaderCompanyName" Text="-" TextColor="Grey" FontSize="14"
                                HorizontalTextAlignment="Center" Margin="0,2,0,12" />
 
                         <!--Garis putus-putus-->
@@ -46,7 +43,7 @@
                               HorizontalOptions="Fill" />
 
                         <!--Info transaksi-->
-                        <VerticalStackLayout Spacing="7" Margin="0,12,0,0">
+                        <VerticalStackLayout Spacing="2" Margin="0,12,0,0">
                             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                                 <Label Grid.Column="0" Text="No. Struk" TextColor="Grey" FontSize="15" />
                                 <Label Grid.Column="1" x:Name="LabelNoStruk" Text="-" TextColor="#1A1A1A" FontSize="15"
@@ -120,9 +117,9 @@
                               HorizontalOptions="Fill" Margin="0,10" />
 
                         <!--Ringkasan-->
-                        <VerticalStackLayout Spacing="7">
+                        <VerticalStackLayout Spacing="2">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Grid.Column="0" Text="Subtotal" TextColor="Grey" FontSize="15" />
+                                <Label Grid.Column="0" Text="Substotal" TextColor="Grey" FontSize="15" />
                                 <Label Grid.Column="1" x:Name="LabelSubtotal" Text="Rp 0" TextColor="#333" FontSize="15"
                                        HorizontalTextAlignment="End" />
                             </Grid>
@@ -155,7 +152,7 @@
                         </VerticalStackLayout>
 
                         <!--TOTAL (band sorot)-->
-                        <Border Padding="16,14" StrokeShape="RoundRectangle 12" Stroke="Transparent"
+                        <Border Padding="16,10" StrokeShape="RoundRectangle 12" Stroke="Transparent"
                                 BackgroundColor="#E3F2F2" Margin="0,12,0,0">
                             <Grid ColumnDefinitions="*,Auto" VerticalOptions="Center">
                                 <Label Grid.Column="0" Text="TOTAL" TextColor="#0E6E6E" FontSize="18" FontAttributes="Bold"
@@ -166,9 +163,9 @@
                         </Border>
 
                         <!--Pembayaran tunai: dibayar & kembalian-->
-                        <Border x:Name="BoxTunai" IsVisible="False" Padding="16,12" StrokeShape="RoundRectangle 12"
+                        <Border x:Name="BoxTunai" IsVisible="False" Padding="16,10" StrokeShape="RoundRectangle 12"
                                 Stroke="Transparent" BackgroundColor="#FFF7E0" Margin="0,8,0,0">
-                            <VerticalStackLayout Spacing="8">
+                            <VerticalStackLayout Spacing="2">
                                 <Grid ColumnDefinitions="*,Auto">
                                     <Label Grid.Column="0" Text="Tunai Dibayar" TextColor="#8A6D00" FontSize="16"
                                            VerticalTextAlignment="Center" />
@@ -203,6 +200,17 @@
                         <Label Text="Terima kasih telah berbelanja" TextColor="#777" FontSize="15"
                                FontAttributes="Italic" HorizontalTextAlignment="Center" Margin="0,4,0,0" />
 
+                        <!-- Footer Company -->
+                        <Line X2="360" Stroke="#CFCFCF" StrokeThickness="1.4" StrokeDashArray="3,3"
+                              HorizontalOptions="Fill" Margin="0,10,0,15" />
+                        
+                        <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                            <Label x:Name="LabelCompanyName" Text="-" TextColor="#1A1A1A" FontSize="14" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                            <Label x:Name="LabelCompanyAddressCity" Text="-" TextColor="Grey" FontSize="12" HorizontalTextAlignment="Center" />
+                            <Label x:Name="LabelCompanyContact" Text="-" TextColor="Grey" FontSize="12" HorizontalTextAlignment="Center" />
+                            <Label x:Name="LabelPrintDate" Text="-" TextColor="Grey" FontSize="11" HorizontalTextAlignment="Center" Margin="0,5,0,0" />
+                        </VerticalStackLayout>
+
                     </VerticalStackLayout>
                 </Border>
 
@@ -214,7 +222,7 @@
         </ScrollView>
 
         <!--Tombol bawah: Print / WhatsApp / Skip-->
-        <VerticalStackLayout Grid.Row="2" BackgroundColor="White" Padding="16,12,16,16" Spacing="10">
+        <VerticalStackLayout Grid.Row="2" BackgroundColor="White" Padding="15,12,15,15" Spacing="10">
             <VerticalStackLayout.Shadow>
                 <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
             </VerticalStackLayout.Shadow>

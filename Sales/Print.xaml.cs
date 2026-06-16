@@ -63,9 +63,12 @@ public partial class Print : ContentPage
             if (!string.IsNullOrWhiteSpace(invoiceNo))
                 invoice = await FetchInvoiceAsync(cleanToken, invoiceNo);
 
+            // 3. Data Company Profile
+            var companyData = await FetchCompanyProfileAsync(cleanToken);
+
             MainThread.BeginInvokeOnMainThread(() =>
             {
-                TampilkanStruk(receipt, invoice, invoiceNo);
+                TampilkanStruk(receipt, invoice, invoiceNo, companyData);
                 StrukLoading.IsRunning = false;
                 StrukLoading.IsVisible = false;
             });
@@ -115,7 +118,30 @@ public partial class Print : ContentPage
         return result?.data;
     }
 
-    private void TampilkanStruk(DetailReceiptData receipt, DetailInvoiceData invoice, string invoiceNo)
+    private async Task<CompanyProfileData> FetchCompanyProfileAsync(string token)
+    {
+        string url = $"{App.API_HOST}profile/company.php";
+        using var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        try
+        {
+            var response = await client.GetAsync(url);
+            string responseContent = await response.Content.ReadAsStringAsync();
+
+            if (string.IsNullOrWhiteSpace(responseContent) || responseContent.TrimStart().StartsWith("<"))
+                return null;
+
+            var result = JsonConvert.DeserializeObject<CompanyProfileResponse>(responseContent);
+            return result?.data;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private void TampilkanStruk(DetailReceiptData receipt, DetailInvoiceData invoice, string invoiceNo, CompanyProfileData companyData)
     {
         // ===== Info transaksi =====
         LabelNoStruk.Text = string.IsNullOrWhiteSpace(_receiptNumber) ? "-" : _receiptNumber;
@@ -203,6 +229,33 @@ public partial class Print : ContentPage
         string catatan = receipt?.description;
         RowCatatan.IsVisible = !string.IsNullOrWhiteSpace(catatan);
         LabelCatatan.Text = catatan ?? "";
+
+        // ===== Footer Company & Header Company =====
+        if (companyData != null)
+        {
+            LabelHeaderCompanyName.Text = companyData.name ?? "-";
+            LabelCompanyName.Text = companyData.name ?? "-";
+            
+            string addressCity = "";
+            if (!string.IsNullOrWhiteSpace(companyData.address)) addressCity += companyData.address;
+            if (!string.IsNullOrWhiteSpace(companyData.city)) 
+            {
+                if (!string.IsNullOrEmpty(addressCity)) addressCity += ", ";
+                addressCity += companyData.city;
+            }
+            LabelCompanyAddressCity.Text = string.IsNullOrEmpty(addressCity) ? "-" : $"📍 {addressCity}";
+            
+            string contact = "";
+            if (!string.IsNullOrWhiteSpace(companyData.phone)) contact += $"📞 {companyData.phone}";
+            if (!string.IsNullOrWhiteSpace(companyData.email)) 
+            {
+                if (!string.IsNullOrEmpty(contact)) contact += "   ";
+                contact += $"✉ {companyData.email}";
+            }
+            LabelCompanyContact.Text = string.IsNullOrEmpty(contact) ? "-" : contact;
+        }
+        
+        LabelPrintDate.Text = $"Dicetak pada: {DateTime.Now.ToString("dd MMM yyyy HH:mm:ss", IdCulture)}";
     }
 
     private static string LabelMetodeFromCode(string code)
@@ -367,5 +420,21 @@ public partial class Print : ContentPage
     {
         public string historyNumber { get; set; }
         public string historyPaymentName { get; set; }
+    }
+
+    // ===================== Response profile/company.php =====================
+    private class CompanyProfileResponse
+    {
+        public string status { get; set; }
+        public CompanyProfileData data { get; set; }
+    }
+
+    private class CompanyProfileData
+    {
+        public string name { get; set; }
+        public string city { get; set; }
+        public string email { get; set; }
+        public string address { get; set; }
+        public string phone { get; set; }
     }
 }
