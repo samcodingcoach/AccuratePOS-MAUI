@@ -34,8 +34,7 @@ public partial class Detail_Faktur2 : BottomSheet
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                   // await DisplayAlert("Info", "Belum ada pembayaran untuk faktur ini.", "OK");
-                    await Navigation.PopAsync();
+                    await this.DismissAsync();
                 });
                 return;
             }
@@ -50,8 +49,7 @@ public partial class Detail_Faktur2 : BottomSheet
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                   // await DisplayAlert("Info", "Nomor pembayaran tidak ditemukan.", "OK");
-                    await Navigation.PopAsync();
+                    await this.DismissAsync();
                 });
                 return;
             }
@@ -66,8 +64,7 @@ public partial class Detail_Faktur2 : BottomSheet
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                    //await DisplayAlert("Error", "Data receipt tidak valid.", "OK");
-                    await Navigation.PopAsync();
+                    await this.DismissAsync();
                 });
                 return;
             }
@@ -93,6 +90,7 @@ public partial class Detail_Faktur2 : BottomSheet
                 LoadingIndicator.IsRunning = false;
                 LoadingIndicator.IsVisible = false;
 
+                LblNoFaktur.Text = _invoiceNo;
                 LblTanggal.Text = historyDateTime ?? "-";
                 LblNoPembayaran.Text = historyNumber;
                 LblKasir.Text = string.IsNullOrEmpty(kasir) ? "-" : kasir;
@@ -107,15 +105,25 @@ public partial class Detail_Faktur2 : BottomSheet
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-               // await DisplayAlert("Error", "Gagal memuat detail pembayaran: " + ex.Message, "OK");
-                await Navigation.PopAsync();
+                await this.DismissAsync();
             });
         }
     }
 
-    private async void BtnKembali_Clicked(object sender, EventArgs e)
+    private async void BtnPrint_Clicked(object sender, EventArgs e)
     {
-        // tidak pakai tombol BtnKembali , gemini hapus saja
-        await Navigation.PopAsync();
+        await this.DismissAsync();
+        // Membuka halaman Print.xaml (sama seperti flow pembayaran lainnya)
+        // await Application.Current.MainPage.Navigation.PushAsync(new Print( ... ));
+    }
+
+    private async void BtnWhatsApp_Clicked(object sender, EventArgs e)
+    {
+        string text = $"Faktur {_invoiceNo}\nTotal: {LblTotal.Text}\nMetode: {LblMetode.Text}\nWaktu: {LblTanggal.Text}";
+        await Share.Default.RequestAsync(new ShareTextRequest
+        {
+            Text = text,
+            Title = "Bagikan Pembayaran"
+        });
     }
 }
