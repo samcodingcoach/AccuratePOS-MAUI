@@ -31,7 +31,7 @@
                     </Border.Shadow>
 
                     <VerticalStackLayout Padding="24,24" Spacing="2">
-
+                        
                         <!--Judul-->
                         <Label Text="STRUK PEMBAYARAN" TextColor="#1A1A1A" FontSize="20" FontAttributes="Bold"
                                CharacterSpacing="1.5" HorizontalTextAlignment="Center" />
