@@ -52,7 +52,8 @@
         <!-- Action Buttons -->
         <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,15,0,0">
             <!-- Print Button -->
-            <Button Grid.Column="0" Text="Cetak" BackgroundColor="#F8F9FA" TextColor="#212529" BorderColor="#DEE2E6" BorderWidth="1" CornerRadius="8" FontAttributes="Bold" HeightRequest="45" Clicked="BtnPrint_Clicked" />
+            <Button Grid.Column="0" Text="Cetak" BackgroundColor="#F8F9FA" TextColor="#212529" BorderColor="#DEE2E6" BorderWidth="1" CornerRadius="8" FontAttributes="Bold" HeightRequest="45" 
+                    Clicked="BtnPrint_Clicked" />
             
             <!-- WhatsApp Button -->
             <Button Grid.Column="1" Text="WhatsApp" BackgroundColor="DarkGreen" TextColor="White" CornerRadius="8" FontAttributes="Bold" HeightRequest="45" Clicked="BtnWhatsApp_Clicked" />

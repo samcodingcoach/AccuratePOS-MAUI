@@ -6,6 +6,7 @@ namespace MyPosAccurate2026.Sales;
 public partial class Detail_Faktur2 : BottomSheet
 {
     private string _invoiceNo;
+    private string _receiptNo;
 
     public Detail_Faktur2(string invoiceNo)
     {
@@ -42,6 +43,7 @@ public partial class Detail_Faktur2 : BottomSheet
             // Ambil history pertama
             var history = receiptHistoryArray[0];
             string historyNumber = history["historyNumber"]?.ToString();
+            _receiptNo = historyNumber;
             string historyDateTime = history["historyDateTime"]?.ToString();
             string historyPaymentName = history["historyPaymentName"]?.ToString();
 
@@ -113,8 +115,12 @@ public partial class Detail_Faktur2 : BottomSheet
     private async void BtnPrint_Clicked(object sender, EventArgs e)
     {
         await this.DismissAsync();
-        // Membuka halaman Print.xaml (sama seperti flow pembayaran lainnya)
-        // await Application.Current.MainPage.Navigation.PushAsync(new Print( ... ));
+        
+        // Buka halaman Print menggunakan instance Print() yang menerima receiptNumber dan invoiceNumber
+        if (Application.Current?.MainPage?.Navigation != null)
+        {
+            await Application.Current.MainPage.Navigation.PushAsync(new Print(_receiptNo, _invoiceNo));
+        }
     }
 
     private async void BtnWhatsApp_Clicked(object sender, EventArgs e)
