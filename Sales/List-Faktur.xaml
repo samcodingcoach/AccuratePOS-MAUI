@@ -103,8 +103,13 @@
 
                             <Label Text="Nilai Faktur" Grid.Column="0" Grid.Row="4" VerticalTextAlignment="Center"></Label>
 
-                            <HorizontalStackLayout Grid.Row="4" Grid.Column="1" HorizontalOptions="End">
+                            <HorizontalStackLayout Grid.Row="4" Grid.Column="1" HorizontalOptions="End" Spacing="5">
                                 <Label Text="{Binding FormattedTotalAmount}" FontSize="24" TextColor="DarkCyan"  VerticalOptions="Center" FontAttributes="Bold"></Label>
+                                <Image Rotation="90" Source="more50gray.png" HeightRequest="16">
+                                    <Image.GestureRecognizers>
+                                        <TapGestureRecognizer x:Name="TapDetailPembayaran" Tapped="TapDetailPembayaran_Tapped"></TapGestureRecognizer>
+                                    </Image.GestureRecognizers>
+                                </Image>
                             </HorizontalStackLayout>
 
                         </Grid>
@@ -122,15 +127,12 @@
                     </Image.GestureRecognizers>
                 </Image>
             </StackLayout>
-            
+
             <StackLayout Orientation="Horizontal" Grid.Column="1" BackgroundColor="DarkOrange" Padding="15"  Spacing="10">
                 <Image Source="totalwhite.png" HeightRequest="28"></Image>
                 <Label Text="{Binding FormattedGrandTotal}" TextColor="White" 
                        HorizontalTextAlignment="End" HorizontalOptions="EndAndExpand" FontSize="28" FontAttributes="Bold" VerticalOptions="Center"/>
             </StackLayout>
         </Grid>
-        
-        
-
     </Grid>
 </ContentPage>

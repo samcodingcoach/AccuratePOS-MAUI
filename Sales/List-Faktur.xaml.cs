@@ -439,4 +439,16 @@ public partial class List_Faktur : ContentPage
         _activeSearch = Search_FakturKonsumen.Text?.Trim() ?? string.Empty;
         await LoadDataFromServer(isRefresh: true);
     }
+
+    private async void TapDetailPembayaran_Tapped(object sender, TappedEventArgs e)
+    {
+        if (sender is Image image)
+        {
+            await image.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
+            await image.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+        }
+
+       //kode eksekusi ke halaman muncul modal / pop dialog 
+
+    }
 }

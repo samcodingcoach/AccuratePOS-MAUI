@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
-using CommunityToolkit.Maui;
+﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using UXDivers.Popups.Maui;
 namespace MyPosAccurate2026;
 
 public static class MauiProgram
@@ -12,6 +13,7 @@ public static class MauiProgram
 			.UseMauiApp<App>()
             // Initialize the .NET MAUI Community Toolkit by adding the below line of code
             .UseMauiCommunityToolkit()
+            .UseUXDiversPopups()
             .ConfigureFonts(fonts =>
 			{
 				fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
