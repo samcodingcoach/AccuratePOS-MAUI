@@ -2,6 +2,13 @@ using System.Globalization;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Newtonsoft.Json;
+using System.Text;
+using System.Linq;
+
+#if ANDROID
+using Android.Bluetooth;
+using Java.Util;
+#endif
 
 namespace MyPosAccurate2026.Sales;
 
@@ -13,9 +20,19 @@ public partial class Print : ContentPage
     private string _invoiceNumber = "";   // nomor faktur SI (fallback untuk detail-invoice)
     private double _nominalBayar = 0;     // khusus tunai: nominal uang yang dibayarkan konsumen
 
+    private DetailReceiptData _receipt;
+    private DetailInvoiceData _invoice;
+    private CompanyProfileData _company;
+    private string _invoiceNoStr;
+
+#if ANDROID
+    private static readonly UUID SPP_UUID = UUID.FromString("00001101-0000-1000-8000-00805f9b34fb");
+#endif
+
     public Print()
     {
         InitializeComponent();
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 
     // Dipanggil dari alur pembayaran (Tunai/QRIS/VA) setelah save-receipt sukses.
@@ -65,6 +82,11 @@ public partial class Print : ContentPage
 
             // 3. Data Company Profile
             var companyData = await FetchCompanyProfileAsync(cleanToken);
+
+            _receipt = receipt;
+            _invoice = invoice;
+            _invoiceNoStr = invoiceNo;
+            _company = companyData;
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
@@ -272,8 +294,244 @@ public partial class Print : ContentPage
     // ===== Tombol bawah =====
     private async void B_Print_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlertAsync("Print", "Fitur cetak struk akan segera hadir.", "OK");
+#if ANDROID
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.Bluetooth>();
+            }
+
+            if (status != PermissionStatus.Granted)
+            {
+                await DisplayAlert("Izin Ditolak", "Izin Bluetooth diperlukan untuk menghubungkan ke printer.", "OK");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error Permission", ex.Message, "OK");
+            return;
+        }
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+        if (bluetoothAdapter == null || !bluetoothAdapter.IsEnabled)
+        {
+            await DisplayAlert("Error", "Bluetooth tidak tersedia atau belum diaktifkan.", "OK");
+            return;
+        }
+
+        var bondedDevices = bluetoothAdapter.BondedDevices;
+        if (bondedDevices == null || bondedDevices.Count == 0)
+        {
+            await DisplayAlert("Error", "Tidak ada printer Bluetooth yang di-pairing.", "OK");
+            return;
+        }
+
+        var deviceNames = bondedDevices.Select(d => d.Name).ToArray();
+        string selectedPrinter = await DisplayActionSheet("Pilih Printer Bluetooth", "Batal", null, deviceNames);
+
+        if (selectedPrinter == "Batal" || string.IsNullOrEmpty(selectedPrinter))
+            return;
+
+        string paperSizeStr = await DisplayActionSheet("Pilih Ukuran Kertas", "Batal", null, "58mm", "80mm");
+        if (paperSizeStr == "Batal" || string.IsNullOrEmpty(paperSizeStr))
+            return;
+        
+        int paperSize = paperSizeStr == "58mm" ? 32 : 48;
+        
+        BluetoothDevice device = bondedDevices.FirstOrDefault(d => d.Name == selectedPrinter);
+        if (device != null)
+        {
+            await ExecutePrint(device, paperSize);
+        }
+#else
+        await DisplayAlert("Error", "Bluetooth hanya didukung di Android!", "OK");
+#endif
     }
+
+    private string AlignRight(string label, string value, int totalLength)
+    {
+        if (label == null) label = "";
+        if (value == null) value = "";
+        
+        int spacing = totalLength - (label.Length + value.Length);
+        if (spacing < 1) spacing = 1;
+        return label + new string(' ', spacing) + value;
+    }
+
+    private string CenterText(string text, int totalLength)
+    {
+        if (text == null) text = "";
+        if (text.Length >= totalLength) return text;
+        int padding = (totalLength - text.Length) / 2;
+        return new string(' ', padding) + text;
+    }
+
+#if ANDROID
+    private async Task ExecutePrint(BluetoothDevice device, int paperSize)
+    {
+        try
+        {
+            StringBuilder sb = new StringBuilder();
+            string line = new string('-', paperSize) + "\n";
+            string lineEq = new string('=', paperSize) + "\n";
+
+            // ESC POS Init
+            sb.Append("\x1B\x40");
+
+            // Header
+            sb.Append("\x1B\x61\x01"); // Center align
+            sb.Append("\x1B\x21\x08"); // Bold
+            sb.Append("STRUK PEMBAYARAN\n");
+            sb.Append("\x1B\x21\x00"); // Normal
+            sb.Append($"{_company?.name ?? "POS ACCURATE"}\n");
+            sb.Append("\x1B\x61\x00"); // Left align
+            sb.Append(line);
+
+            // Info transaksi
+            string tgl = _receipt?.transDate ?? _invoice?.transDate ?? "-";
+            string kasir = string.IsNullOrWhiteSpace(_receipt?.charField2) ? "-" : _receipt.charField2;
+            string konsumen = _receipt?.customer != null ? $"{_receipt.customer.customerNo} - {_receipt.customer.name}" : "-";
+            
+            sb.Append(AlignRight("No. Struk", string.IsNullOrWhiteSpace(_receiptNumber) ? "-" : _receiptNumber, paperSize) + "\n");
+            sb.Append(AlignRight("No. Faktur", string.IsNullOrWhiteSpace(_invoiceNoStr) ? "-" : _invoiceNoStr, paperSize) + "\n");
+            sb.Append(AlignRight("Tanggal", tgl, paperSize) + "\n");
+            sb.Append(AlignRight("Kasir", kasir, paperSize) + "\n");
+            sb.Append(AlignRight("Konsumen", konsumen, paperSize) + "\n");
+            
+            string sales = _invoice?.masterSalesmanName;
+            if (!string.IsNullOrWhiteSpace(sales)) sb.Append(AlignRight("Sales", sales, paperSize) + "\n");
+            
+            string pengiriman = _invoice?.shipment?.name;
+            if (!string.IsNullOrWhiteSpace(pengiriman)) sb.Append(AlignRight("Pengiriman", pengiriman, paperSize) + "\n");
+            
+            sb.Append(line);
+
+            // Items header
+            sb.Append(AlignRight("ITEM", "TOTAL", paperSize) + "\n");
+
+            // Items
+            var items = _invoice?.detailItem ?? new List<InvItem>();
+            foreach (var itm in items)
+            {
+                sb.Append($"{itm.item?.name}\n");
+                string qtyPrice = $"{itm.quantity.ToString("0.##", IdCulture)} {itm.itemUnit?.name} x {FormatRupiah(itm.unitPrice)}";
+                string totalLn = FormatRupiah(itm.quantity * itm.unitPrice);
+                sb.Append(AlignRight(qtyPrice, totalLn, paperSize) + "\n");
+            }
+
+            sb.Append(line);
+
+            // Ringkasan
+            sb.Append(AlignRight("Subtotal", FormatRupiah(_invoice?.subTotal ?? 0), paperSize) + "\n");
+            
+            double diskonFaktur = _invoice?.cashDiscount ?? 0;
+            if (diskonFaktur > 0)
+                sb.Append(AlignRight("Diskon Faktur", $"- {FormatRupiah(diskonFaktur)}", paperSize) + "\n");
+
+            var expenses = _invoice?.detailExpense ?? new List<InvExpense>();
+            if (expenses.Count > 0)
+            {
+                sb.Append("Biaya-biaya\n");
+                foreach (var exp in expenses)
+                {
+                    sb.Append(AlignRight($"  {exp.detailName}", FormatRupiah(exp.expenseAmount), paperSize) + "\n");
+                }
+            }
+
+            sb.Append(AlignRight("Total Pajak (PPN)", FormatRupiah(_invoice?.tax1AmountBase ?? 0), paperSize) + "\n");
+            
+            sb.Append(lineEq);
+            
+            double totalAll = _invoice?.totalAmount ?? _receipt?.totalPayment ?? 0;
+            sb.Append("\x1B\x21\x08"); // Bold
+            sb.Append(AlignRight("TOTAL", FormatRupiah(totalAll), paperSize) + "\n");
+            sb.Append("\x1B\x21\x00"); // Normal
+            
+            sb.Append(lineEq);
+
+            // Tunai Dibayar & Kembalian
+            bool isTunai = string.Equals(_receipt?.paymentMethod, "CASH_OTHER", StringComparison.OrdinalIgnoreCase);
+            if (isTunai)
+            {
+                double tagihan = _receipt?.totalPayment > 0 ? _receipt.totalPayment : totalAll;
+                double bayar = _nominalBayar > 0 ? _nominalBayar : tagihan + (_receipt?.numericField1 ?? 0);
+                double kembalian = bayar - tagihan;
+                if (kembalian < 0) kembalian = 0;
+
+                sb.Append(AlignRight("Tunai Dibayar", FormatRupiah(bayar), paperSize) + "\n");
+                sb.Append(AlignRight("Kembalian", FormatRupiah(kembalian), paperSize) + "\n");
+            }
+
+            // Metode
+            string metode = _invoice?.receiptHistory?.FirstOrDefault()?.historyPaymentName;
+            if (string.IsNullOrWhiteSpace(metode))
+                metode = LabelMetodeFromCode(_receipt?.paymentMethod);
+            sb.Append(AlignRight("Metode", metode, paperSize) + "\n");
+
+            string catatan = _receipt?.description;
+            if (!string.IsNullOrWhiteSpace(catatan))
+            {
+                sb.Append($"Catatan:\n{catatan}\n");
+            }
+
+            sb.Append(line);
+
+            // Footer
+            sb.Append("\x1B\x61\x01"); // Center align
+            sb.Append("Terima kasih telah berbelanja\n\n");
+            
+            if (_company != null)
+            {
+                sb.Append($"{_company.name ?? "-"}\n");
+                
+                string addressCity = "";
+                if (!string.IsNullOrWhiteSpace(_company.address)) addressCity += _company.address;
+                if (!string.IsNullOrWhiteSpace(_company.city)) 
+                {
+                    if (!string.IsNullOrEmpty(addressCity)) addressCity += ", ";
+                    addressCity += _company.city;
+                }
+                if (!string.IsNullOrEmpty(addressCity)) sb.Append($"{addressCity}\n");
+
+                string contact = "";
+                if (!string.IsNullOrWhiteSpace(_company.phone)) contact += $"{_company.phone}";
+                if (!string.IsNullOrWhiteSpace(_company.email)) 
+                {
+                    if (!string.IsNullOrEmpty(contact)) contact += "  ";
+                    contact += $"{_company.email}";
+                }
+                if (!string.IsNullOrEmpty(contact)) sb.Append($"{contact}\n");
+            }
+
+            sb.Append($"Dicetak pada: {DateTime.Now.ToString("dd MMM yyyy HH:mm:ss", IdCulture)}\n\n\n\n");
+
+            string struk = sb.ToString();
+            byte[] buffer = Encoding.GetEncoding(437).GetBytes(struk);
+
+            await Task.Delay(500); // Stabilkan koneksi
+            using (BluetoothSocket bluetoothSocket = device.CreateRfcommSocketToServiceRecord(SPP_UUID))
+            {
+                bluetoothSocket.Connect();
+                for (int i = 0; i < buffer.Length; i += 512)
+                {
+                    int size = Math.Min(512, buffer.Length - i);
+                    bluetoothSocket.OutputStream.Write(buffer, i, size);
+                    await Task.Delay(10);
+                }
+                bluetoothSocket.OutputStream.Flush();
+                bluetoothSocket.Close();
+                await DisplayAlert("Sukses", "Print berhasil.", "OK");
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Error", $"Gagal print: {ex.Message}", "OK");
+        }
+    }
+#endif
 
     private async void B_Whatsapp_Clicked(object sender, EventArgs e)
     {
