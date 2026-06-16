@@ -450,7 +450,15 @@ public partial class List_Faktur : ContentPage
             
             if (image.BindingContext is InvoiceData invoice)
             {
-                await Navigation.PushAsync(new Sales.Detail_Faktur2(invoice.number));
+                // await Navigation.PushAsync(new Sales.Detail_Faktur2(invoice.number));
+
+                var page = new Sales.Detail_Faktur2(invoice.number);
+                page.HasHandle = true;
+                page.HasBackdrop = true;
+                //page.HandleColor = Color.FromArgb()
+                page.ShowAsync(Window);
+
+
             }
         }
     }

@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using Newtonsoft.Json.Linq;
-
+using The49.Maui.BottomSheet;
 namespace MyPosAccurate2026.Sales;
 
-public partial class Detail_Faktur2 : ContentPage
+public partial class Detail_Faktur2 : BottomSheet
 {
     private string _invoiceNo;
 
@@ -11,13 +11,10 @@ public partial class Detail_Faktur2 : ContentPage
     {
         InitializeComponent();
         _invoiceNo = invoiceNo;
+        LoadDetailPembayaran();
     }
 
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await LoadDetailPembayaran();
-    }
+   
 
     private async Task LoadDetailPembayaran()
     {
@@ -37,7 +34,7 @@ public partial class Detail_Faktur2 : ContentPage
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                    await DisplayAlert("Info", "Belum ada pembayaran untuk faktur ini.", "OK");
+                   // await DisplayAlert("Info", "Belum ada pembayaran untuk faktur ini.", "OK");
                     await Navigation.PopAsync();
                 });
                 return;
@@ -53,7 +50,7 @@ public partial class Detail_Faktur2 : ContentPage
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                    await DisplayAlert("Info", "Nomor pembayaran tidak ditemukan.", "OK");
+                   // await DisplayAlert("Info", "Nomor pembayaran tidak ditemukan.", "OK");
                     await Navigation.PopAsync();
                 });
                 return;
@@ -69,7 +66,7 @@ public partial class Detail_Faktur2 : ContentPage
             {
                 MainThread.BeginInvokeOnMainThread(async () => 
                 {
-                    await DisplayAlert("Error", "Data receipt tidak valid.", "OK");
+                    //await DisplayAlert("Error", "Data receipt tidak valid.", "OK");
                     await Navigation.PopAsync();
                 });
                 return;
@@ -110,7 +107,7 @@ public partial class Detail_Faktur2 : ContentPage
         {
             MainThread.BeginInvokeOnMainThread(async () =>
             {
-                await DisplayAlert("Error", "Gagal memuat detail pembayaran: " + ex.Message, "OK");
+               // await DisplayAlert("Error", "Gagal memuat detail pembayaran: " + ex.Message, "OK");
                 await Navigation.PopAsync();
             });
         }
@@ -118,6 +115,7 @@ public partial class Detail_Faktur2 : ContentPage
 
     private async void BtnKembali_Clicked(object sender, EventArgs e)
     {
+        // tidak pakai tombol BtnKembali , gemini hapus saja
         await Navigation.PopAsync();
     }
 }
