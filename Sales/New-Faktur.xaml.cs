@@ -389,6 +389,20 @@ public partial class New_Faktur : ContentPage
                 return;
             }
 
+            // 4. Validasi Barang Sudah Ada di Keranjang
+            // Jika barang sudah termuat di CollectionView, jangan tambah baris baru.
+            // Tawarkan untuk mengubah kuantitasnya saja.
+            var existingItem = CartItems.FirstOrDefault(x => x.itemNo == selectedItem.item_no);
+            if (existingItem != null)
+            {
+                List_AutoComplete.SelectedItem = null;
+                Border_AutoComplete.IsVisible = false;
+                SearchBar_Item.Text = string.Empty;
+
+                await EditKuantitasBarangAsync(existingItem);
+                return;
+            }
+
             // Jika semua lolos validasi, proses navigasi
             SearchBar_Item.Text = selectedItem.item_no;
             Border_AutoComplete.IsVisible = false;
@@ -412,6 +426,181 @@ public partial class New_Faktur : ContentPage
             await Navigation.PushAsync(itemAddPage);
 
             List_AutoComplete.SelectedItem = null;
+        }
+    }
+
+    // =========================================================
+    // EDIT KUANTITAS BARANG YANG SUDAH ADA DI KERANJANG
+    // Dipanggil saat user memilih barang yang sudah termuat di CollectionView.
+    // =========================================================
+    private async Task EditKuantitasBarangAsync(CartItemModel existingItem)
+    {
+        // Barang dengan Serial Number tidak bisa diubah qty-nya langsung,
+        // karena jumlah SN harus sama persis dengan qty. Arahkan untuk hapus & tambah ulang.
+        if (existingItem.HasSerialNumbers)
+        {
+            await DisplayAlertAsync(
+                "Barang Sudah Ada",
+                $"\"{existingItem.itemName}\" sudah ada di keranjang dan menggunakan Nomor Serial. " +
+                "Untuk mengubah kuantitas, silakan hapus barang ini lalu tambahkan kembali.",
+                "OK");
+            return;
+        }
+
+        bool wantEdit = await DisplayAlertAsync(
+            "Barang Sudah Ada",
+            $"\"{existingItem.itemName}\" sudah ada di keranjang dengan kuantitas {existingItem.quantity}. " +
+            "Apakah Anda ingin mengubah kuantitasnya?",
+            "Ya, Ubah", "Batal");
+
+        if (!wantEdit) return;
+
+        // Ambil stok ONLINE terkini dari server (bukan stok lokal hasil pencarian)
+        double stokTersedia = await FetchOnlineStockAsync(existingItem.itemNo);
+        if (stokTersedia < 0)
+        {
+            await DisplayAlertAsync("Gagal", "Tidak dapat memuat stok online barang ini. Coba lagi.", "OK");
+            return;
+        }
+
+        string input = await DisplayPromptAsync(
+            "Ubah Kuantitas",
+            $"Masukkan kuantitas baru (Stok tersedia: {stokTersedia:N0}):",
+            "Simpan", "Batal",
+            initialValue: existingItem.quantity.ToString(),
+            keyboard: Keyboard.Numeric);
+
+        // User menekan Batal
+        if (input == null) return;
+
+        string cleanInput = new string(input.Where(char.IsDigit).ToArray());
+        if (!int.TryParse(cleanInput, out int qtyBaru) || qtyBaru <= 0)
+        {
+            await DisplayAlertAsync("Peringatan", "Kuantitas tidak valid. Masukkan angka lebih besar dari 0.", "OK");
+            return;
+        }
+
+        // Cegah qty melebihi stok yang tersedia
+        if (qtyBaru > stokTersedia)
+        {
+            await DisplayAlertAsync(
+                "Stok Terbatas",
+                $"Kuantitas tidak boleh melebihi stok yang tersedia ({stokTersedia:N0}).",
+                "OK");
+            return;
+        }
+
+        int qtyLama = existingItem.quantity;
+        int selisih = qtyBaru - qtyLama;
+
+        // Jika tidak ada perubahan, tidak perlu lakukan apa-apa
+        if (selisih == 0) return;
+
+        // Jika barang memakai promo, sesuaikan kuota di database:
+        // - penambahan qty => potong kuota tambahan
+        // - pengurangan qty => kembalikan kuota
+        if (existingItem.id_promo > 0)
+        {
+            if (selisih > 0)
+                await UpdatePromoKuotaAsync(existingItem.id_promo, selisih);
+            else
+                await CancelPromoKuotaAsync(existingItem.id_promo, -selisih);
+        }
+
+        // Terapkan kuantitas baru. CartItemModel bukan INotifyPropertyChanged,
+        // jadi refresh baris dengan remove + insert di posisi yang sama.
+        int index = CartItems.IndexOf(existingItem);
+        existingItem.quantity = qtyBaru;
+        if (index >= 0)
+        {
+            CartItems.RemoveAt(index);
+            CartItems.Insert(index, existingItem);
+        }
+
+        KalkulasiSemuaTotal();
+    }
+
+    public class StockResponse
+    {
+        public string status { get; set; }
+        public string message { get; set; }
+        public StockData data { get; set; }
+    }
+
+    public class StockData
+    {
+        public double availableStock { get; set; }
+    }
+
+    // =========================================================
+    // AMBIL STOK ONLINE TERKINI DARI SERVER (item/stock.php)
+    // Mengembalikan -1 jika gagal memuat.
+    // =========================================================
+    private async Task<double> FetchOnlineStockAsync(string itemNo)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            string apiUrl = $"{App.API_HOST}item/stock.php?no={Uri.EscapeDataString(itemNo)}";
+
+            using (var client = new HttpClient())
+            {
+                if (!string.IsNullOrEmpty(cleanToken))
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+                var response = await client.GetAsync(apiUrl);
+                if (!response.IsSuccessStatusCode) return -1;
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+                if (string.IsNullOrWhiteSpace(responseContent) || responseContent.TrimStart().StartsWith("<"))
+                    return -1;
+
+                var apiResult = JsonConvert.DeserializeObject<StockResponse>(responseContent);
+                if (apiResult?.data == null) return -1;
+
+                return apiResult.data.availableStock;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Gagal memuat stok online: {ex.Message}");
+            return -1;
+        }
+    }
+
+    // =========================================================
+    // FUNGSI API UNTUK MEMOTONG KUOTA PROMO (PENAMBAHAN QTY)
+    // =========================================================
+    private async Task UpdatePromoKuotaAsync(int idPromo, int usedKuota)
+    {
+        try
+        {
+            string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+            string apiUrl = $"{App.API_HOST}promo/update-kuota.php";
+
+            var payload = new
+            {
+                kuota = usedKuota,
+                id_promo = idPromo
+            };
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+                string jsonPayload = JsonConvert.SerializeObject(payload);
+                var content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync(apiUrl, content);
+
+                if (!response.IsSuccessStatusCode)
+                    System.Diagnostics.Debug.WriteLine($"Gagal memotong Kuota Promo ID: {idPromo}");
+                else
+                    System.Diagnostics.Debug.WriteLine($"Sukses memotong Kuota Promo ID: {idPromo} sejumlah {usedKuota}");
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Koneksi Update Promo Gagal: {ex.Message}");
         }
     }
 
