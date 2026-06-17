@@ -103,11 +103,13 @@
 
                                             <Grid ColumnDefinitions="*, Auto">
                                                 <Label Grid.Column="0" Text="{Binding itemName}" FontAttributes="Bold" TextColor="Black" FontSize="14" MaxLines="2" LineBreakMode="TailTruncation" VerticalOptions="Start" />
-                                                <Label Grid.Column="1" Text="Hapus" TextColor="OrangeRed" FontAttributes="Bold" FontSize="13" VerticalOptions="Start">
-                                                    <Label.GestureRecognizers>
+                                               
+                                                <Image Source="delete1.png" HeightRequest="20" HorizontalOptions="EndAndExpand">
+                                                    <Image.GestureRecognizers>
                                                         <TapGestureRecognizer Tapped="HapusCartItem_Tapped" />
-                                                    </Label.GestureRecognizers>
-                                                </Label>
+                                                    </Image.GestureRecognizers>
+                                                </Image>
+                                                
                                             </Grid>
 
                                             <Label Text="{Binding ItemInfoDisplay}" TextColor="Black" FontSize="12" />

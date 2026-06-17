@@ -995,8 +995,14 @@ public partial class New_Faktur : ContentPage
 
     private async void HapusCartItem_Tapped(object sender, TappedEventArgs e)
     {
-        if (sender is Label label && label.BindingContext is CartItemModel cartItem)
+
+        
+
+        if (sender is Image label && label.BindingContext is CartItemModel cartItem)
         {
+            await label.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
+            await label.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+
             // Cek apakah barang yang dihapus dari keranjang memiliki ID Promo
             if (cartItem.id_promo > 0)
             {
