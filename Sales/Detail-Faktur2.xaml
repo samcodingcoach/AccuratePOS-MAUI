@@ -50,13 +50,19 @@
 
         </Grid>
         <!-- Action Buttons -->
-        <Grid ColumnDefinitions="*, *" ColumnSpacing="10" Margin="0,15,0,0">
-            <!-- Print Button -->
-            <Button Grid.Column="0" Text="Cetak" BackgroundColor="#F8F9FA" TextColor="#212529" BorderColor="#DEE2E6" BorderWidth="1" CornerRadius="8" FontAttributes="Bold" HeightRequest="45" 
-                    Clicked="BtnPrint_Clicked" />
-            
-            <!-- WhatsApp Button -->
-            <Button Grid.Column="1" Text="WhatsApp" BackgroundColor="DarkGreen" TextColor="White" CornerRadius="8" FontAttributes="Bold" HeightRequest="45" Clicked="BtnWhatsApp_Clicked" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Margin="0,15,0,0">
+            <Border Grid.Column="1" Padding="12,10" StrokeShape="RoundRectangle 8"  Stroke="Transparent" StrokeThickness="0.5" 
+                    BackgroundColor="DarkCyan">
+
+                <StackLayout Orientation="Horizontal" Spacing="10">
+                    <StackLayout.GestureRecognizers>
+                        <TapGestureRecognizer x:Name="TapPrintExport" Tapped="TapPrintExport_Tapped"></TapGestureRecognizer>
+                    </StackLayout.GestureRecognizers>
+                    <Image Source="export100.png"  HeightRequest="24"></Image>
+                    <Label Text="Cetak dan PDF" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="Center"></Label>
+                </StackLayout>
+
+            </Border>
         </Grid>
 
     </VerticalStackLayout>

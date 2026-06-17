@@ -112,24 +112,20 @@ public partial class Detail_Faktur2 : BottomSheet
         }
     }
 
-    private async void BtnPrint_Clicked(object sender, EventArgs e)
+    private async void TapPrintExport_Tapped(object sender, TappedEventArgs e)
     {
-        await this.DismissAsync();
-        
+
+        if (sender is StackLayout press)
+        {
+            await press.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
+            await press.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+        }
+            await this.DismissAsync();
+
         // Buka halaman Print menggunakan instance Print() yang menerima receiptNumber dan invoiceNumber
         if (Application.Current?.MainPage?.Navigation != null)
         {
             await Application.Current.MainPage.Navigation.PushAsync(new Print(_receiptNo, _invoiceNo));
         }
-    }
-
-    private async void BtnWhatsApp_Clicked(object sender, EventArgs e)
-    {
-        string text = $"Faktur {_invoiceNo}\nTotal: {LblTotal.Text}\nMetode: {LblMetode.Text}\nWaktu: {LblTanggal.Text}";
-        await Share.Default.RequestAsync(new ShareTextRequest
-        {
-            Text = text,
-            Title = "Bagikan Pembayaran"
-        });
     }
 }
