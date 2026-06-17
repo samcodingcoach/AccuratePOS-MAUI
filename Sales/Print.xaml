@@ -226,15 +226,37 @@
             <VerticalStackLayout.Shadow>
                 <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
             </VerticalStackLayout.Shadow>
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="10">
-                <Button Grid.Column="0" x:Name="B_Print" Text="PRINT" Clicked="B_Print_Clicked"
-                        BackgroundColor="DodgerBlue" TextColor="White" CornerRadius="12"
-                        FontSize="16" FontAttributes="Bold" HeightRequest="54" />
-                <Button Grid.Column="1" x:Name="B_Whatsapp" Text="WHATSAPP" Clicked="B_Whatsapp_Clicked"
-                        BackgroundColor="#25D366" TextColor="White" CornerRadius="12"
-                        FontSize="16" FontAttributes="Bold" HeightRequest="54" />
-                <Button Grid.Column="2" x:Name="B_Skip" Text="SKIP" Clicked="B_Skip_Clicked"
-                        BackgroundColor="#9E9E9E" TextColor="White" CornerRadius="12"
+            <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="10">
+                
+                <Border Grid.Column="0" Padding="12,10" StrokeShape="RoundRectangle 8"  Stroke="Transparent" StrokeThickness="0.5" 
+                        BackgroundColor="WhiteSmoke">
+
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="TapPrint" Tapped="TapPrint_Tapped"></TapGestureRecognizer>
+                        </StackLayout.GestureRecognizers>
+                        <Image Source="print100.png"  HeightRequest="24"></Image>
+                        <Label Text="PRINT" TranslationX="5" FontAttributes="Bold" TextColor="DarkCyan" VerticalTextAlignment="Center"></Label>
+                    </StackLayout>
+
+                </Border>
+                
+                <Border Grid.Column="1" Padding="12,10" StrokeShape="RoundRectangle 8"  Stroke="Transparent" StrokeThickness="0.5" 
+                        BackgroundColor="DarkCyan">
+
+                    <StackLayout Orientation="Horizontal" Spacing="10">
+                        <StackLayout.GestureRecognizers>
+                            <TapGestureRecognizer x:Name="TapWA" Tapped="TapWA_Tapped"></TapGestureRecognizer>
+                        </StackLayout.GestureRecognizers>
+                        <Image Source="wawhite100.png"  HeightRequest="24"></Image>
+                        <Label Text="WHATSAPP" TranslationX="5" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="White" VerticalTextAlignment="Center"></Label>
+                    </StackLayout>
+
+                </Border>
+
+                
+                <Button Grid.Column="2" x:Name="B_Skip" Text="X" Clicked="B_Skip_Clicked"
+                        BackgroundColor="OrangeRed" TextColor="White" CornerRadius="12"
                         FontSize="16" FontAttributes="Bold" HeightRequest="54" />
             </Grid>
         </VerticalStackLayout>

@@ -292,64 +292,7 @@ public partial class Print : ContentPage
     }
 
     // ===== Tombol bawah =====
-    private async void B_Print_Clicked(object sender, EventArgs e)
-    {
-#if ANDROID
-        try
-        {
-            var status = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
-            if (status != PermissionStatus.Granted)
-            {
-                status = await Permissions.RequestAsync<Permissions.Bluetooth>();
-            }
-
-            if (status != PermissionStatus.Granted)
-            {
-                await DisplayAlertAsync("Izin Ditolak", "Izin Bluetooth diperlukan untuk menghubungkan ke printer.", "OK");
-                return;
-            }
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlertAsync("Error Permission", ex.Message, "OK");
-            return;
-        }
-
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
-        if (bluetoothAdapter == null || !bluetoothAdapter.IsEnabled)
-        {
-            await DisplayAlertAsync("Error", "Bluetooth tidak tersedia atau belum diaktifkan.", "OK");
-            return;
-        }
-
-        var bondedDevices = bluetoothAdapter.BondedDevices;
-        if (bondedDevices == null || bondedDevices.Count == 0)
-        {
-            await DisplayAlertAsync("Error", "Tidak ada printer Bluetooth yang di-pairing.", "OK");
-            return;
-        }
-
-        var deviceNames = bondedDevices.Select(d => d.Name).ToArray();
-        string selectedPrinter = await DisplayActionSheet("Pilih Printer Bluetooth", "Batal", null, deviceNames);
-
-        if (selectedPrinter == "Batal" || string.IsNullOrEmpty(selectedPrinter))
-            return;
-
-        string paperSizeStr = await DisplayActionSheet("Pilih Ukuran Kertas", "Batal", null, "58mm", "80mm");
-        if (paperSizeStr == "Batal" || string.IsNullOrEmpty(paperSizeStr))
-            return;
-        
-        int paperSize = paperSizeStr == "58mm" ? 32 : 48;
-        
-        BluetoothDevice device = bondedDevices.FirstOrDefault(d => d.Name == selectedPrinter);
-        if (device != null)
-        {
-            await ExecutePrint(device, paperSize);
-        }
-#else
-        await DisplayAlertAsync("Error", "Bluetooth hanya didukung di Android!", "OK");
-#endif
-    }
+    
 
     private string AlignRight(string label, string value, int totalLength)
     {
@@ -533,86 +476,8 @@ public partial class Print : ContentPage
     }
 #endif
 
-    private async void B_Whatsapp_Clicked(object sender, EventArgs e)
-    {
-#if ANDROID
-        // Pastikan data struk sudah dimuat
-        if (_invoice == null && _receipt == null)
-        {
-            await DisplayAlertAsync("WhatsApp", "Data struk belum termuat. Coba lagi sebentar.", "OK");
-            return;
-        }
-
-        // 1. Minta nomor HP tujuan
-        string inputNomor = await DisplayPromptAsync(
-            "Kirim via WhatsApp",
-            "Masukkan nomor WhatsApp tujuan:",
-            accept: "Kirim",
-            cancel: "Batal",
-            placeholder: "08xxxxxxxxxx",
-            keyboard: Keyboard.Telephone);
-
-        if (string.IsNullOrWhiteSpace(inputNomor))
-            return;
-
-        string nomorWa = NormalisasiNomorWa(inputNomor);
-        if (nomorWa.Length < 10)
-        {
-            await DisplayAlertAsync("Nomor Tidak Valid", "Periksa kembali nomor WhatsApp tujuan.", "OK");
-            return;
-        }
-
-        try
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                StrukLoading.IsRunning = true;
-                StrukLoading.IsVisible = true;
-            });
-
-            // 2. Generate PDF (PdfDocument bawaan Android) & simpan ke storage
-            byte[] pdfBytes = await Task.Run(() => BuildReceiptPdfAndroid());
-
-            string fileName = $"Struk-{(string.IsNullOrWhiteSpace(_receiptNumber) ? _invoiceNoStr : _receiptNumber)}.pdf"
-                .Replace("/", "-").Replace("\\", "-").Replace(" ", "");
-            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
-            File.WriteAllBytes(filePath, pdfBytes);
-
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                StrukLoading.IsRunning = false;
-                StrukLoading.IsVisible = false;
-            });
-
-            // 3. Susun pesan teks
-            string pesan = SusunPesanWa();
-
-            // 4. Kirim ke WhatsApp dengan PDF terlampir (extra "jid" -> langsung ke nomor tujuan)
-            bool terkirim = KirimWhatsAppAndroid(filePath, nomorWa, pesan);
-            if (!terkirim)
-            {
-                // Fallback: buka chat nomor via wa.me (tanpa lampiran) + bagikan file lewat share sheet
-                await Launcher.OpenAsync(new Uri($"https://wa.me/{nomorWa}?text={Uri.EscapeDataString(pesan)}"));
-                await Share.RequestAsync(new ShareFileRequest
-                {
-                    Title = "Bagikan Struk PDF",
-                    File = new ShareFile(filePath)
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                StrukLoading.IsRunning = false;
-                StrukLoading.IsVisible = false;
-            });
-            await DisplayAlertAsync("Gagal Kirim WhatsApp", ex.Message, "OK");
-        }
-#else
-        await DisplayAlertAsync("WhatsApp", "Kirim struk via WhatsApp hanya didukung di Android.", "OK");
-#endif
-    }
+   
+    
 
     // Ubah input nomor jadi format internasional Indonesia (62xxxx) tanpa tanda/spasi.
     private static string NormalisasiNomorWa(string raw)
@@ -1109,5 +974,157 @@ public partial class Print : ContentPage
         public string email { get; set; }
         public string address { get; set; }
         public string phone { get; set; }
+    }
+
+    private async void TapPrint_Tapped(object sender, TappedEventArgs e)
+    {
+
+        if (sender is StackLayout press)
+        {
+            await press.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
+            await press.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+        }
+#if ANDROID
+        try
+        {
+            var status = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
+            if (status != PermissionStatus.Granted)
+            {
+                status = await Permissions.RequestAsync<Permissions.Bluetooth>();
+            }
+
+            if (status != PermissionStatus.Granted)
+            {
+                await DisplayAlertAsync("Izin Ditolak", "Izin Bluetooth diperlukan untuk menghubungkan ke printer.", "OK");
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Error Permission", ex.Message, "OK");
+            return;
+        }
+
+        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
+        if (bluetoothAdapter == null || !bluetoothAdapter.IsEnabled)
+        {
+            await DisplayAlertAsync("Error", "Bluetooth tidak tersedia atau belum diaktifkan.", "OK");
+            return;
+        }
+
+        var bondedDevices = bluetoothAdapter.BondedDevices;
+        if (bondedDevices == null || bondedDevices.Count == 0)
+        {
+            await DisplayAlertAsync("Error", "Tidak ada printer Bluetooth yang di-pairing.", "OK");
+            return;
+        }
+
+        var deviceNames = bondedDevices.Select(d => d.Name).ToArray();
+        string selectedPrinter = await DisplayActionSheetAsync("Pilih Printer Bluetooth", "Batal", null, deviceNames);
+
+        if (selectedPrinter == "Batal" || string.IsNullOrEmpty(selectedPrinter))
+            return;
+
+        string paperSizeStr = await DisplayActionSheetAsync("Pilih Ukuran Kertas", "Batal", null, "58mm", "80mm");
+        if (paperSizeStr == "Batal" || string.IsNullOrEmpty(paperSizeStr))
+            return;
+        
+        int paperSize = paperSizeStr == "58mm" ? 32 : 48;
+        
+        BluetoothDevice device = bondedDevices.FirstOrDefault(d => d.Name == selectedPrinter);
+        if (device != null)
+        {
+            await ExecutePrint(device, paperSize);
+        }
+#else
+        await DisplayAlertAsync("Error", "Bluetooth hanya didukung di Android!", "OK");
+#endif
+    }
+
+    private async void TapWA_Tapped(object sender, TappedEventArgs e)
+    {
+
+        if (sender is StackLayout press)
+        {
+            await press.FadeToAsync(0.3, 100); // Turunkan opacity ke 0.3 dalam 100ms
+            await press.FadeToAsync(1, 200);   // Kembalikan opacity ke 1 dalam 200ms
+        }
+#if ANDROID
+        // Pastikan data struk sudah dimuat
+        if (_invoice == null && _receipt == null)
+        {
+            await DisplayAlertAsync("WhatsApp", "Data struk belum termuat. Coba lagi sebentar.", "OK");
+            return;
+        }
+
+        // 1. Minta nomor HP tujuan
+        string inputNomor = await DisplayPromptAsync(
+            "Kirim via WhatsApp",
+            "Masukkan nomor WhatsApp tujuan:",
+            accept: "Kirim",
+            cancel: "Batal",
+            placeholder: "08xxxxxxxxxx",
+            keyboard: Keyboard.Telephone);
+
+        if (string.IsNullOrWhiteSpace(inputNomor))
+            return;
+
+        string nomorWa = NormalisasiNomorWa(inputNomor);
+        if (nomorWa.Length < 10)
+        {
+            await DisplayAlertAsync("Nomor Tidak Valid", "Periksa kembali nomor WhatsApp tujuan.", "OK");
+            return;
+        }
+
+        try
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = true;
+                StrukLoading.IsVisible = true;
+            });
+
+            // 2. Generate PDF (PdfDocument bawaan Android) & simpan ke storage
+            byte[] pdfBytes = await Task.Run(() => BuildReceiptPdfAndroid());
+
+            string fileName = $"Struk-{(string.IsNullOrWhiteSpace(_receiptNumber) ? _invoiceNoStr : _receiptNumber)}.pdf"
+                .Replace("/", "-").Replace("\\", "-").Replace(" ", "");
+            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+            File.WriteAllBytes(filePath, pdfBytes);
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = false;
+                StrukLoading.IsVisible = false;
+            });
+
+            // 3. Susun pesan teks
+            string pesan = SusunPesanWa();
+
+            // 4. Kirim ke WhatsApp dengan PDF terlampir (extra "jid" -> langsung ke nomor tujuan)
+            bool terkirim = KirimWhatsAppAndroid(filePath, nomorWa, pesan);
+            if (!terkirim)
+            {
+                // Fallback: buka chat nomor via wa.me (tanpa lampiran) + bagikan file lewat share sheet
+                await Launcher.OpenAsync(new Uri($"https://wa.me/{nomorWa}?text={Uri.EscapeDataString(pesan)}"));
+                await Share.RequestAsync(new ShareFileRequest
+                {
+                    Title = "Bagikan Struk PDF",
+                    File = new ShareFile(filePath)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = false;
+                StrukLoading.IsVisible = false;
+            });
+            await DisplayAlertAsync("Gagal Kirim WhatsApp", ex.Message, "OK");
+        }
+#else
+        await DisplayAlertAsync("WhatsApp", "Kirim struk via WhatsApp hanya didukung di Android.", "OK");
+#endif
     }
 }

@@ -119,7 +119,9 @@
         </CollectionView>
         <!--total dan new-->
         <Grid Grid.Row="2" ColumnDefinitions="Auto,*" Padding="0">
-
+            <Grid.Shadow>
+                <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
+            </Grid.Shadow>
             <StackLayout BackgroundColor="DarkCyan" Padding="15">
                 <Image Grid.Column="0" Source="newinvoice.png" HeightRequest="28">
                     <Image.GestureRecognizers>
