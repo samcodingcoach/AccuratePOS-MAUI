@@ -305,27 +305,27 @@ public partial class Print : ContentPage
 
             if (status != PermissionStatus.Granted)
             {
-                await DisplayAlert("Izin Ditolak", "Izin Bluetooth diperlukan untuk menghubungkan ke printer.", "OK");
+                await DisplayAlertAsync("Izin Ditolak", "Izin Bluetooth diperlukan untuk menghubungkan ke printer.", "OK");
                 return;
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error Permission", ex.Message, "OK");
+            await DisplayAlertAsync("Error Permission", ex.Message, "OK");
             return;
         }
 
         BluetoothAdapter bluetoothAdapter = BluetoothAdapter.DefaultAdapter;
         if (bluetoothAdapter == null || !bluetoothAdapter.IsEnabled)
         {
-            await DisplayAlert("Error", "Bluetooth tidak tersedia atau belum diaktifkan.", "OK");
+            await DisplayAlertAsync("Error", "Bluetooth tidak tersedia atau belum diaktifkan.", "OK");
             return;
         }
 
         var bondedDevices = bluetoothAdapter.BondedDevices;
         if (bondedDevices == null || bondedDevices.Count == 0)
         {
-            await DisplayAlert("Error", "Tidak ada printer Bluetooth yang di-pairing.", "OK");
+            await DisplayAlertAsync("Error", "Tidak ada printer Bluetooth yang di-pairing.", "OK");
             return;
         }
 
@@ -347,7 +347,7 @@ public partial class Print : ContentPage
             await ExecutePrint(device, paperSize);
         }
 #else
-        await DisplayAlert("Error", "Bluetooth hanya didukung di Android!", "OK");
+        await DisplayAlertAsync("Error", "Bluetooth hanya didukung di Android!", "OK");
 #endif
     }
 
@@ -523,12 +523,12 @@ public partial class Print : ContentPage
                 }
                 bluetoothSocket.OutputStream.Flush();
                 bluetoothSocket.Close();
-                await DisplayAlert("Sukses", "Print berhasil.", "OK");
+                await DisplayAlertAsync("Sukses", "Print berhasil.", "OK");
             }
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Error", $"Gagal print: {ex.Message}", "OK");
+            await DisplayAlertAsync("Error", $"Gagal print: {ex.Message}", "OK");
         }
     }
 #endif
