@@ -535,8 +535,423 @@ public partial class Print : ContentPage
 
     private async void B_Whatsapp_Clicked(object sender, EventArgs e)
     {
-        await DisplayAlertAsync("WhatsApp", "Fitur kirim struk via WhatsApp akan segera hadir.", "OK");
+#if ANDROID
+        // Pastikan data struk sudah dimuat
+        if (_invoice == null && _receipt == null)
+        {
+            await DisplayAlertAsync("WhatsApp", "Data struk belum termuat. Coba lagi sebentar.", "OK");
+            return;
+        }
+
+        // 1. Minta nomor HP tujuan
+        string inputNomor = await DisplayPromptAsync(
+            "Kirim via WhatsApp",
+            "Masukkan nomor WhatsApp tujuan:",
+            accept: "Kirim",
+            cancel: "Batal",
+            placeholder: "08xxxxxxxxxx",
+            keyboard: Keyboard.Telephone);
+
+        if (string.IsNullOrWhiteSpace(inputNomor))
+            return;
+
+        string nomorWa = NormalisasiNomorWa(inputNomor);
+        if (nomorWa.Length < 10)
+        {
+            await DisplayAlertAsync("Nomor Tidak Valid", "Periksa kembali nomor WhatsApp tujuan.", "OK");
+            return;
+        }
+
+        try
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = true;
+                StrukLoading.IsVisible = true;
+            });
+
+            // 2. Generate PDF (PdfDocument bawaan Android) & simpan ke storage
+            byte[] pdfBytes = await Task.Run(() => BuildReceiptPdfAndroid());
+
+            string fileName = $"Struk-{(string.IsNullOrWhiteSpace(_receiptNumber) ? _invoiceNoStr : _receiptNumber)}.pdf"
+                .Replace("/", "-").Replace("\\", "-").Replace(" ", "");
+            string filePath = Path.Combine(FileSystem.CacheDirectory, fileName);
+            File.WriteAllBytes(filePath, pdfBytes);
+
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = false;
+                StrukLoading.IsVisible = false;
+            });
+
+            // 3. Susun pesan teks
+            string pesan = SusunPesanWa();
+
+            // 4. Kirim ke WhatsApp dengan PDF terlampir (extra "jid" -> langsung ke nomor tujuan)
+            bool terkirim = KirimWhatsAppAndroid(filePath, nomorWa, pesan);
+            if (!terkirim)
+            {
+                // Fallback: buka chat nomor via wa.me (tanpa lampiran) + bagikan file lewat share sheet
+                await Launcher.OpenAsync(new Uri($"https://wa.me/{nomorWa}?text={Uri.EscapeDataString(pesan)}"));
+                await Share.RequestAsync(new ShareFileRequest
+                {
+                    Title = "Bagikan Struk PDF",
+                    File = new ShareFile(filePath)
+                });
+            }
+        }
+        catch (Exception ex)
+        {
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                StrukLoading.IsRunning = false;
+                StrukLoading.IsVisible = false;
+            });
+            await DisplayAlertAsync("Gagal Kirim WhatsApp", ex.Message, "OK");
+        }
+#else
+        await DisplayAlertAsync("WhatsApp", "Kirim struk via WhatsApp hanya didukung di Android.", "OK");
+#endif
     }
+
+    // Ubah input nomor jadi format internasional Indonesia (62xxxx) tanpa tanda/spasi.
+    private static string NormalisasiNomorWa(string raw)
+    {
+        if (string.IsNullOrWhiteSpace(raw)) return "";
+        string digits = new string(raw.Where(char.IsDigit).ToArray());
+
+        if (digits.StartsWith("62")) return digits;
+        if (digits.StartsWith("0")) return "62" + digits.Substring(1);
+        if (digits.StartsWith("8")) return "62" + digits;
+        return digits;
+    }
+
+    private string SusunPesanWa()
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine($"*{_company?.name ?? "Struk Pembayaran"}*");
+        sb.AppendLine("Terima kasih telah berbelanja 🙏");
+        sb.AppendLine();
+        if (!string.IsNullOrWhiteSpace(_invoiceNoStr)) sb.AppendLine($"No. Faktur: {_invoiceNoStr}");
+        double total = _invoice?.totalAmount ?? _receipt?.totalPayment ?? 0;
+        sb.AppendLine($"Total: {FormatRupiah(total)}");
+        sb.AppendLine();
+        sb.AppendLine("Struk pembayaran terlampir dalam bentuk PDF.");
+        return sb.ToString();
+    }
+
+#if ANDROID
+    // Kirim PDF langsung ke chat nomor tujuan di WhatsApp (extra "jid" menargetkan nomor tanpa pilih kontak).
+    private bool KirimWhatsAppAndroid(string filePath, string nomorWa, string pesan)
+    {
+        try
+        {
+            var context = Android.App.Application.Context;
+            var javaFile = new Java.IO.File(filePath);
+            var uri = AndroidX.Core.Content.FileProvider.GetUriForFile(
+                context, context.PackageName + ".fileprovider", javaFile);
+
+            var intent = new Android.Content.Intent(Android.Content.Intent.ActionSend);
+            intent.SetType("application/pdf");
+            intent.PutExtra(Android.Content.Intent.ExtraStream, uri);
+            intent.PutExtra(Android.Content.Intent.ExtraText, pesan);
+            intent.PutExtra("jid", $"{nomorWa}@s.whatsapp.net"); // arahkan ke nomor tujuan
+            intent.AddFlags(Android.Content.ActivityFlags.GrantReadUriPermission);
+
+            // Utamakan WhatsApp reguler, lalu WhatsApp Business
+            string paket = ResolveWhatsAppPackage(context);
+            if (paket == null)
+                return false; // WhatsApp tidak terpasang -> biar caller pakai fallback
+
+            intent.SetPackage(paket);
+            intent.AddFlags(Android.Content.ActivityFlags.NewTask);
+            context.StartActivity(intent);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string ResolveWhatsAppPackage(Android.Content.Context context)
+    {
+        foreach (var paket in new[] { "com.whatsapp", "com.whatsapp.w4b" })
+        {
+            try
+            {
+                context.PackageManager.GetPackageInfo(paket, 0);
+                return paket;
+            }
+            catch (Android.Content.PM.PackageManager.NameNotFoundException)
+            {
+                // coba paket berikutnya
+            }
+        }
+        return null;
+    }
+
+    // ===================== Generate PDF struk (Android native PdfDocument) =====================
+    // QuestPDF tidak menyertakan native runtime untuk Android, jadi di Android kita gambar
+    // struk langsung ke PdfDocument bawaan Android. Desain mengikuti tampilan kartu di layar.
+    private byte[] BuildReceiptPdfAndroid()
+    {
+        var items = _invoice?.detailItem ?? new List<InvItem>();
+        var expenses = _invoice?.detailExpense ?? new List<InvExpense>();
+        double subTotal = _invoice?.subTotal ?? 0;
+        double diskonFaktur = _invoice?.cashDiscount ?? 0;
+        double pajak = _invoice?.tax1AmountBase ?? 0;
+        double total = _invoice?.totalAmount ?? _receipt?.totalPayment ?? 0;
+
+        string tgl = _receipt?.transDate ?? _invoice?.transDate ?? "-";
+        string kasir = string.IsNullOrWhiteSpace(_receipt?.charField2) ? "-" : _receipt.charField2;
+        string konsumen = _receipt?.customer != null
+            ? $"{_receipt.customer.customerNo} - {_receipt.customer.name}" : "-";
+        string sales = _invoice?.masterSalesmanName;
+        string pengiriman = _invoice?.shipment?.name;
+        string metode = _invoice?.receiptHistory?.FirstOrDefault()?.historyPaymentName;
+        if (string.IsNullOrWhiteSpace(metode))
+            metode = LabelMetodeFromCode(_receipt?.paymentMethod);
+        string catatan = _receipt?.description;
+
+        bool isTunai = string.Equals(_receipt?.paymentMethod, "CASH_OTHER", StringComparison.OrdinalIgnoreCase);
+        double tagihan = _receipt?.totalPayment > 0 ? _receipt.totalPayment : total;
+        double bayar = _nominalBayar > 0 ? _nominalBayar : tagihan + (_receipt?.numericField1 ?? 0);
+        double kembalian = bayar - tagihan;
+        if (kembalian < 0) kembalian = 0;
+
+        const int width = 400;
+        const int margin = 26;
+
+        // ===== Palet warna: hitam, grey, dark cyan =====
+        var cBlack = Android.Graphics.Color.Argb(255, 26, 26, 26);    // #1A1A1A judul/nilai
+        var cValue = Android.Graphics.Color.Argb(255, 51, 51, 51);    // #333 nilai biasa
+        var cGrey = Android.Graphics.Color.Argb(255, 119, 119, 119);  // #777 label
+        var cMuted = Android.Graphics.Color.Argb(255, 153, 153, 153); // #999 header kolom
+        var cCyan = Android.Graphics.Color.Argb(255, 14, 110, 110);   // #0E6E6E aksen
+        var cCyanBg = Android.Graphics.Color.Argb(255, 227, 242, 242);// #E3F2F2 band total
+        var cDash = Android.Graphics.Color.Argb(255, 207, 207, 207);  // #CFCFCF garis
+
+        // ===== Paints =====
+        var pTitle = new Android.Graphics.Paint { Color = cBlack, TextSize = 18, FakeBoldText = true, AntiAlias = true, LetterSpacing = 0.08f };
+        var pHeaderCompany = new Android.Graphics.Paint { Color = cGrey, TextSize = 12, AntiAlias = true };
+        var pLabel = new Android.Graphics.Paint { Color = cGrey, TextSize = 12, AntiAlias = true };
+        var pValue = new Android.Graphics.Paint { Color = cValue, TextSize = 12, AntiAlias = true };
+        var pValueB = new Android.Graphics.Paint { Color = cBlack, TextSize = 12, FakeBoldText = true, AntiAlias = true };
+        var pColHead = new Android.Graphics.Paint { Color = cMuted, TextSize = 11, FakeBoldText = true, AntiAlias = true, LetterSpacing = 0.06f };
+        var pItemName = new Android.Graphics.Paint { Color = cBlack, TextSize = 13, FakeBoldText = true, AntiAlias = true };
+        var pQty = new Android.Graphics.Paint { Color = cGrey, TextSize = 11, AntiAlias = true };
+        var pLineTotal = new Android.Graphics.Paint { Color = cBlack, TextSize = 12, FakeBoldText = true, AntiAlias = true };
+        var pTotalLabel = new Android.Graphics.Paint { Color = cCyan, TextSize = 15, FakeBoldText = true, AntiAlias = true };
+        var pTotalVal = new Android.Graphics.Paint { Color = cCyan, TextSize = 22, FakeBoldText = true, AntiAlias = true };
+        var pBoxLabel = new Android.Graphics.Paint { Color = cCyan, TextSize = 12, AntiAlias = true };
+        var pBoxVal = new Android.Graphics.Paint { Color = cCyan, TextSize = 14, FakeBoldText = true, AntiAlias = true };
+        var pThanks = new Android.Graphics.Paint { Color = cGrey, TextSize = 12, AntiAlias = true, TextSkewX = -0.25f };
+        var pFootName = new Android.Graphics.Paint { Color = cBlack, TextSize = 12, FakeBoldText = true, AntiAlias = true };
+        var pFootInfo = new Android.Graphics.Paint { Color = cGrey, TextSize = 10, AntiAlias = true };
+        var pFootDate = new Android.Graphics.Paint { Color = cMuted, TextSize = 9, AntiAlias = true };
+        var pBg = new Android.Graphics.Paint { AntiAlias = true };
+        var pDash = new Android.Graphics.Paint { Color = cDash, StrokeWidth = 1.2f, AntiAlias = true };
+        pDash.SetStyle(Android.Graphics.Paint.Style.Stroke);
+        pDash.SetPathEffect(new Android.Graphics.DashPathEffect(new float[] { 4f, 4f }, 0));
+
+        // Baseline agar teks center vertikal di dalam kotak.
+        static float CenterBaseline(float top, float h, Android.Graphics.Paint p)
+            => top + h / 2f - (p.Ascent() + p.Descent()) / 2f;
+
+        // Fungsi gambar dipakai 2x: measure (canvas null) lalu draw. Mengembalikan tinggi akhir (y).
+        float DrawAll(Android.Graphics.Canvas canvas)
+        {
+            float y = margin + 18;
+
+            void Center(string text, Android.Graphics.Paint p, float gap)
+            {
+                text ??= "";
+                float w = p.MeasureText(text);
+                canvas?.DrawText(text, (width - w) / 2f, y, p);
+                y += p.TextSize + gap;
+            }
+            void Row(string label, string value, Android.Graphics.Paint pL, Android.Graphics.Paint pV)
+            {
+                value ??= "-";
+                canvas?.DrawText(label ?? "", margin, y, pL);
+                float w = pV.MeasureText(value);
+                canvas?.DrawText(value, width - margin - w, y, pV);
+                y += Math.Max(pL.TextSize, pV.TextSize) + 7;
+            }
+            void WrapLeft(string text, Android.Graphics.Paint p, float maxW)
+            {
+                text ??= "";
+                int start = 0;
+                while (start < text.Length)
+                {
+                    int count = p.BreakText(text.Substring(start), true, maxW, null);
+                    if (count <= 0) count = text.Length - start;
+                    canvas?.DrawText(text.Substring(start, count), margin, y, p);
+                    y += p.TextSize + 4;
+                    start += count;
+                }
+            }
+            void Dashed(float gapAbove, float gapBelow)
+            {
+                y += gapAbove;
+                if (canvas != null)
+                {
+                    using var path = new Android.Graphics.Path();
+                    path.MoveTo(margin, y);
+                    path.LineTo(width - margin, y);
+                    canvas.DrawPath(path, pDash);
+                }
+                y += gapBelow;
+            }
+
+            // ===== Judul & company =====
+            Center("STRUK PEMBAYARAN", pTitle, 6);
+            if (!string.IsNullOrWhiteSpace(_company?.name)) Center(_company.name, pHeaderCompany, 6);
+
+            Dashed(8, 20);
+
+            // ===== Info transaksi =====
+            Row("No. Struk", string.IsNullOrWhiteSpace(_receiptNumber) ? "-" : _receiptNumber, pLabel, pValueB);
+            Row("No. Faktur", string.IsNullOrWhiteSpace(_invoiceNoStr) ? "-" : _invoiceNoStr, pLabel, pValue);
+            Row("Tanggal", tgl, pLabel, pValue);
+            Row("Kasir", kasir, pLabel, pValue);
+            Row("Konsumen", konsumen, pLabel, pValueB);
+            if (!string.IsNullOrWhiteSpace(sales)) Row("Sales", sales, pLabel, pValue);
+            if (!string.IsNullOrWhiteSpace(pengiriman)) Row("Pengiriman", pengiriman, pLabel, pValue);
+
+            Dashed(10, 20);
+
+            // ===== Header kolom item =====
+            canvas?.DrawText("ITEM", margin, y, pColHead);
+            float tw = pColHead.MeasureText("TOTAL");
+            canvas?.DrawText("TOTAL", width - margin - tw, y, pColHead);
+            y += pColHead.TextSize + 10;
+
+            // ===== Daftar item =====
+            foreach (var itm in items)
+            {
+                float startY = y;
+                // total sejajar baris pertama nama
+                string totalLn = FormatRupiah(itm.quantity * itm.unitPrice);
+                float w = pLineTotal.MeasureText(totalLn);
+                canvas?.DrawText(totalLn, width - margin - w, startY, pLineTotal);
+
+                // nama (wrap, sisakan ruang untuk kolom total)
+                WrapLeft(itm.item?.name, pItemName, width - 2 * margin - w - 12);
+
+                string qtyPrice = $"{itm.quantity.ToString("0.##", IdCulture)} {itm.itemUnit?.name} x {FormatRupiah(itm.unitPrice)}";
+                canvas?.DrawText(qtyPrice, margin, y, pQty);
+                y += pQty.TextSize + 12;
+            }
+
+            Dashed(2, 20);
+
+            // ===== Ringkasan =====
+            Row("Subtotal", FormatRupiah(subTotal), pLabel, pValue);
+            if (diskonFaktur > 0) Row("Diskon Faktur", $"- {FormatRupiah(diskonFaktur)}", pLabel, pValue);
+            if (expenses.Count > 0)
+            {
+                canvas?.DrawText("Biaya-biaya", margin, y, pLabel);
+                y += pLabel.TextSize + 7;
+                foreach (var exp in expenses)
+                    Row("   " + (exp.detailName ?? "Biaya"), FormatRupiah(exp.expenseAmount), pLabel, pValue);
+            }
+            Row("Total Pajak (PPN)", FormatRupiah(pajak), pLabel, pValue);
+
+            // ===== Band TOTAL =====
+            y += 10;
+            float bandH = 42;
+            if (canvas != null)
+            {
+                pBg.Color = cCyanBg;
+                var rect = new Android.Graphics.RectF(margin, y, width - margin, y + bandH);
+                canvas.DrawRoundRect(rect, 12, 12, pBg);
+                canvas.DrawText("TOTAL", margin + 16, CenterBaseline(y, bandH, pTotalLabel), pTotalLabel);
+                string tv = FormatRupiah(total);
+                float wv = pTotalVal.MeasureText(tv);
+                canvas.DrawText(tv, width - margin - 16 - wv, CenterBaseline(y, bandH, pTotalVal), pTotalVal);
+            }
+            y += bandH + 12;
+
+            // ===== Box tunai (dibayar & kembalian) =====
+            if (isTunai)
+            {
+                float boxH = 58;
+                if (canvas != null)
+                {
+                    pBg.Color = cCyanBg;
+                    var rect = new Android.Graphics.RectF(margin, y, width - margin, y + boxH);
+                    canvas.DrawRoundRect(rect, 12, 12, pBg);
+
+                    float ry1 = y + 22;
+                    canvas.DrawText("Tunai Dibayar", margin + 16, ry1, pBoxLabel);
+                    string bv = FormatRupiah(bayar);
+                    canvas.DrawText(bv, width - margin - 16 - pBoxVal.MeasureText(bv), ry1, pBoxVal);
+
+                    float ry2 = y + 44;
+                    canvas.DrawText("Kembalian", margin + 16, ry2, pBoxLabel);
+                    string kv = FormatRupiah(kembalian);
+                    canvas.DrawText(kv, width - margin - 16 - pBoxVal.MeasureText(kv), ry2, pBoxVal);
+                }
+                y += boxH + 12;
+            }
+
+            // ===== Metode =====
+            Row("Metode Pembayaran", metode, pLabel, pValueB);
+
+            // ===== Catatan =====
+            if (!string.IsNullOrWhiteSpace(catatan))
+            {
+                y += 4;
+                canvas?.DrawText("Catatan", margin, y, pLabel);
+                y += pLabel.TextSize + 6;
+                WrapLeft(catatan, pValue, width - 2 * margin);
+            }
+
+            Dashed(14, 20);
+
+            // ===== Footer =====
+            Center("Terima kasih telah berbelanja", pThanks, 8);
+
+            Dashed(6, 22);
+
+            if (!string.IsNullOrWhiteSpace(_company?.name)) Center(_company.name, pFootName, 6);
+
+            string addressCity = "";
+            if (!string.IsNullOrWhiteSpace(_company?.address)) addressCity += _company.address;
+            if (!string.IsNullOrWhiteSpace(_company?.city))
+                addressCity += (addressCity.Length > 0 ? ", " : "") + _company.city;
+            if (!string.IsNullOrWhiteSpace(addressCity)) Center(addressCity, pFootInfo, 5);
+
+            string contact = "";
+            if (!string.IsNullOrWhiteSpace(_company?.phone)) contact += _company.phone;
+            if (!string.IsNullOrWhiteSpace(_company?.email))
+                contact += (contact.Length > 0 ? "  •  " : "") + _company.email;
+            if (!string.IsNullOrWhiteSpace(contact)) Center(contact, pFootInfo, 8);
+
+            Center($"Dicetak pada: {DateTime.Now.ToString("dd MMM yyyy HH:mm:ss", IdCulture)}", pFootDate, 4);
+
+            return y;
+        }
+
+        // Pass 1: ukur tinggi
+        float contentHeight = DrawAll(null);
+        int pageHeight = (int)Math.Ceiling(contentHeight) + margin;
+
+        using var document = new Android.Graphics.Pdf.PdfDocument();
+        var pageInfo = new Android.Graphics.Pdf.PdfDocument.PageInfo.Builder(width, pageHeight, 1).Create();
+        var page = document.StartPage(pageInfo);
+        page.Canvas.DrawColor(Android.Graphics.Color.White);
+        DrawAll(page.Canvas); // Pass 2: gambar
+        document.FinishPage(page);
+
+        using var ms = new MemoryStream();
+        document.WriteTo(ms);
+        document.Close();
+        return ms.ToArray();
+    }
+#endif
 
     private void B_Skip_Clicked(object sender, EventArgs e)
     {
