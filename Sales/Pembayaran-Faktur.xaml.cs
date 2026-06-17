@@ -151,6 +151,9 @@ public partial class Pembayaran_Faktur : ContentPage
                             FormNameCustomerNo.Text = $"{inv.customer?.customerNo} - {inv.customer?.name}";
                             nomor_pelanggan = inv.customer?.customerNo;
 
+                            // Mapping keterangan faktur ke kolom keterangan pembayaran
+                            EntryKeterangan.Text = inv.description ?? "";
+
                             // 2. Mapping Jumlah Pembayaran Default
                             FormtotalAmount.Text = inv.totalAmount.ToString("N0", new CultureInfo("id-ID"));
 
