@@ -186,7 +186,34 @@ public partial class Print : ContentPage
         LabelPengiriman.Text = pengiriman ?? "-";
 
         string alamat = invoice?.toAddress;
-        RowAlamat.IsVisible = !string.IsNullOrWhiteSpace(alamat);
+        if (!string.IsNullOrWhiteSpace(alamat))
+        {
+            var gpsMatch = System.Text.RegularExpressions.Regex.Match(alamat, @"\[GPS:(.+?)\]");
+            if (gpsMatch.Success)
+            {
+                string gpsValue = gpsMatch.Groups[1].Value.Trim();
+                GpsQrCode.Value = $"https://maps.google.com/?q={gpsValue}";
+                GpsQrCode.IsVisible = true;
+                alamat = alamat.Replace(gpsMatch.Value, "");
+            }
+            else
+            {
+                GpsQrCode.IsVisible = false;
+            }
+
+            alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\b\d{5}\b", "");
+            alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"(?i)\bIndonesia\b", "");
+            
+            alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\s+", " ");
+            alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\s*,\s*", ", ");
+            alamat = alamat.Trim().TrimEnd(',').Trim();
+        }
+        else
+        {
+            GpsQrCode.IsVisible = false;
+        }
+
+        RowAlamat.IsVisible = !string.IsNullOrWhiteSpace(alamat) || GpsQrCode.IsVisible;
         LabelAlamat.Text = alamat ?? "";
 
         // ===== Daftar item =====

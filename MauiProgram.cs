@@ -3,6 +3,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using The49.Maui.BottomSheet;
 using UXDivers.Popups.Maui;
+using ZXing.Net.Maui.Controls;
+
 namespace MyPosAccurate2026;
 
 public static class MauiProgram
@@ -15,6 +17,7 @@ public static class MauiProgram
             // Initialize the .NET MAUI Community Toolkit by adding the below line of code
             .UseMauiCommunityToolkit()
             .UseBottomSheet()
+            .UseBarcodeReader()
             .UseUXDiversPopups()
             .ConfigureFonts(fonts =>
 			{

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
              x:Class="MyPosAccurate2026.Sales.Print"
              NavigationPage.HasNavigationBar="False"
              BackgroundColor="#d2dae2">
@@ -79,15 +80,21 @@
                                 <Label Grid.Column="1" x:Name="LabelPengiriman" Text="-" TextColor="#333" FontSize="15"
                                        HorizontalTextAlignment="End" />
                             </Grid>
-                            <Grid x:Name="RowAlamat" IsVisible="False" ColumnDefinitions="Auto,*" ColumnSpacing="20">
-                                <Label Grid.Column="0" Text="Alamat" TextColor="Grey" FontSize="15" VerticalOptions="Start" />
-                                <Label Grid.Column="1" x:Name="LabelAlamat" Text="-" TextColor="#333" FontSize="15"
-                                       HorizontalTextAlignment="End" />
-                            </Grid>
+                            <VerticalStackLayout x:Name="RowAlamat" IsVisible="False" Spacing="4" Margin="0,4,0,0">
+                               
+                                <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="10">
+                                    <Label Text="Alamat" TextColor="Grey" FontSize="15" Grid.Row="0" />
+                                    <Label Grid.Column="0" Grid.Row="1" x:Name="LabelAlamat" Text="-" TextColor="#333" FontSize="15"
+                                           HorizontalTextAlignment="Start" VerticalOptions="Start" />
+                                    <zxing:BarcodeGeneratorView Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" x:Name="GpsQrCode" Format="QrCode" 
+                                           WidthRequest="100" HeightRequest="100" VerticalOptions="Start" IsVisible="False" />
+                                </Grid>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
 
+                        
                         <Line X2="360" Stroke="#CFCFCF" StrokeThickness="1.4" StrokeDashArray="3,3"
-                              HorizontalOptions="Fill" Margin="0,14,0,2" />
+                                HorizontalOptions="Fill" />
 
                         <!--Label kolom item-->
                         <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
