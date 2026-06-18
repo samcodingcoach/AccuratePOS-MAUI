@@ -5,6 +5,24 @@ using Newtonsoft.Json;
 
 namespace MyPosAccurate2026.Sales;
 
+public class LokasiTerpilihEventArgs : EventArgs
+{
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
+    public string Alamat { get; set; }
+    public bool DariGps { get; set; }
+}
+
+// Daftar kota beserta titik pusatnya.
+public class Kota
+{
+    public string Nama { get; set; }
+    public double Lat { get; set; }
+    public double Lng { get; set; }
+    public bool IsMain { get; set; }
+    public override string ToString() => Nama;
+}
+
 public partial class Maps : ContentPage
 {
     private static readonly CultureInfo Inv = CultureInfo.InvariantCulture;
@@ -20,24 +38,6 @@ public partial class Maps : ContentPage
 
     // Event opsional supaya halaman pemanggil bisa menerima hasil pilihan.
     public event EventHandler<LokasiTerpilihEventArgs> LokasiDipilih;
-
-    public class LokasiTerpilihEventArgs : EventArgs
-    {
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
-        public string Alamat { get; set; }
-        public bool DariGps { get; set; }
-    }
-
-    // Daftar kota beserta titik pusatnya.
-    public class Kota
-    {
-        public string Nama { get; set; }
-        public double Lat { get; set; }
-        public double Lng { get; set; }
-        public bool IsMain { get; set; }
-        public override string ToString() => Nama;
-    }
 
     // Kota utama tampil paling atas, sisanya menyusul.
     private readonly List<Kota> _allCities = new()
