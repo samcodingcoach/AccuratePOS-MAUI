@@ -377,6 +377,29 @@ public partial class Print : ContentPage
             string pengiriman = _invoice?.shipment?.name;
             if (!string.IsNullOrWhiteSpace(pengiriman)) sb.Append(AlignRight("Pengiriman", pengiriman, paperSize) + "\n");
             
+            string gpsQrUrl = null;
+            string alamat = _invoice?.toAddress;
+            if (!string.IsNullOrWhiteSpace(alamat))
+            {
+                var gpsMatch = System.Text.RegularExpressions.Regex.Match(alamat, @"\[GPS:(.+?)\]");
+                if (gpsMatch.Success)
+                {
+                    gpsQrUrl = $"https://maps.google.com/?q={gpsMatch.Groups[1].Value.Trim()}";
+                    alamat = alamat.Replace(gpsMatch.Value, "");
+                }
+
+                alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\b\d{5}\b", "");
+                alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"(?i)\bIndonesia\b", "");
+                alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\s+", " ");
+                alamat = System.Text.RegularExpressions.Regex.Replace(alamat, @"\s*,\s*", ", ");
+                alamat = alamat.Trim().TrimEnd(',').Trim();
+
+                if (!string.IsNullOrWhiteSpace(alamat))
+                {
+                    sb.Append($"Alamat:\n{alamat}\n");
+                }
+            }
+
             sb.Append(line);
 
             // Items header
@@ -476,10 +499,35 @@ public partial class Print : ContentPage
                 if (!string.IsNullOrEmpty(contact)) sb.Append($"{contact}\n");
             }
 
-            sb.Append($"Dicetak pada: {DateTime.Now.ToString("dd MMM yyyy HH:mm:ss", IdCulture)}\n\n\n\n");
+            sb.Append($"Dicetak pada: {DateTime.Now.ToString("dd MMM yyyy HH:mm:ss", IdCulture)}\n");
 
             string struk = sb.ToString();
-            byte[] buffer = Encoding.GetEncoding(437).GetBytes(struk);
+            var bufferList = new System.Collections.Generic.List<byte>(Encoding.GetEncoding(437).GetBytes(struk));
+
+            if (!string.IsNullOrEmpty(gpsQrUrl))
+            {
+                bufferList.AddRange(Encoding.GetEncoding(437).GetBytes("\nLokasi (Scan):\n"));
+                
+                // ESC/POS QR Code Commands
+                int len = gpsQrUrl.Length + 3;
+                byte pL = (byte)(len % 256);
+                byte pH = (byte)(len / 256);
+
+                // 1. Model 2
+                bufferList.AddRange(new byte[] { 29, 40, 107, 4, 0, 49, 65, 50, 0 });
+                // 2. Size 6
+                bufferList.AddRange(new byte[] { 29, 40, 107, 3, 0, 49, 67, 6 });
+                // 3. Error correction L (48)
+                bufferList.AddRange(new byte[] { 29, 40, 107, 3, 0, 49, 69, 48 });
+                // 4. Store data
+                bufferList.AddRange(new byte[] { 29, 40, 107, pL, pH, 49, 80, 48 });
+                bufferList.AddRange(Encoding.ASCII.GetBytes(gpsQrUrl));
+                // 5. Print QR
+                bufferList.AddRange(new byte[] { 29, 40, 107, 3, 0, 49, 81, 48 });
+            }
+
+            bufferList.AddRange(Encoding.ASCII.GetBytes("\n\n\n\n"));
+            byte[] buffer = bufferList.ToArray();
 
             await Task.Delay(500); // Stabilkan koneksi
             using (BluetoothSocket bluetoothSocket = device.CreateRfcommSocketToServiceRecord(SPP_UUID))

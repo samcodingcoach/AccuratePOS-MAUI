@@ -105,10 +105,16 @@
 
                             <HorizontalStackLayout Grid.Row="4" Grid.Column="1" HorizontalOptions="End" Spacing="5">
                                 <Label Text="{Binding FormattedTotalAmount}" FontSize="24" TextColor="DarkCyan"  VerticalOptions="Center" FontAttributes="Bold"></Label>
-                                <Image Rotation="90" Source="more50gray.png" HeightRequest="16">
+                                <Image Rotation="90" Source="more50gray.png" HeightRequest="16" Opacity="1" IsEnabled="True">
                                     <Image.GestureRecognizers>
                                         <TapGestureRecognizer x:Name="TapDetailPembayaran" Tapped="TapDetailPembayaran_Tapped"></TapGestureRecognizer>
                                     </Image.GestureRecognizers>
+                                    <Image.Triggers>
+                                        <DataTrigger TargetType="Image" Binding="{Binding statusName}" Value="Belum Lunas">
+                                            <Setter Property="Opacity" Value="0.5" />
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Image.Triggers>
                                 </Image>
                             </HorizontalStackLayout>
 
