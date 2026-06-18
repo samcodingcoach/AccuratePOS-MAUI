@@ -131,6 +131,32 @@ public partial class New_Faktur : ContentPage
 
     
 
+    // Tampilkan alamat & tombol Maps hanya jika pengiriman "Kurir Toko".
+    private void PickerPengirim_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        bool kurirToko = string.Equals(PickerPengirim.SelectedItem as string, "Kurir Toko", StringComparison.OrdinalIgnoreCase);
+        BorderAlamat.IsVisible = kurirToko;
+        B_CariAlamatMaps.IsVisible = kurirToko;
+    }
+
+    // Buka halaman Maps untuk memilih alamat; hasil dimuat ke EntryAlamat.
+    // Format: dari GPS -> "[GPS:lat,lng] alamat", selain itu -> "alamat".
+    private async void B_CariAlamatMaps_Clicked(object sender, EventArgs e)
+    {
+        var maps = new Maps();
+        maps.LokasiDipilih += (s, ev) =>
+        {
+            // Lokasi dari Maps selalu punya koordinat -> sertakan prefix [GPS:lat,lng].
+            string lat = ev.Latitude.ToString("0.######", CultureInfo.InvariantCulture);
+            string lng = ev.Longitude.ToString("0.######", CultureInfo.InvariantCulture);
+            string alamat = $"[GPS:{lat},{lng}] {ev.Alamat}";
+
+            MainThread.BeginInvokeOnMainThread(() => EntryAlamat.Text = alamat);
+        };
+
+        await Navigation.PushAsync(maps);
+    }
+
     // Fungsi pemeta data dari API ke Element UI
     public void LoadEditData(List_Faktur.DetailInvoiceData data)
     {

@@ -128,6 +128,9 @@
 	  <MauiXaml Update="Sales\List-Faktur.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Sales\Maps.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Sales\New-Faktur.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
