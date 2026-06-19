@@ -6,4 +6,14 @@ public partial class ScanQR : ContentPage
 	{
 		InitializeComponent();
 	}
+
+    private void BDetail_Clicked(object sender, EventArgs e)
+    {
+
+    }
+
+    private void BScanAgain_Clicked(object sender, EventArgs e)
+    {
+
+    }
 }
