@@ -123,6 +123,9 @@
 	  <MauiXaml Update="Produk\ScanQR.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Produk\DetailScan.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Sales\Detail-Faktur2.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

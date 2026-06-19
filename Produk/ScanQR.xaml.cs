@@ -163,9 +163,12 @@ public partial class ScanQR : ContentPage
         });
     }
 
-    private void BDetail_Clicked(object sender, EventArgs e)
+    private async void BDetail_Clicked(object sender, EventArgs e)
     {
-
+        if (!string.IsNullOrEmpty(_scannedItemNo))
+        {
+            await Navigation.PushAsync(new DetailScan(_scannedItemNo));
+        }
     }
 
     private void BScanAgain_Clicked(object sender, EventArgs e)
