@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MyPosAccurate2026.Produk.ScanQR" BackgroundColor="GhostWhite" 
+             x:Class="MyPosAccurate2026.Produk.ScanQR" BackgroundColor="GhostWhite"
              NavigationPage.HasNavigationBar="False"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:zxing="clr-namespace:ZXing.Net.Maui.Controls;assembly=ZXing.Net.MAUI.Controls"
              Title="ScanQR">
     <Grid RowDefinitions="*,Auto" RowSpacing="0" ColumnDefinitions="*" ColumnSpacing="10" Padding="0">
+        <!--Area Camera Aktif Scanner-->
+        <Grid Grid.Row="0">
+            <zxing:CameraBarcodeReaderView x:Name="CameraScanner" BarcodesDetected="CameraScanner_BarcodesDetected" />
+
+            <!--Bingkai pemindaian-->
+            <Border WidthRequest="240" HeightRequest="240" InputTransparent="True"
+                    StrokeShape="RoundRectangle 20" Stroke="White" StrokeThickness="3"
+                    BackgroundColor="Transparent" HorizontalOptions="Center" VerticalOptions="Center" />
+
+            <Label Text="Arahkan kamera ke barcode / QR code produk" InputTransparent="True"
+                   TextColor="White" FontAttributes="Bold" BackgroundColor="#80000000" Padding="16,8"
+                   HorizontalOptions="Center" VerticalOptions="Start" Margin="0,30,0,0" />
+
+            <ActivityIndicator x:Name="LoadingIndicator" IsRunning="False" IsVisible="False"
+                               Color="White" HorizontalOptions="Center" VerticalOptions="Center" />
+        </Grid>
 
         <Border Grid.Row="1" Padding="20,10" StrokeShape="RoundRectangle 20,20,0,0"  Stroke="Transparent" 
                 StrokeThickness="0.5" BackgroundColor="White">
