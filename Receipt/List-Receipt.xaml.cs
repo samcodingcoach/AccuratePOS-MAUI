@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Net.Http.Headers;
+using System.Text;
 using Newtonsoft.Json;
 
 namespace MyPosAccurate2026.Receipt;
@@ -10,15 +12,33 @@ public partial class List_Receipt : ContentPage
 	string customerNo = string.Empty;
 	string bankNo = string.Empty;
 
+	// Nama cara bayar yang dipilih (filter lokal berdasarkan paymentMethodName di output). Kosong = semua
+	string _caraBayarFilter = string.Empty;
+
 	ObservableCollection<KonsumenItem> _konsumenList = new ObservableCollection<KonsumenItem>();
 	ObservableCollection<KasBankItem> _caraBayarList = new ObservableCollection<KasBankItem>();
 	bool _filterLoaded = false;
+
+	// Data penerimaan
+	ObservableCollection<ReceiptItem> _receiptList = new ObservableCollection<ReceiptItem>();
+	List<ReceiptItem> _allReceipts = new List<ReceiptItem>();
+	const int _limit = 50;
+	int _currentPage = 1;
+	bool _hasMoreData = true;
+	bool _isFetchingReceipt = false;
+	bool _uiReady = false;
 
 	public List_Receipt()
 	{
 		InitializeComponent();
 		CV_Konsumen.ItemsSource = _konsumenList;
 		CV_CaraBayar.ItemsSource = _caraBayarList;
+		CV_Receipt.ItemsSource = _receiptList;
+
+		// Rentang tanggal default: awal bulan berjalan s/d hari ini
+		var today = DateTime.Today;
+		DP_startdate.Date = new DateTime(today.Year, today.Month, 1);
+		DP_enddate.Date = today;
 	}
 
 	protected override async void OnAppearing()
@@ -30,6 +50,8 @@ public partial class List_Receipt : ContentPage
 			_filterLoaded = true;
 			await LoadKonsumen();
 			await LoadCaraBayar();
+			await LoadReceipt(true);
+			_uiReady = true;
 		}
 	}
 
@@ -102,6 +124,10 @@ public partial class List_Receipt : ContentPage
 
 			item.IsSelected = true;
 			customerNo = item.customerNo;
+
+			// Konsumen adalah parameter server → muat ulang data penerimaan
+			if (_uiReady)
+				_ = LoadReceipt(true);
 		}
 	}
 
@@ -169,7 +195,188 @@ public partial class List_Receipt : ContentPage
 
 			item.IsSelected = true;
 			bankNo = item.no;
+
+			// Cara bayar = filter lokal berdasarkan paymentMethodName (Semua = no kosong)
+			_caraBayarFilter = string.IsNullOrEmpty(item.no) ? string.Empty : item.name;
+			ApplyFilters();
 		}
+	}
+
+	private async Task LoadReceipt(bool reset)
+	{
+		if (_isFetchingReceipt) return;
+
+		if (reset)
+		{
+			_currentPage = 1;
+			_hasMoreData = true;
+			_allReceipts.Clear();
+			_receiptList.Clear();
+		}
+
+		if (!_hasMoreData) return;
+
+		_isFetchingReceipt = true;
+
+		try
+		{
+			string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
+			if (string.IsNullOrEmpty(cleanToken))
+			{
+				await DisplayAlertAsync("Sesi Habis", "Anda harus login kembali.", "OK");
+				return;
+			}
+
+			string startDate = DP_startdate.Date.GetValueOrDefault(DateTime.Today).ToString("yyyy-MM-dd");
+			string endDate = DP_enddate.Date.GetValueOrDefault(DateTime.Today).ToString("yyyy-MM-dd");
+
+			var urlBuilder = new StringBuilder(
+				$"{App.API_HOST}penerimaan-jual/list-receipt.php?start_date={startDate}&end_date={endDate}&limit={_limit}&page={_currentPage}");
+
+			if (!string.IsNullOrEmpty(customerNo))
+				urlBuilder.Append($"&customerNo={Uri.EscapeDataString(customerNo)}");
+
+			using (var client = new HttpClient())
+			{
+				client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", cleanToken);
+
+				var response = await client.GetAsync(urlBuilder.ToString());
+				var responseContent = await response.Content.ReadAsStringAsync();
+
+				if (responseContent.StartsWith("<"))
+				{
+					await DisplayAlertAsync("Error Server", "Gagal membaca format data dari server.", "OK");
+					return;
+				}
+
+				var apiResult = JsonConvert.DeserializeObject<ReceiptListResponse>(responseContent);
+				var data = apiResult?.data;
+
+				if (data == null || data.Count == 0)
+				{
+					_hasMoreData = false;
+				}
+				else
+				{
+					_allReceipts.AddRange(data);
+
+					// Tampilkan hanya item halaman baru yang lolos filter (append, agar posisi scroll terjaga)
+					var newItems = FilterItems(data).ToList();
+					MainThread.BeginInvokeOnMainThread(() =>
+					{
+						foreach (var r in newItems)
+							_receiptList.Add(r);
+					});
+
+					if (data.Count < _limit) _hasMoreData = false;
+					else _currentPage++;
+				}
+			}
+		}
+		catch (Exception ex)
+		{
+			System.Diagnostics.Debug.WriteLine($"Gagal memuat data penerimaan: {ex.Message}");
+		}
+		finally
+		{
+			_isFetchingReceipt = false;
+		}
+	}
+
+	// Terapkan filter lokal (cara bayar + pencarian nomor) terhadap sumber data
+	private IEnumerable<ReceiptItem> FilterItems(IEnumerable<ReceiptItem> source)
+	{
+		IEnumerable<ReceiptItem> filtered = source;
+
+		if (!string.IsNullOrEmpty(_caraBayarFilter))
+			filtered = filtered.Where(r =>
+				string.Equals(r.paymentMethodName, _caraBayarFilter, StringComparison.OrdinalIgnoreCase));
+
+		string search = (T_Search.Text ?? "").Trim();
+		if (!string.IsNullOrEmpty(search))
+			filtered = filtered.Where(r =>
+				r.number != null && r.number.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0);
+
+		return filtered;
+	}
+
+	// Bangun ulang daftar tampil dari seluruh data yang sudah dimuat (dipakai saat filter lokal berubah)
+	private void ApplyFilters()
+	{
+		_receiptList.Clear();
+		foreach (var r in FilterItems(_allReceipts))
+			_receiptList.Add(r);
+	}
+
+	private void OnReceiptThresholdReached(object sender, EventArgs e)
+	{
+		if (_uiReady && _hasMoreData && !_isFetchingReceipt)
+			_ = LoadReceipt(false);
+	}
+
+	private void OnFilterDateSelected(object sender, DateChangedEventArgs e)
+	{
+		// Tanggal adalah parameter server → muat ulang
+		if (_uiReady)
+			_ = LoadReceipt(true);
+	}
+
+	private void OnSearchTextChanged(object sender, TextChangedEventArgs e)
+	{
+		// Pencarian nomor = filter lokal terhadap data yang sudah dimuat
+		if (_uiReady)
+			ApplyFilters();
+	}
+
+	public class ReceiptListResponse
+	{
+		public string status { get; set; }
+		public List<ReceiptItem> data { get; set; }
+	}
+
+	public class ReceiptItem
+	{
+		public string number { get; set; }
+		public double totalPayment { get; set; }
+		public string charField2 { get; set; }
+		public string transDate { get; set; }
+		public string paymentMethodName { get; set; }
+		public ReceiptCustomer customer { get; set; }
+
+		public string FormattedTotalPayment => $"Rp {totalPayment.ToString("N0", new CultureInfo("id-ID"))}";
+		public string PaymentMethodDisplay => (paymentMethodName ?? "").ToUpper();
+		public string CustomerName => customer?.name ?? "-";
+
+		// Ikon badge sesuai cara bayar
+		public string PaymentMethodIcon
+		{
+			get
+			{
+				string method = paymentMethodName ?? "";
+				if (method.IndexOf("QRIS", StringComparison.OrdinalIgnoreCase) >= 0)
+					return "qris100white.png";
+				if (method.IndexOf("Tunai", StringComparison.OrdinalIgnoreCase) >= 0)
+					return "cash100white.png";
+				return "bank100white.png";
+			}
+		}
+
+		// Kasir: hilangkan awalan "1 - ", ambil teks setelah tanda "-"
+		public string DisplayKasir
+		{
+			get
+			{
+				if (string.IsNullOrEmpty(charField2)) return "-";
+				int idx = charField2.IndexOf('-');
+				return idx >= 0 ? charField2.Substring(idx + 1).Trim() : charField2.Trim();
+			}
+		}
+	}
+
+	public class ReceiptCustomer
+	{
+		public string name { get; set; }
+		public string customerNo { get; set; }
 	}
 
 	public class KonsumenListResponse

@@ -11,11 +11,14 @@
 
             
         <Border Grid.Row="0" Padding="10" StrokeShape="RoundRectangle 10" Margin="10" Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
+            <Border.Shadow>
+                <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
+            </Border.Shadow>
             <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                     <Border Grid.Column="0" Padding="0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
-                        <SearchBar Placeholder="Nomor Penerimaan" x:Name="T_Search"></SearchBar>
+                        <SearchBar Placeholder="Nomor Penerimaan" x:Name="T_Search" TextChanged="OnSearchTextChanged"></SearchBar>
                     </Border>
                     <Border Grid.Column="1" Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
                         <Image Source="filtersort100.png" HeightRequest="24"></Image>
@@ -26,10 +29,10 @@
                     <Grid ColumnDefinitions="*,*" Grid.Row="0" RowDefinitions="Auto,Auto" ColumnSpacing="10" Margin="0,10">
                         <Label Text="Berdasarkan tanggal" Margin="0,0,0,5" TextColor="Grey"></Label>
                         <Border Grid.Column="0" Grid.Row="1" Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
-                            <DatePicker FontSize="Large" x:Name="DP_startdate"/>
+                            <DatePicker FontSize="Large" x:Name="DP_startdate" DateSelected="OnFilterDateSelected"/>
                         </Border>
                         <Border Grid.Column="1" Grid.Row="1"  Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
-                            <DatePicker FontSize="Large" x:Name="DP_enddate"/>
+                            <DatePicker FontSize="Large" x:Name="DP_enddate" DateSelected="OnFilterDateSelected"/>
                         </Border>
                     </Grid>
                     <!--cara bayar, data dari coa/list-kasbank.php-->
@@ -101,43 +104,50 @@
             </toolkit:Expander>
         </Border>
         
-        <!--data receipt pakai listview/collection view. scroll able-->
+        <!--data receipt pakai collection view, scroll able-->
 
-        <Border Padding="20,15" Grid.Row="1" Margin="10,0" VerticalOptions="Start" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
-            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
-                <StackLayout Grid.Column="0" Grid.Row="0">
-                    <Label Text="110103.2026.06.00027" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
-                    <Label Text="20/06/2026" TextColor="Grey"></Label>
-                </StackLayout>
-                <StackLayout Grid.Column="1" Grid.Row="0">
-                    <Border Grid.Column="0" Grid.Row="1" Padding="10,5" StrokeShape="RoundRectangle 5"  
-                            Stroke="Transparent" HorizontalOptions="End" StrokeThickness="0.5" BackgroundColor="CadetBlue">
+        <CollectionView x:Name="CV_Receipt" Grid.Row="1" Margin="10,0"
+                        RemainingItemsThreshold="3" RemainingItemsThresholdReached="OnReceiptThresholdReached">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
+            </CollectionView.ItemsLayout>
+            <CollectionView.EmptyView>
+                <Label Text="Tidak ada data penerimaan." TextColor="Grey" HorizontalTextAlignment="Center" Margin="0,40,0,0"/>
+            </CollectionView.EmptyView>
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Padding="20,15" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                            <StackLayout Grid.Column="0" Grid.Row="0">
+                                <Label Text="{Binding number}" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                                <Label Text="{Binding transDate}" TextColor="Grey"></Label>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1" Grid.Row="0">
+                                <Border Padding="10,5" StrokeShape="RoundRectangle 5"
+                                        Stroke="Transparent" HorizontalOptions="End" StrokeThickness="0.5" BackgroundColor="CadetBlue">
+                                    <StackLayout Orientation="Horizontal" Spacing="10">
+                                        <Image Source="{Binding PaymentMethodIcon}" HeightRequest="10" VerticalOptions="Center"></Image>
+                                        <Label Text="{Binding PaymentMethodDisplay}" VerticalTextAlignment="Center" TextColor="White"></Label>
+                                    </StackLayout>
+                                </Border>
+                                <Label Text="{Binding FormattedTotalPayment}" Margin="0,5,0,0" TextColor="DarkCyan" FontAttributes="Bold" FontSize="26" HorizontalOptions="EndAndExpand"></Label>
+                            </StackLayout>
 
-                        <StackLayout Orientation="Horizontal" Spacing="10">
-                            <Image Source="bank100white.png" HeightRequest="10"></Image>
-                            <Label Text="TRANSFER BANK" VerticalTextAlignment="Center" TextColor="White"></Label>
-                        </StackLayout>
-                        
-                       
+                            <Line X2="360" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Stroke="#CFCFCF" StrokeThickness="1.4" StrokeDashArray="3,3"
+                                    HorizontalOptions="Fill" />
+                            <StackLayout Grid.Column="0" Grid.Row="2">
+                                <Label Text="Kasir" TextColor="Grey"></Label>
+                                <Label Text="{Binding DisplayKasir}" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                            </StackLayout>
+                            <StackLayout Grid.Column="1" Grid.Row="2">
+                                <Label Text="Customer" TextColor="Grey" HorizontalOptions="End"></Label>
+                                <Label Text="{Binding CustomerName}" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                            </StackLayout>
+                        </Grid>
                     </Border>
-                    <Label Text="Rp 50.000.000" Margin="0,5,0,0" TextColor="DarkCyan" FontAttributes="Bold" FontSize="26" HorizontalOptions="EndAndExpand"></Label>
-                </StackLayout>
-
-                <Line X2="360" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Stroke="#CFCFCF" StrokeThickness="1.4" StrokeDashArray="3,3"
-                        HorizontalOptions="Fill" />
-                <StackLayout Grid.Column="0" Grid.Row="2">
-                  
-                    <Label Text="Kasir" TextColor="Grey"></Label>
-                    <Label Text="Administrator 01" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
-                </StackLayout>
-                <StackLayout Grid.Column="1" Grid.Row="2">
-                  
-                    <Label Text="Customer" TextColor="Grey" HorizontalOptions="End"></Label>
-                    <Label Text="Shopee" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
-                </StackLayout>
-
-            </Grid>
-        </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
 
     </Grid>
