@@ -32,18 +32,38 @@
                             <DatePicker FontSize="Large" x:Name="DP_enddate"/>
                         </Border>
                     </Grid>
-                    <!--cara bayar, ganti ke collectionview nanti-->
-                    <Grid ColumnDefinitions="Auto,Auto" Grid.Row="1"  RowDefinitions="Auto,Auto" ColumnSpacing="1" Margin="0,0,0,10">
+                    <!--cara bayar, data dari coa/list-kasbank.php-->
+                    <StackLayout Grid.Row="1" Spacing="5" Margin="0,0,0,10">
                         <Label Text="Berdasarkan cara bayar" Margin="0,0,0,5" TextColor="Grey"></Label>
-                        <Border Grid.Column="0" Grid.Row="1" Padding="10" StrokeShape="RoundRectangle 15"  
-                                Stroke="Transparent" HorizontalOptions="Start" StrokeThickness="0.5" BackgroundColor="DarkCyan">
-                            <Label Text="Semua" TextColor="White" Margin="10,0" FontAttributes="Bold" HorizontalTextAlignment="Center"></Label>
-                        </Border>
-                        <Border Grid.Column="1" Grid.Row="1"  Padding="10" StrokeShape="RoundRectangle 15"  Stroke="DarkCyan" 
-                                StrokeThickness="0.5" HorizontalOptions="Start" BackgroundColor="Transparent">
-                            <Label Text="Tunai" TextColor="DarkCyan" Margin="10,0" FontAttributes="Bold" HorizontalTextAlignment="Center"></Label>
-                        </Border>
-                    </Grid>
+                        <CollectionView x:Name="CV_CaraBayar" SelectionMode="None">
+                            <CollectionView.ItemsLayout>
+                                <LinearItemsLayout Orientation="Horizontal" ItemSpacing="8"/>
+                            </CollectionView.ItemsLayout>
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Padding="10" StrokeShape="RoundRectangle 15" Stroke="DarkCyan"
+                                            StrokeThickness="0.5" HorizontalOptions="Start" BackgroundColor="Transparent">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnCaraBayarTapped"/>
+                                        </Border.GestureRecognizers>
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="BackgroundColor" Value="DarkCyan"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Label Text="{Binding name}" Margin="10,0" FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center" TextColor="DarkCyan">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="TextColor" Value="White"/>
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
+                    </StackLayout>
                     <!--konsumen, data dari pelanggan/list.php-->
                     <StackLayout Grid.Row="2" Spacing="5" Margin="0,0,0,10">
                         <Label Text="Berdasarkan konsumen" Margin="0,0,0,5" TextColor="Grey"></Label>
