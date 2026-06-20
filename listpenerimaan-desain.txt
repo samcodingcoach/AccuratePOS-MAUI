@@ -1,0 +1,251 @@
+<!DOCTYPE html><html lang="id"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Daftar Transaksi - ERP Mobile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#5d5f5f",
+                    "on-secondary": "#ffffff",
+                    "surface-dim": "#d8dada",
+                    "on-primary-fixed-variant": "#004f4f",
+                    "on-primary-fixed": "#002020",
+                    "surface-tint": "#006a6a",
+                    "surface-container-high": "#e6e8e9",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#191c1d",
+                    "primary-fixed-dim": "#6fd7d6",
+                    "on-surface-variant": "#3d4949",
+                    "outline-variant": "#bcc9c8",
+                    "tertiary-fixed-dim": "#b8cac9",
+                    "on-primary": "#ffffff",
+                    "inverse-primary": "#6fd7d6",
+                    "secondary-fixed": "#e2e2e2",
+                    "on-tertiary-fixed": "#0e1e1e",
+                    "error-container": "#ffdad6",
+                    "on-surface": "#191c1d",
+                    "on-primary-container": "#f3fffe",
+                    "tertiary": "#4f5f5f",
+                    "on-error": "#ffffff",
+                    "surface-container-highest": "#e1e3e3",
+                    "on-tertiary-container": "#f3fffe",
+                    "surface-container-low": "#f2f4f4",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-fixed-dim": "#c6c6c7",
+                    "surface-container": "#eceeee",
+                    "background": "#f8fafa",
+                    "outline": "#6d7979",
+                    "tertiary-container": "#677877",
+                    "on-tertiary-fixed-variant": "#3a4a49",
+                    "error": "#ba1a1a",
+                    "primary-fixed": "#8cf3f3",
+                    "surface-variant": "#e1e3e3",
+                    "primary-container": "#008282",
+                    "surface-bright": "#f8fafa",
+                    "primary": "#006767",
+                    "inverse-surface": "#2e3131",
+                    "tertiary-fixed": "#d4e6e5",
+                    "on-error-container": "#93000a",
+                    "inverse-on-surface": "#eff1f1",
+                    "on-secondary-fixed": "#1a1c1c",
+                    "on-secondary-container": "#616363",
+                    "on-secondary-fixed-variant": "#454747",
+                    "surface": "#f8fafa",
+                    "secondary-container": "#dfe0e0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "24px",
+                    "gutter-mobile": "12px",
+                    "md": "16px",
+                    "sm": "8px",
+                    "base": "4px",
+                    "xs": "4px",
+                    "xl": "32px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "label-lg": ["Inter"],
+                    "title-lg": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "body-md": ["Inter"],
+                    "title-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-sm": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-lg": ["12px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                    "title-lg": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.25px", "fontWeight": "400"}],
+                    "title-md": ["16px", {"lineHeight": "24px", "letterSpacing": "0.15px", "fontWeight": "500"}],
+                    "label-sm": ["11px", {"lineHeight": "16px", "letterSpacing": "0.5px", "fontWeight": "500"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "0.5px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .bento-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .bento-card:active {
+            transform: scale(0.98);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bcc9c8;
+            border-radius: 10px;
+        }
+        #filter-content {
+            transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+        }
+        #filter-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            margin-top: 0;
+        }
+        #filter-content.expanded {
+            max-height: 500px;
+            opacity: 1;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- Search & Minimalist Filters -->
+<div class="px-margin-mobile py-6 space-y-4">
+<div class="flex items-center gap-3">
+<div class="relative flex-1">
+<input class="w-full h-12 bg-surface-container-lowest border border-outline-variant rounded-xl pl-11 pr-4 font-body-md text-on-surface focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="Cari No. Transaksi..." type="text">
+<span class="material-symbols-outlined absolute left-3.5 top-3 text-outline">search</span>
+</div>
+<button class="flex items-center justify-center h-12 px-4 bg-surface-container border border-outline-variant rounded-xl text-primary font-label-lg gap-2 active:scale-95 transition-transform" id="filter-toggle">
+<span class="material-symbols-outlined">filter_list</span>
+<span class="">Filter</span>
+</button>
+</div>
+<!-- Collapsible Filter Content -->
+<div class="collapsed space-y-4" id="filter-content">
+<!-- Date Filter -->
+<div class="flex items-center gap-2 overflow-x-auto pb-2 custom-scrollbar">
+<div class="flex flex-col gap-1 min-w-[140px]">
+<label class="font-label-sm text-outline px-1">Tanggal Awal</label>
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-[18px] text-secondary">calendar_today</span>
+<span class="font-body-md text-on-surface-variant">01/06/2026</span>
+</div>
+</div>
+<div class="flex flex-col gap-1 min-w-[140px]">
+<label class="font-label-sm text-outline px-1">Tanggal Akhir</label>
+<div class="flex items-center gap-2 bg-surface-container-low px-3 py-2 rounded-lg border border-outline-variant">
+<span class="material-symbols-outlined text-[18px] text-secondary">event</span>
+<span class="font-body-md text-on-surface-variant">18/06/2026</span>
+</div>
+</div>
+</div>
+<!-- Quick Filters Chips -->
+<div class="space-y-3">
+<div>
+<p class="font-label-sm text-outline mb-2">Cara Bayar</p>
+<div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-lg shadow-sm">Semua</button>
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg border border-outline-variant">Tunai</button>
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg border border-outline-variant">Transfer</button>
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg border border-outline-variant">QRIS</button>
+</div>
+</div>
+<div>
+<p class="font-label-sm text-outline mb-2">Jenis Customer</p>
+<div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg border border-outline-variant">Shopee</button>
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-surface-container-high text-on-surface-variant font-label-lg border border-outline-variant">Tokopedia</button>
+<button class="filter-chip flex-shrink-0 px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container font-label-lg">Umum</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content: Scrollable Transaction List -->
+<main class="px-margin-mobile space-y-3">
+<!-- Card 1 -->
+<div class="bento-card bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-3"><div class="flex justify-between items-start"><div class="flex flex-col"><span class="font-label-sm text-outline tracking-wider">110103.2026.06.00027</span><span class="font-label-sm text-outline mt-1">18/06/2026</span></div><div class="flex flex-col items-end"><div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container border border-outline-variant"><span class="material-symbols-outlined text-[14px]">payments</span><span class="font-label-lg">Tunai</span></div><span class="font-title-lg text-primary font-bold text-[20px] mt-1">Rp 149.900</span></div></div><div class="h-px bg-outline-variant w-full opacity-50"></div><div class="flex justify-between items-end"><div class="flex flex-col gap-1"><span class="font-label-sm text-outline">Kasir</span><span class="font-body-md font-medium text-on-surface">Administrator</span></div><div class="text-right flex flex-col gap-1"><span class="font-label-sm text-outline">Customer</span><span class="font-body-md font-medium text-on-surface">Shopee (C.00001)</span></div></div></div>
+<!-- Card 2 -->
+<div class="bento-card bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-3"><div class="flex justify-between items-start"><div class="flex flex-col"><span class="font-label-sm text-outline tracking-wider">110103.2026.06.00028</span><span class="font-label-sm text-outline mt-1">18/06/2026</span></div><div class="flex flex-col items-end"><div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-tertiary-container text-on-tertiary-container border border-outline-variant"><span class="material-symbols-outlined text-[14px]">account_balance</span><span class="font-label-lg">Transfer</span></div><span class="font-title-lg text-primary font-bold text-[20px] mt-1">Rp 2.450.000</span></div></div><div class="h-px bg-outline-variant w-full opacity-50"></div><div class="flex justify-between items-end"><div class="flex flex-col gap-1"><span class="font-label-sm text-outline">Kasir</span><span class="font-body-md font-medium text-on-surface">Administrator</span></div><div class="text-right flex flex-col gap-1"><span class="font-label-sm text-outline">Customer</span><span class="font-body-md font-medium text-on-surface">Tokopedia (C.00004)</span></div></div></div>
+<!-- Card 3 -->
+<div class="bento-card bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-3"><div class="flex justify-between items-start"><div class="flex flex-col"><span class="font-label-sm text-outline tracking-wider">110103.2026.06.00029</span><span class="font-label-sm text-outline mt-1">17/06/2026</span></div><div class="flex flex-col items-end"><div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary-container text-on-primary-container border border-outline-variant"><span class="material-symbols-outlined text-[14px]">qr_code_2</span><span class="font-label-lg">QRIS</span></div><span class="font-title-lg text-primary font-bold text-[20px] mt-1">Rp 85.000</span></div></div><div class="h-px bg-outline-variant w-full opacity-50"></div><div class="flex justify-between items-end"><div class="flex flex-col gap-1"><span class="font-label-sm text-outline">Kasir</span><span class="font-body-md font-medium text-on-surface">Administrator</span></div><div class="text-right flex flex-col gap-1"><span class="font-label-sm text-outline">Customer</span><span class="font-body-md font-medium text-on-surface">Umum</span></div></div></div>
+<!-- Card 4 -->
+<div class="bento-card bg-surface-container-lowest p-4 rounded-xl shadow-sm border border-outline-variant flex flex-col gap-3"><div class="flex justify-between items-start"><div class="flex flex-col"><span class="font-label-sm text-outline tracking-wider">110103.2026.06.00030</span><span class="font-label-sm text-outline mt-1">17/06/2026</span></div><div class="flex flex-col items-end"><div class="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-secondary-container text-on-secondary-container border border-outline-variant"><span class="material-symbols-outlined text-[14px]">payments</span><span class="font-label-lg">Tunai</span></div><span class="font-title-lg text-primary font-bold text-[20px] mt-1">Rp 522.400</span></div></div><div class="h-px bg-outline-variant w-full opacity-50"></div><div class="flex justify-between items-end"><div class="flex flex-col gap-1"><span class="font-label-sm text-outline">Kasir</span><span class="font-body-md font-medium text-on-surface">Administrator</span></div><div class="text-right flex flex-col gap-1"><span class="font-label-sm text-outline">Customer</span><span class="font-body-md font-medium text-on-surface">Shopee (C.00231)</span></div></div></div>
+</main>
+<!-- BottomNavBar -->
+
+<script>
+    // Collapsible Logic
+    const filterToggle = document.getElementById('filter-toggle');
+    const filterContent = document.getElementById('filter-content');
+
+    filterToggle.addEventListener('click', () => {
+        if (filterContent.classList.contains('collapsed')) {
+            filterContent.classList.remove('collapsed');
+            filterContent.classList.add('expanded');
+        } else {
+            filterContent.classList.remove('expanded');
+            filterContent.classList.add('collapsed');
+        }
+    });
+
+    // Micro-interactions
+    document.querySelectorAll('.bento-card').forEach(card => {
+        card.addEventListener('touchstart', () => {
+            card.style.transform = 'scale(0.98)';
+        });
+        card.addEventListener('touchend', () => {
+            card.style.transform = 'scale(1)';
+        });
+    });
+
+    // Chip toggle logic
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.addEventListener('click', function() {
+            const parent = this.parentElement;
+            parent.querySelectorAll('.filter-chip').forEach(b => {
+                b.classList.remove('bg-primary', 'text-on-primary', 'bg-primary-container', 'text-on-primary-container');
+                b.classList.add('bg-surface-container-high', 'text-on-surface-variant', 'border', 'border-outline-variant');
+            });
+            this.classList.remove('bg-surface-container-high', 'text-on-surface-variant', 'border', 'border-outline-variant');
+            this.classList.add('bg-primary', 'text-on-primary');
+        });
+    });
+</script>
+
+
+
+
+</body></html>
