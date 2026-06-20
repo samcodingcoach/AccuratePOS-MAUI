@@ -54,17 +54,49 @@
                             <Label Text="Non Member" TextColor="DarkCyan" Margin="10,0" FontAttributes="Bold" HorizontalTextAlignment="Center"></Label>
                         </Border>
                     </Grid>
-                    
+
                 </Grid>
-
-
-
-
-
-
             </toolkit:Expander>
         </Border>
         
-       
+        <!--data receipt pakai listview/collection view. scroll able-->
+
+        <Border Padding="20,15" Grid.Row="1" Margin="10,0" VerticalOptions="Start" StrokeShape="RoundRectangle 10" Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                <StackLayout Grid.Column="0" Grid.Row="0">
+                    <Label Text="110103.2026.06.00027" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                    <Label Text="20/06/2026" TextColor="Grey"></Label>
+                </StackLayout>
+                <StackLayout Grid.Column="1" Grid.Row="0">
+                    <Border Grid.Column="0" Grid.Row="1" Padding="10,5" StrokeShape="RoundRectangle 5"  
+                            Stroke="Transparent" HorizontalOptions="End" StrokeThickness="0.5" BackgroundColor="CadetBlue">
+
+                        <StackLayout Orientation="Horizontal" Spacing="10">
+                            <Image Source="bank100white.png" HeightRequest="10"></Image>
+                            <Label Text="TRANSFER BANK" VerticalTextAlignment="Center" TextColor="White"></Label>
+                        </StackLayout>
+                        
+                       
+                    </Border>
+                    <Label Text="Rp 50.000.000" Margin="0,5,0,0" TextColor="DarkCyan" FontAttributes="Bold" FontSize="26" HorizontalOptions="EndAndExpand"></Label>
+                </StackLayout>
+
+                <Line X2="360" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Stroke="#CFCFCF" StrokeThickness="1.4" StrokeDashArray="3,3"
+                        HorizontalOptions="Fill" />
+                <StackLayout Grid.Column="0" Grid.Row="2">
+                  
+                    <Label Text="Kasir" TextColor="Grey"></Label>
+                    <Label Text="Administrator 01" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                </StackLayout>
+                <StackLayout Grid.Column="1" Grid.Row="2">
+                  
+                    <Label Text="Customer" TextColor="Grey" HorizontalOptions="End"></Label>
+                    <Label Text="Shopee" HorizontalOptions="End" FontAttributes="Bold" FontSize="18" TextColor="#444"></Label>
+                </StackLayout>
+
+            </Grid>
+        </Border>
+
+
     </Grid>
 </ContentPage>
