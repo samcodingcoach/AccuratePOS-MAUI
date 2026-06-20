@@ -314,6 +314,15 @@ public partial class List_Receipt : ContentPage
 			_ = LoadReceipt(false);
 	}
 
+	private async void OnReceiptSelectionChanged(object sender, SelectionChangedEventArgs e)
+	{
+		if (e.CurrentSelection.FirstOrDefault() is ReceiptItem selectedItem)
+		{
+			((CollectionView)sender).SelectedItem = null;
+			await Navigation.PushAsync(new Detail_Receipt(selectedItem.number));
+		}
+	}
+
 	private void OnFilterDateSelected(object sender, DateChangedEventArgs e)
 	{
 		// Tanggal adalah parameter server → muat ulang

@@ -126,6 +126,9 @@
 	  <MauiXaml Update="Produk\DetailScan.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
+	  <MauiXaml Update="Receipt\Detail-Receipt.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Receipt\List-Receipt.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>

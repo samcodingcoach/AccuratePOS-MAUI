@@ -106,7 +106,7 @@
         
         <!--data receipt pakai collection view, scroll able-->
 
-        <CollectionView x:Name="CV_Receipt" Grid.Row="1" Margin="10,0"
+        <CollectionView x:Name="CV_Receipt" Grid.Row="1" Margin="10,0" SelectionMode="Single" SelectionChanged="OnReceiptSelectionChanged"
                         RemainingItemsThreshold="3" RemainingItemsThresholdReached="OnReceiptThresholdReached">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical" ItemSpacing="10"/>
