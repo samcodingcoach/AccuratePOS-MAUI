@@ -35,9 +35,9 @@ public partial class List_Receipt : ContentPage
 		CV_CaraBayar.ItemsSource = _caraBayarList;
 		CV_Receipt.ItemsSource = _receiptList;
 
-		// Rentang tanggal default: awal bulan berjalan s/d hari ini
+		// Default: tampilkan data hari ini saja
 		var today = DateTime.Today;
-		DP_startdate.Date = new DateTime(today.Year, today.Month, 1);
+		DP_startdate.Date = today;
 		DP_enddate.Date = today;
 	}
 
