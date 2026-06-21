@@ -938,7 +938,7 @@ public partial class Print : ContentPage
         public string paymentMethod { get; set; }
         public string description { get; set; }
         public string transDate { get; set; }
-        public double numericField2 { get; set; } // nomor VA
+        public string charField3 { get; set; } // nomor VA
         public double numericField1 { get; set; } // kembalian (tunai)
         public ReceiptCustomer customer { get; set; }
         public List<ReceiptDetailInvoice> detailInvoice { get; set; }

@@ -421,6 +421,7 @@ public partial class VirtualAccount : ContentPage
             description = _receiptData.Description ?? "",
             charField1 = _transaction_id, // referensi transaksi VA
             charField2 = _receiptData.CharField2,
+            charField3 = _vaNumber,
             detailInvoice = detailInvoice
         };
 

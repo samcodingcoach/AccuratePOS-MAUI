@@ -104,7 +104,7 @@ public class DetailReceiptData
 	public string paymentMethod { get; set; }
 	public string description { get; set; }
 	public string transDate { get; set; }
-	public long numericField2 { get; set; }
+	public string charField3 { get; set; }
 	public DetailReceiptCustomer customer { get; set; }
 
 	public string FormattedTotalPayment => $"Rp {totalPayment.ToString("N0", new CultureInfo("id-ID"))}";
@@ -123,7 +123,7 @@ public class DetailReceiptData
 		get
 		{
 			if (!string.IsNullOrEmpty(charField1)) return charField1;
-			if (numericField2 > 0) return numericField2.ToString();
+			if (!string.IsNullOrEmpty(charField3)) return charField3;
 			return "-";
 		}
 	}

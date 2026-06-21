@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyPosAccurate2026.Receipt.Detail_Receipt"
              >
-
+    
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Border Grid.Row="0" Padding="20" StrokeShape="RoundRectangle 18" Margin="10,0,10,10" 
                 Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">

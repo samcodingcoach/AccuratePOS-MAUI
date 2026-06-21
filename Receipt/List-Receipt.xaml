@@ -149,6 +149,14 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-
+        <!-- Loading Overlay -->
+        <Grid x:Name="LoadingOverlay" Grid.Row="1" BackgroundColor="#80000000" IsVisible="False" Margin="10,0">
+            <StackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="10">
+                <ActivityIndicator IsRunning="{Binding Source={x:Reference LoadingOverlay}, Path=IsVisible}" 
+                                   Color="White" 
+                                   HorizontalOptions="Center" />
+                <Label Text="Memuat Data..." TextColor="White" FontAttributes="Bold" HorizontalOptions="Center"/>
+            </StackLayout>
+        </Grid>
     </Grid>
 </ContentPage>

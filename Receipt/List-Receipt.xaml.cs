@@ -212,6 +212,7 @@ public partial class List_Receipt : ContentPage
 			_hasMoreData = true;
 			_allReceipts.Clear();
 			_receiptList.Clear();
+			MainThread.BeginInvokeOnMainThread(() => LoadingOverlay.IsVisible = true);
 		}
 
 		if (!_hasMoreData) return;
@@ -280,6 +281,7 @@ public partial class List_Receipt : ContentPage
 		finally
 		{
 			_isFetchingReceipt = false;
+			MainThread.BeginInvokeOnMainThread(() => LoadingOverlay.IsVisible = false);
 		}
 	}
 
