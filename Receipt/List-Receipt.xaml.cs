@@ -321,7 +321,10 @@ public partial class List_Receipt : ContentPage
 		if (e.CurrentSelection.FirstOrDefault() is ReceiptItem selectedItem)
 		{
 			((CollectionView)sender).SelectedItem = null;
-			await Navigation.PushAsync(new Detail_Receipt(selectedItem.number));
+			var page = new Detail_Receipt(selectedItem.number);
+			page.HasHandle = true;
+			page.HasBackdrop = true;
+			page.ShowAsync(Window);
 		}
 	}
 

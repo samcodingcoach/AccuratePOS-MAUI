@@ -1,10 +1,11 @@
 using Newtonsoft.Json;
 using System.Globalization;
 using System.Net.Http.Headers;
+using The49.Maui.BottomSheet;
 
 namespace MyPosAccurate2026.Receipt;
 
-public partial class Detail_Receipt : ContentPage
+public partial class Detail_Receipt : BottomSheet
 {
 	private string _number;
 
@@ -12,14 +13,9 @@ public partial class Detail_Receipt : ContentPage
 	{
 		InitializeComponent();
 		_number = number;
-	}
-
-	protected override async void OnAppearing()
-	{
-		base.OnAppearing();
 		if (!string.IsNullOrEmpty(_number))
 		{
-			await LoadDetail();
+			_ = LoadDetail();
 		}
 	}
 
@@ -28,7 +24,9 @@ public partial class Detail_Receipt : ContentPage
 		string cleanToken = Preferences.Get("TOKEN_KEY", "").Replace("Bearer ", "").Trim();
 		if (string.IsNullOrEmpty(cleanToken))
 		{
-			await DisplayAlertAsync("Sesi Habis", "Anda harus login kembali.", "OK");
+			if (Application.Current?.MainPage != null)
+				await Application.Current.MainPage.DisplayAlertAsync("Sesi Habis", "Anda harus login kembali.", "OK");
+			MainThread.BeginInvokeOnMainThread(async () => await this.DismissAsync());
 			return;
 		}
 
@@ -44,7 +42,9 @@ public partial class Detail_Receipt : ContentPage
 
 				if (responseContent.StartsWith("<"))
 				{
-					await DisplayAlertAsync("Error Server", "Gagal membaca format data dari server.", "OK");
+					if (Application.Current?.MainPage != null)
+						await Application.Current.MainPage.DisplayAlertAsync("Error Server", "Gagal membaca format data dari server.", "OK");
+					MainThread.BeginInvokeOnMainThread(async () => await this.DismissAsync());
 					return;
 				}
 
@@ -54,13 +54,18 @@ public partial class Detail_Receipt : ContentPage
 					MainThread.BeginInvokeOnMainThread(() =>
 					{
 						BindingContext = apiResult.data;
+						LoadingIndicator.IsRunning = false;
+						LoadingIndicator.IsVisible = false;
+						DetailContainer.IsVisible = true;
 					});
 				}
 			}
 		}
 		catch (Exception ex)
 		{
-			await DisplayAlertAsync("Error", $"Gagal memuat detail: {ex.Message}", "OK");
+			if (Application.Current?.MainPage != null)
+				await Application.Current.MainPage.DisplayAlertAsync("Error", $"Gagal memuat detail: {ex.Message}", "OK");
+			MainThread.BeginInvokeOnMainThread(async () => await this.DismissAsync());
 		}
 	}
 
@@ -84,7 +89,11 @@ public partial class Detail_Receipt : ContentPage
 			if (invoiceNo == "-") invoiceNo = "";
 		}
 
-		await Navigation.PushAsync(new MyPosAccurate2026.Sales.Print(_number, invoiceNo));
+		await this.DismissAsync();
+		if (Application.Current?.MainPage?.Navigation != null)
+		{
+			await Application.Current.MainPage.Navigation.PushAsync(new MyPosAccurate2026.Sales.Print(_number, invoiceNo));
+		}
 	}
 }
 

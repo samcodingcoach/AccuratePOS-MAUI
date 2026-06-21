@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+<the49:BottomSheet xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyPosAccurate2026.Receipt.Detail_Receipt"
-             >
+             xmlns:the49="https://schemas.the49.com/dotnet/2023/maui"
+             BackgroundColor="#F8F9FA">
+    <the49:BottomSheet.Detents>
+        <the49:RatioDetent Ratio="0.5" />
+    </the49:BottomSheet.Detents>
     
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
-        <Border Grid.Row="0" Padding="20" StrokeShape="RoundRectangle 18" Margin="10,0,10,10" 
+    <ScrollView>
+        <StackLayout>
+            <ActivityIndicator x:Name="LoadingIndicator" IsRunning="True" IsVisible="True" Color="DarkCyan" HorizontalOptions="Center" Margin="0,40,0,0" Scale="1.2" />
+            <Grid x:Name="DetailContainer" RowDefinitions="Auto,Auto,Auto,Auto" Padding="0,20,0,0" IsVisible="False">
+        <Border Grid.Row="0" Padding="20" StrokeShape="RoundRectangle 18" Margin="10,5,10,10" 
                 Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <Border.Shadow>
                 <Shadow Brush="#444" Opacity="0.10" Radius="12" Offset="0,-3" />
@@ -117,7 +124,7 @@
             </StackLayout>
         </Grid>
 
-        <Border Grid.Row="4" Padding="20,10" StrokeShape="RoundRectangle 18" Margin="10,0,10,10" HorizontalOptions="End"  Stroke="Transparent" StrokeThickness="0.5" 
+        <Border Grid.Row="3" Padding="20,10" StrokeShape="RoundRectangle 18" Margin="10,0,10,10" HorizontalOptions="End"  Stroke="Transparent" StrokeThickness="0.5" 
                 BackgroundColor="DarkCyan">
 
             <StackLayout Orientation="Horizontal" Spacing="10">
@@ -130,5 +137,7 @@
             </StackLayout>
 
         </Border>
-    </Grid>
-</ContentPage>
+            </Grid>
+        </StackLayout>
+    </ScrollView>
+</the49:BottomSheet>
