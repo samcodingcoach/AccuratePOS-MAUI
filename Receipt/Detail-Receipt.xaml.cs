@@ -118,12 +118,21 @@ public class DetailReceiptData
 		}
 	}
 	public string DisplayCustomer => customer?.name ?? "-";
+	public string QrisOrVaLabel
+	{
+		get
+		{
+			if (!string.IsNullOrEmpty(charField3)) return "VA";
+			return "QRIS";
+		}
+	}
+
 	public string QrisOrVa
 	{
 		get
 		{
-			if (!string.IsNullOrEmpty(charField1)) return charField1;
 			if (!string.IsNullOrEmpty(charField3)) return charField3;
+			if (!string.IsNullOrEmpty(charField1)) return charField1;
 			return "-";
 		}
 	}

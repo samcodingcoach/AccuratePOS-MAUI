@@ -58,8 +58,7 @@
                 </StackLayout>
                 <BoxView BackgroundColor="Grey" Margin="10,0" HeightRequest="0.5" Opacity="0.2"></BoxView>
                 <StackLayout Orientation="Horizontal" Padding="31,8">
-                    <Label Text="QRIS / VA" FontSize="14" TextColor="#444"></Label>
-                    <!--disini di isikan jika QRIS ambil dari charField1, jika VA ada di numericField2 maka isi VA-->
+                    <Label Text="{Binding QrisOrVaLabel}" FontSize="14" TextColor="#444"></Label>
                     <Label Text="{Binding QrisOrVa}" FontAttributes="Bold" HorizontalTextAlignment="End" HorizontalOptions="EndAndExpand" FontSize="14" TextColor="#444"></Label>
                 </StackLayout>
                 <BoxView BackgroundColor="Grey" Margin="10,0" HeightRequest="0.5" Opacity="0.2"></BoxView>

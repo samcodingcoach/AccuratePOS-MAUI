@@ -26,7 +26,7 @@ public partial class App : Application
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new NavigationPage(new Login());
+        MainPage = new NavigationPage(new Receipt.List_Receipt());
 
     }
 
