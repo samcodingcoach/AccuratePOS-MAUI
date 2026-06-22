@@ -34,7 +34,7 @@
                         <Border Grid.Column="1" Grid.Row="1"  Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
                             <StackLayout Orientation="Horizontal">
                                 
-                                <Picker x:Name="PickerNamaKasir" Title="Pilih Nama Kasir"></Picker>
+                                <Picker x:Name="PickerNamaKasir" Title="Pilih Nama Kasir" ItemDisplayBinding="{Binding DisplayName}" HorizontalOptions="FillAndExpand"></Picker>
                                 <Image Source="chevron100.png" HeightRequest="24" HorizontalOptions="EndAndExpand"></Image>
                             </StackLayout>
                         </Border>
