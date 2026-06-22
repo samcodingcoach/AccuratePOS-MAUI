@@ -13,14 +13,10 @@
             </Border.Shadow>
             <toolkit:Expander IsExpanded="False">
                 <toolkit:Expander.Header>
-
                     <StackLayout Orientation="Horizontal">
                         <Label Text="Laporan Penerimaan Kasir" FontSize="20" TextColor="#444" VerticalTextAlignment="Center" FontAttributes="Bold"></Label>
                         <Image Source="chevron100.png" HeightRequest="24" HorizontalOptions="EndAndExpand"></Image>
                     </StackLayout>
-
-                    
-
                 </toolkit:Expander.Header>
 
                 <Grid ColumnDefinitions="*,*" Grid.Row="0" RowDefinitions="Auto,Auto, Auto" ColumnSpacing="10" Margin="0,10">
@@ -37,6 +33,7 @@
                         <Label Text="Berdasarkan Kasir" Margin="0,0,0,5" TextColor="Grey"></Label>
                         <Border Grid.Column="1" Grid.Row="1"  Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="White">
                             <StackLayout Orientation="Horizontal">
+                                
                                 <Picker x:Name="PickerNamaKasir" Title="Pilih Nama Kasir"></Picker>
                                 <Image Source="chevron100.png" HeightRequest="24" HorizontalOptions="EndAndExpand"></Image>
                             </StackLayout>
