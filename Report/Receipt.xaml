@@ -6,7 +6,7 @@
              BackgroundColor="#f8fafa"
              Title="Receipt">
     
-    <Grid RowDefinitions="Auto, *,Auto">
+    <Grid RowDefinitions="Auto, *">
         <Border Grid.Row="0" Padding="20,15" StrokeShape="RoundRectangle 10" Margin="10" Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <Border.Shadow>
                 <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
@@ -41,11 +41,44 @@
 
                         <Button Text="GENERATE REPORT" CharacterSpacing="4" 
                                 BackgroundColor="DarkCyan"
-                                FontAttributes="Bold" Margin="0,20,0,0"></Button>
+                                FontAttributes="Bold" Margin="0,20,0,0"
+                                x:Name="BtnGenerate" Clicked="BtnGenerate_Clicked"></Button>
                     </StackLayout>
                 </Grid>
 
             </toolkit:Expander>
         </Border>
+        
+        <!--row 2 desain report-->
+    
+
+        <!--row 2 desain report-->
+        <ScrollView Grid.Row="1" Orientation="Vertical" Padding="10,0,10,10">
+            <VerticalStackLayout Spacing="8">
+                <Label Text="Laporan Penerimaan Berdasarkan Kasir"
+                       FontSize="18" FontAttributes="Bold" TextColor="#333"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                       Margin="0,5,0,0"/>
+                <Label x:Name="LblPeriode" Text="Per Periode -"
+                       FontAttributes="Italic" FontSize="13" TextColor="#666"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+
+                <Label x:Name="LblEmptyReport"
+                       Text="Pilih rentang tanggal lalu tekan GENERATE REPORT."
+                       FontSize="13" TextColor="#999"
+                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                       Margin="0,30,0,0"/>
+
+                <Border x:Name="ReportBorder" IsVisible="False"
+                        Stroke="#333" StrokeThickness="1"
+                        StrokeShape="Rectangle" BackgroundColor="White"
+                        Margin="0,5,0,0">
+                    <Grid x:Name="ReportGrid"
+                          ColumnDefinitions="*,Auto,Auto"
+                          ColumnSpacing="18" RowSpacing="0"
+                          Padding="12,8"/>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
     </Grid>
 </ContentPage>
