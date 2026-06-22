@@ -178,160 +178,64 @@ public partial class Receipt : ContentPage
 
 	private void RenderReport(List<ReceiptData> receipts, DateTime start, DateTime end, string namaKasir)
 	{
-		LblPeriode.Text = $"Per Periode {start:dd/MM/yyyy} - {end:dd/MM/yyyy}";
-
-		// Bersihkan tabel
-		ReportGrid.Children.Clear();
-		ReportGrid.RowDefinitions.Clear();
-		int row = 0;
-
-		// Header tabel
-		AddCell(MakeLabel("Metode Pembayaran", bold: true), row, 0);
-		AddCell(MakeLabel("Jumlah", bold: true, alignEnd: true), row, 1);
-		AddCell(MakeLabel("Total", bold: true, alignEnd: true), row, 2);
-		row++;
-		AddSeparator(ref row);
+		string periode = $"Per Periode {start:dd/MM/yyyy} - {end:dd/MM/yyyy}";
 
 		if (receipts == null || receipts.Count == 0)
 		{
-			AddCell(MakeLabel("Tidak ada data penerimaan pada periode ini.", color: "#999"), row, 0, colSpan: 3);
-			row++;
-			LblEmptyReport.IsVisible = false;
-			ReportBorder.IsVisible = true;
+			ReportCollection.ItemsSource = null;
+			ReportBorder.IsVisible = false;
+			LblEmptyReport.Text = "Tidak ada data penerimaan pada periode ini.";
+			LblEmptyReport.IsVisible = true;
 			return;
 		}
 
 		// Kelompokkan per tanggal (urut menaik), lalu per metode pembayaran
-		var byDate = receipts
+		var groups = receipts
 			.GroupBy(r => r.transDate)
-			.OrderBy(g => ParseTransDate(g.Key));
-
-		foreach (var dateGroup in byDate)
-		{
-			// Sub-header tanggal
-			AddCell(MakeLabel(dateGroup.Key, bold: false, color: "#333"), row, 0, colSpan: 3);
-			row++;
-
-			foreach (var methodGroup in dateGroup.GroupBy(r => r.paymentMethodName))
+			.OrderBy(g => ParseTransDate(g.Key))
+			.Select(dateGroup =>
 			{
-				double sum = methodGroup.Sum(r => r.totalPayment);
-				int count = methodGroup.Count();
+				var dg = new DateGroup
+				{
+					DateLabel = dateGroup.Key,
+					TotalCount = dateGroup.Count(),
+					TotalAmount = dateGroup.Sum(r => r.totalPayment)
+				};
+				dg.AddRange(dateGroup
+					.GroupBy(r => r.paymentMethodName)
+					.Select(m => new MethodRow
+					{
+						MethodName = m.Key,
+						Count = m.Count(),
+						Amount = m.Sum(r => r.totalPayment)
+					}));
+				return dg;
+			})
+			.ToList();
 
-				AddCell(MakeLabel("   " + methodGroup.Key), row, 0);
-				AddCell(MakeLabel(count.ToString(IdCulture), alignEnd: true), row, 1);
-				AddCell(MakeLabel(sum.ToString("N0", IdCulture), alignEnd: true), row, 2);
-				row++;
-			}
-
-			// Total per tanggal
-			double dateSum = dateGroup.Sum(r => r.totalPayment);
-			int dateCount = dateGroup.Count();
-			AddSpacer(ref row, 6);
-			AddCell(MakeLabel("Total"), row, 0);
-			AddCell(MakeLabel(dateCount.ToString(IdCulture), alignEnd: true), row, 1);
-			AddCell(MakeLabel(dateSum.ToString("N0", IdCulture), alignEnd: true), row, 2);
-			row++;
-			AddSpacer(ref row, 8);
-		}
-
-		AddSeparator(ref row);
-
-		// Ringkasan
-		AddCell(MakeLabel("Ringkasan", bold: true), row, 0, colSpan: 3);
-		row++;
-
-		AddCell(MakeLabel("Jumlah Transaksi"), row, 0, colSpan: 2);
-		AddCell(MakeLabel(receipts.Count.ToString(IdCulture), alignEnd: true), row, 2);
-		row++;
-
-		foreach (var methodGroup in receipts.GroupBy(r => r.paymentMethodName))
+		// Ringkasan keseluruhan
+		var summary = new ReportSummary
 		{
-			double sum = methodGroup.Sum(r => r.totalPayment);
-			AddCell(MakeLabel(methodGroup.Key), row, 0, colSpan: 2);
-			AddCell(MakeLabel(sum.ToString("N0", IdCulture), alignEnd: true), row, 2);
-			row++;
-		}
+			Periode = periode,
+			TransactionCount = receipts.Count,
+			GrandTotalAmount = receipts.Sum(r => r.totalPayment),
+			NamaKasir = namaKasir,
+			Methods = receipts
+				.GroupBy(r => r.paymentMethodName)
+				.Select(m => new MethodRow
+				{
+					MethodName = m.Key,
+					Amount = m.Sum(r => r.totalPayment)
+				})
+				.ToList()
+		};
 
-		AddSpacer(ref row, 6);
-
-		// Baris Total (diberi latar abu-abu)
-		double grandTotal = receipts.Sum(r => r.totalPayment);
-		AddRowBackground(row, "#E8E8E8");
-		AddCell(MakeLabel("Total", bold: true, alignCenter: true), row, 0, colSpan: 2);
-		AddCell(MakeLabel(grandTotal.ToString("N0", IdCulture), bold: true, alignEnd: true), row, 2);
-		row++;
-
-		// Baris Nama Kasir
-		AddCell(MakeLabel("Nama Kasir", alignCenter: true), row, 0, colSpan: 2);
-		AddCell(MakeLabel(namaKasir, bold: true, alignEnd: true), row, 2);
-		row++;
+		// Header & Footer membaca BindingContext; item grup membaca konteksnya sendiri
+		ReportCollection.BindingContext = summary;
+		ReportCollection.ItemsSource = groups;
 
 		LblEmptyReport.IsVisible = false;
 		ReportBorder.IsVisible = true;
-	}
-
-	// ---------- Helper builder tabel ----------
-
-	private Label MakeLabel(string text, bool bold = false, bool alignEnd = false,
-		bool alignCenter = false, string color = "#222")
-	{
-		return new Label
-		{
-			Text = text,
-			FontSize = 13,
-			FontAttributes = bold ? FontAttributes.Bold : FontAttributes.None,
-			TextColor = Color.FromArgb(color),
-			VerticalTextAlignment = TextAlignment.Center,
-			HorizontalTextAlignment = alignEnd ? TextAlignment.End
-				: alignCenter ? TextAlignment.Center : TextAlignment.Start
-		};
-	}
-
-	private void AddCell(View view, int row, int col, int colSpan = 1)
-	{
-		EnsureRow(row);
-		Grid.SetRow(view, row);
-		Grid.SetColumn(view, col);
-		if (colSpan > 1) Grid.SetColumnSpan(view, colSpan);
-		ReportGrid.Children.Add(view);
-	}
-
-	private void AddRowBackground(int row, string color)
-	{
-		EnsureRow(row);
-		var bg = new BoxView { Color = Color.FromArgb(color) };
-		Grid.SetRow(bg, row);
-		Grid.SetColumn(bg, 0);
-		Grid.SetColumnSpan(bg, 3);
-		ReportGrid.Children.Add(bg); // ditambahkan lebih dulu -> berada di belakang
-	}
-
-	private void AddSeparator(ref int row)
-	{
-		EnsureRow(row);
-		var line = new BoxView { Color = Color.FromArgb("#333"), HeightRequest = 1 };
-		Grid.SetRow(line, row);
-		Grid.SetColumn(line, 0);
-		Grid.SetColumnSpan(line, 3);
-		ReportGrid.Children.Add(line);
-		row++;
-	}
-
-	private void AddSpacer(ref int row, double height)
-	{
-		EnsureRow(row);
-		var spacer = new BoxView { Color = Colors.Transparent, HeightRequest = height };
-		Grid.SetRow(spacer, row);
-		Grid.SetColumn(spacer, 0);
-		Grid.SetColumnSpan(spacer, 3);
-		ReportGrid.Children.Add(spacer);
-		row++;
-	}
-
-	private void EnsureRow(int row)
-	{
-		while (ReportGrid.RowDefinitions.Count <= row)
-			ReportGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 	}
 
 	private static DateTime ParseTransDate(string transDate)
@@ -379,5 +283,44 @@ public partial class Receipt : ContentPage
 	{
 		public string name { get; set; }
 		public string customerNo { get; set; }
+	}
+
+	// ---------- View-model untuk CollectionView ----------
+
+	// Grup per tanggal; harus berupa koleksi agar bisa dipakai IsGrouped CollectionView.
+	public class DateGroup : List<MethodRow>
+	{
+		public string DateLabel { get; set; }   // mis. "21/06/2026"
+		public int TotalCount { get; set; }
+		public double TotalAmount { get; set; }
+
+		// Dipakai GroupFooterTemplate
+		public string DisplayCount => TotalCount.ToString("N0", IdCulture);
+		public string DisplayTotal => TotalAmount.ToString("N0", IdCulture);
+	}
+
+	// Baris satu metode pembayaran (dipakai item grup & ringkasan).
+	public class MethodRow
+	{
+		public string MethodName { get; set; }
+		public int Count { get; set; }
+		public double Amount { get; set; }
+
+		public string DisplayMethod => "   " + MethodName;          // sedikit indent di tabel
+		public string DisplayCount => Count.ToString("N0", IdCulture);
+		public string DisplayAmount => Amount.ToString("N0", IdCulture);
+	}
+
+	// Konteks Header/Footer CollectionView.
+	public class ReportSummary
+	{
+		public string Periode { get; set; }
+		public int TransactionCount { get; set; }
+		public double GrandTotalAmount { get; set; }
+		public string NamaKasir { get; set; }
+		public List<MethodRow> Methods { get; set; }
+
+		public string JumlahTransaksi => TransactionCount.ToString("N0", IdCulture);
+		public string GrandTotal => GrandTotalAmount.ToString("N0", IdCulture);
 	}
 }

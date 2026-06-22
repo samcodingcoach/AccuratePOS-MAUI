@@ -50,35 +50,105 @@
         </Border>
         
         <!--row 2 desain report-->
-    
+        <Grid Grid.Row="1" Margin="10,0,10,10">
+            <!--Placeholder ketika belum ada data-->
+            <Label x:Name="LblEmptyReport"
+                   Text="Pilih rentang tanggal lalu tekan GENERATE REPORT."
+                   FontSize="13" TextColor="#999"
+                   HorizontalOptions="Center" VerticalOptions="Start"
+                   HorizontalTextAlignment="Center" Margin="0,30,0,0"/>
 
-        <!--row 2 desain report-->
-        <ScrollView Grid.Row="1" Orientation="Vertical" Padding="10,0,10,10">
-            <VerticalStackLayout Spacing="8">
-                <Label Text="Laporan Penerimaan Berdasarkan Kasir"
-                       FontSize="18" FontAttributes="Bold" TextColor="#333"
-                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                       Margin="0,5,0,0"/>
-                <Label x:Name="LblPeriode" Text="Per Periode -"
-                       FontAttributes="Italic" FontSize="13" TextColor="#666"
-                       HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+            <Border x:Name="ReportBorder" IsVisible="False"
+                    Stroke="#333" StrokeThickness="1"
+                    StrokeShape="Rectangle" BackgroundColor="White">
+                <CollectionView x:Name="ReportCollection" IsGrouped="True">
 
-                <Label x:Name="LblEmptyReport"
-                       Text="Pilih rentang tanggal lalu tekan GENERATE REPORT."
-                       FontSize="13" TextColor="#999"
-                       HorizontalOptions="Center" HorizontalTextAlignment="Center"
-                       Margin="0,30,0,0"/>
+                    <!--Judul + periode + header kolom-->
+                    <CollectionView.Header>
+                        <VerticalStackLayout Padding="12,10" Spacing="2">
+                            <Label Text="Laporan Penerimaan Berdasarkan Kasir"
+                                   FontSize="17" FontAttributes="Bold" TextColor="#333"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding Periode}"
+                                   FontAttributes="Italic" FontSize="13" TextColor="#666"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"
+                                   Margin="0,0,0,8"/>
+                            <Grid ColumnDefinitions="*,70,120" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="Metode Pembayaran" FontAttributes="Bold" TextColor="#222"/>
+                                <Label Grid.Column="1" Text="Jumlah" FontAttributes="Bold" TextColor="#222" HorizontalTextAlignment="End"/>
+                                <Label Grid.Column="2" Text="Total" FontAttributes="Bold" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+                            <BoxView HeightRequest="1" Color="#333" Margin="0,4,0,0"/>
+                        </VerticalStackLayout>
+                    </CollectionView.Header>
 
-                <Border x:Name="ReportBorder" IsVisible="False"
-                        Stroke="#333" StrokeThickness="1"
-                        StrokeShape="Rectangle" BackgroundColor="White"
-                        Margin="0,5,0,0">
-                    <Grid x:Name="ReportGrid"
-                          ColumnDefinitions="*,Auto,Auto"
-                          ColumnSpacing="18" RowSpacing="0"
-                          Padding="12,8"/>
-                </Border>
-            </VerticalStackLayout>
-        </ScrollView>
+                    <!--Sub-header per tanggal-->
+                    <CollectionView.GroupHeaderTemplate>
+                        <DataTemplate>
+                            <Label Text="{Binding DateLabel}" FontSize="13" TextColor="#333"
+                                   Padding="12,8,12,2"/>
+                        </DataTemplate>
+                    </CollectionView.GroupHeaderTemplate>
+
+                    <!--Baris metode pembayaran-->
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,70,120" ColumnSpacing="8" Padding="12,1">
+                                <Label Grid.Column="0" Text="{Binding DisplayMethod}" FontSize="13" TextColor="#222"/>
+                                <Label Grid.Column="1" Text="{Binding DisplayCount}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                                <Label Grid.Column="2" Text="{Binding DisplayAmount}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+
+                    <!--Total per tanggal-->
+                    <CollectionView.GroupFooterTemplate>
+                        <DataTemplate>
+                            <Grid ColumnDefinitions="*,70,120" ColumnSpacing="8" Padding="12,6,12,10">
+                                <Label Grid.Column="0" Text="Total" FontSize="13" TextColor="#222"/>
+                                <Label Grid.Column="1" Text="{Binding DisplayCount}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                                <Label Grid.Column="2" Text="{Binding DisplayTotal}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+                        </DataTemplate>
+                    </CollectionView.GroupFooterTemplate>
+
+                    <!--Ringkasan + grand total + nama kasir-->
+                    <CollectionView.Footer>
+                        <VerticalStackLayout Padding="12,4,12,10" Spacing="2">
+                            <BoxView HeightRequest="1" Color="#333" Margin="0,0,0,4"/>
+                            <Label Text="Ringkasan" FontAttributes="Bold" FontSize="13" TextColor="#222"/>
+
+                            <Grid ColumnDefinitions="*,120" ColumnSpacing="8">
+                                <Label Grid.Column="0" Text="Jumlah Transaksi" FontSize="13" TextColor="#222"/>
+                                <Label Grid.Column="1" Text="{Binding JumlahTransaksi}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+
+                            <!--Total per metode-->
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Methods}" Spacing="0">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnDefinitions="*,120" ColumnSpacing="8">
+                                            <Label Grid.Column="0" Text="{Binding MethodName}" FontSize="13" TextColor="#222"/>
+                                            <Label Grid.Column="1" Text="{Binding DisplayAmount}" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <!--Total keseluruhan (latar abu-abu)-->
+                            <Grid ColumnDefinitions="*,120" ColumnSpacing="8" BackgroundColor="#E8E8E8" Padding="0,4" Margin="0,6,0,0">
+                                <Label Grid.Column="0" Text="Total" FontAttributes="Bold" FontSize="13" TextColor="#222" HorizontalTextAlignment="Center"/>
+                                <Label Grid.Column="1" Text="{Binding GrandTotal}" FontAttributes="Bold" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,120" ColumnSpacing="8" Padding="0,2">
+                                <Label Grid.Column="0" Text="Nama Kasir" FontSize="13" TextColor="#222" HorizontalTextAlignment="Center"/>
+                                <Label Grid.Column="1" Text="{Binding NamaKasir}" FontAttributes="Bold" FontSize="13" TextColor="#222" HorizontalTextAlignment="End"/>
+                            </Grid>
+                        </VerticalStackLayout>
+                    </CollectionView.Footer>
+                </CollectionView>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>
