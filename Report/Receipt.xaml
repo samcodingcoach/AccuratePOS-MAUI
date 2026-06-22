@@ -6,7 +6,7 @@
              BackgroundColor="#f8fafa"
              Title="Receipt">
     
-    <Grid RowDefinitions="Auto, *">
+    <Grid RowDefinitions="Auto, *, Auto">
         <Border Grid.Row="0" Padding="20,15" StrokeShape="RoundRectangle 10" Margin="10" Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
             <Border.Shadow>
                 <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
@@ -63,9 +63,25 @@
                     StrokeShape="Rectangle" BackgroundColor="White">
                 <CollectionView x:Name="ReportCollection" IsGrouped="True">
 
-                    <!--Judul + periode + header kolom-->
+                    <!--Kop usaha + Judul + periode + header kolom-->
                     <CollectionView.Header>
                         <VerticalStackLayout Padding="12,10" Spacing="2">
+                            <!--Kop pelaporan (info usaha)-->
+                            <Label Text="{Binding CompanyName}" IsVisible="{Binding HasCompany}"
+                                   FontSize="18" FontAttributes="Bold" TextColor="#222"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding CompanyAddress}" IsVisible="{Binding HasCompany}"
+                                   FontSize="12" TextColor="#666"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding CompanyRegion}" IsVisible="{Binding HasCompany}"
+                                   FontSize="12" TextColor="#666"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <Label Text="{Binding CompanyContact}" IsVisible="{Binding HasCompany}"
+                                   FontSize="12" TextColor="#666"
+                                   HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
+                            <BoxView HeightRequest="1" Color="#CCC" Margin="0,6"
+                                     IsVisible="{Binding HasCompany}"/>
+
                             <Label Text="Laporan Penerimaan Berdasarkan Kasir"
                                    FontSize="17" FontAttributes="Bold" TextColor="#333"
                                    HorizontalOptions="Center" HorizontalTextAlignment="Center"/>
@@ -149,6 +165,16 @@
                     </CollectionView.Footer>
                 </CollectionView>
             </Border>
+        </Grid>
+
+        <!--Aksi: unduh PDF & kirim WhatsApp-->
+        <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="10" Padding="10,5,10,10">
+            <Button x:Name="BtnDownloadPdf" Grid.Column="0" Text="DOWNLOAD PDF"
+                    CharacterSpacing="2" FontAttributes="Bold" BackgroundColor="#444"
+                    Clicked="BtnDownloadPdf_Clicked"/>
+            <Button x:Name="BtnWhatsApp" Grid.Column="1" Text="KIRIM WHATSAPP"
+                    CharacterSpacing="2" FontAttributes="Bold" BackgroundColor="#25D366"
+                    Clicked="BtnWhatsApp_Clicked"/>
         </Grid>
     </Grid>
 </ContentPage>
