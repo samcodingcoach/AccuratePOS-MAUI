@@ -26,7 +26,7 @@ public partial class App : Application
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new NavigationPage(new MainPage());
+        MainPage = new MainPage();
 
     }
 

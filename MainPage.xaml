@@ -1,97 +1,34 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml" BackgroundColor="WhiteSmoke"
-             NavigationPage.HasNavigationBar="False"
-             x:Class="MyPosAccurate2026.MainPage">
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+       xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+       xmlns:local="clr-namespace:MyPosAccurate2026"
+       FlyoutBehavior="Disabled"
+       Shell.TabBarUnselectedColor="#80808080"
+       x:Class="MyPosAccurate2026.MainPage">
 
-    <ScrollView>
-        <Grid RowDefinitions="Auto,Auto,Auto">
+    <!--Bottom navigation : Beranda, Transaksi, Pengaturan, Profil-->
+    <TabBar>
+        <Tab Title="Beranda" Icon="navhome50.png">
+            <ShellContent ContentTemplate="{DataTemplate local:Beranda}" />
+        </Tab>
+        <Tab Title="Transaksi" Icon="navtx50.png">
+            <!--ContentTemplate masih kosong, nanti disetting-->
+            <ShellContent>
+                <ContentPage />
+            </ShellContent>
+        </Tab>
+        <Tab Title="Pengaturan" Icon="navsetting50.png">
+            <!--ContentTemplate masih kosong, nanti disetting-->
+            <ShellContent>
+                <ContentPage />
+            </ShellContent>
+        </Tab>
+        <Tab Title="Profil" Icon="navprofil50.png">
+            <!--ContentTemplate masih kosong, nanti disetting-->
+            <ShellContent>
+                <ContentPage />
+            </ShellContent>
+        </Tab>
+    </TabBar>
 
-            <!--header : Menu Hamburger, Nama Toko, Bell, Icon Avatar-->
-            <Border Grid.Row="0" Padding="12" StrokeShape="RoundRectangle 15" Margin="10" Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
-                </Border.Shadow>
-                <!--nama toko-->
-                <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
-
-                    <Label Text="PT. MUSA.COM" Grid.Column="1"  VerticalTextAlignment="Center"
-                           FontAttributes="Bold" TextColor="DarkCyan" FontSize="18"></Label>
-
-                    <Image Source="notifgreen100.png" Grid.Column="2" HeightRequest="20"></Image>
-                    <Image Source="avatar100.png" Grid.Column="3" HeightRequest="38"></Image>
-                </Grid>
-            </Border>
-            
-            <!--search-->
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" Grid.Row ="1" Margin="10,0,0,0">
-                <Border Grid.Column="0" Padding="0,5,10,5" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" 
-                        BackgroundColor="White">
-
-
-                    <StackLayout Orientation="Horizontal" Spacing="5">
-                        <SearchBar Placeholder="Cari Produk, Faktur, Penerimaan..." WidthRequest="260" x:Name="T_Search"></SearchBar>
-                        
-                        <Image Source="scanqr1.png" HeightRequest="24" HorizontalOptions="EndAndExpand"></Image>
-                    </StackLayout>
-                    
-                    
-                </Border>
-            </Grid>
-            
-            <!--menu nav-->
-           
-            <Border Grid.Row="2" Padding="12" StrokeShape="RoundRectangle 15" Margin="10" Stroke="Transparent" StrokeThickness="0.5" BackgroundColor="White">
-                <Border.Shadow>
-                    <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,-3" />
-                </Border.Shadow>
-
-                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="10">
-                    <Border Grid.Row="0" Grid.Column="0" Padding="10" StrokeShape="RoundRectangle 10" 
-                            Stroke="DarkCyan" StrokeThickness="0.7" BackgroundColor="White">
-                        <Border.Shadow>
-                            <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,1" />
-                        </Border.Shadow>
-                        <StackLayout Padding="0" Spacing="5">
-                            <Image Source="categori100.png" HeightRequest="32"></Image>
-                            <Label Text="Kategori" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="DarkCyan"></Label>
-                        </StackLayout>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="1" Padding="10" StrokeShape="RoundRectangle 10" 
-                            Stroke="DarkCyan" StrokeThickness="0.7" BackgroundColor="White">
-                        <Border.Shadow>
-                            <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,1" />
-                        </Border.Shadow>
-                        <StackLayout Padding="0" Spacing="5">
-                            <Image Source="product100.png" HeightRequest="32"></Image>
-                            <Label Text="Produk" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="DarkCyan"></Label>
-                        </StackLayout>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="2" Padding="10" StrokeShape="RoundRectangle 10" 
-                            Stroke="DarkCyan" StrokeThickness="0.7" BackgroundColor="White">
-                        <Border.Shadow>
-                            <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,1" />
-                        </Border.Shadow>
-                        <StackLayout Padding="0" Spacing="5">
-                            <Image Source="customergreen100.png" HeightRequest="32"></Image>
-                            <Label Text="Konsumen" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="DarkCyan"></Label>
-                        </StackLayout>
-                    </Border>
-                    <Border Grid.Row="0" Grid.Column="3" Padding="10" StrokeShape="RoundRectangle 10" 
-                            Stroke="DarkCyan" StrokeThickness="0.7" BackgroundColor="White">
-                        <Border.Shadow>
-                            <Shadow Brush="#000000" Opacity="0.10" Radius="12" Offset="0,1" />
-                        </Border.Shadow>
-                        <StackLayout Padding="0" Spacing="5">
-                            <Image Source="receivegreen100.png" HeightRequest="32"></Image>
-                            <Label Text="Penerimaan" LineBreakMode="TailTruncation" HorizontalTextAlignment="Center" FontAttributes="Bold" TextColor="DarkCyan"></Label>
-                        </StackLayout>
-                    </Border>
-                </Grid>
-
-            </Border>
-
-        </Grid>
-    </ScrollView>
-
-</ContentPage>
+</Shell>
