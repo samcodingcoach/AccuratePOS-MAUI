@@ -15,13 +15,11 @@
                     <SearchBar Placeholder="Kode Barang atau Nama" x:Name="T_Search" TextChanged="T_Search_TextChanged"></SearchBar>
                 </Border>
                 <Border Grid.Column="1" Padding="10,0" StrokeShape="RoundRectangle 10"  Stroke="#CCCCCC" StrokeThickness="0.5" BackgroundColor="WhiteSmoke">
-                    <Picker x:Name="SortPicker" Title="Urutkan" SelectedIndexChanged="SortPicker_SelectedIndexChanged" BackgroundColor="Transparent" TextColor="#444">
-                        <Picker.Items>
-                            <x:String>A - Z</x:String>
-                            <x:String>Harga Tertinggi</x:String>
-                            <x:String>Harga Terendah</x:String>
-                        </Picker.Items>
-                    </Picker>
+                    <Image Source="filtersort100.png" HeightRequest="24">
+                        <Image.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="SortImage_Tapped" />
+                        </Image.GestureRecognizers>
+                    </Image>
                 </Border>
             </Grid>
         </Border>

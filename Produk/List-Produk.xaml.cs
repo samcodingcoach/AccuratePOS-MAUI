@@ -12,6 +12,7 @@ public partial class List_Produk : ContentPage
     private int _currentPage = 1;
     private bool _isFetching = false;
     private bool _hasMoreData = true;
+    private int _currentSortIndex = -1;
 
     public List_Produk()
     {
@@ -45,8 +46,19 @@ public partial class List_Produk : ContentPage
         await FetchProductsFromApi();
     }
 
-    private void SortPicker_SelectedIndexChanged(object sender, EventArgs e)
+    private async void SortImage_Tapped(object sender, TappedEventArgs e)
     {
+        string action = await DisplayActionSheet("Urutkan Produk", "Batal", null, "A - Z", "Harga Tertinggi", "Harga Terendah");
+        
+        if (action == "A - Z")
+            _currentSortIndex = 0;
+        else if (action == "Harga Tertinggi")
+            _currentSortIndex = 1;
+        else if (action == "Harga Terendah")
+            _currentSortIndex = 2;
+        else
+            return; // Batal dipilih
+
         ApplyLocalSort();
     }
 
@@ -163,11 +175,11 @@ public partial class List_Produk : ContentPage
         if (ProdukList == null || ProdukList.Count == 0) return;
 
         List<ProdukModel> sortedList;
-        if (SortPicker.SelectedIndex == 0) // A-Z
+        if (_currentSortIndex == 0) // A-Z
             sortedList = ProdukList.OrderBy(x => x.name).ToList();
-        else if (SortPicker.SelectedIndex == 1) // Harga Tertinggi
+        else if (_currentSortIndex == 1) // Harga Tertinggi
             sortedList = ProdukList.OrderByDescending(x => x.price).ToList();
-        else if (SortPicker.SelectedIndex == 2) // Harga Terendah
+        else if (_currentSortIndex == 2) // Harga Terendah
             sortedList = ProdukList.OrderBy(x => x.price).ToList();
         else
             return;
