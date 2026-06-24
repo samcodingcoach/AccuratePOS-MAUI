@@ -78,6 +78,30 @@ public partial class List_Produk : ContentPage
         await FetchProductsFromApi();
     }
 
+    private async void ProductList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (e.CurrentSelection.FirstOrDefault() is ProdukModel selectedItem)
+        {
+            // Kosongkan kembali selected item agar barang yang sama bisa ditekan lagi nanti
+            ProductList.SelectedItem = null;
+
+            if (!string.IsNullOrEmpty(selectedItem.item_no))
+            {
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    try
+                    {
+                        await Navigation.PushAsync(new DetailScan(selectedItem.item_no));
+                    }
+                    catch (Exception ex)
+                    {
+                        await Application.Current.MainPage.DisplayAlert("Error", $"Gagal membuka detail: {ex.Message}", "OK");
+                    }
+                });
+            }
+        }
+    }
+
     private async Task FetchProductsFromApi()
     {
         if (_isFetching || !_hasMoreData) return;

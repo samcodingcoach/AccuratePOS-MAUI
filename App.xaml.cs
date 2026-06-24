@@ -26,7 +26,7 @@ public partial class App : Application
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new NavigationPage(new Produk.ScanQR());
+        MainPage = new NavigationPage(new Produk.List_Produk());
 
     }
 

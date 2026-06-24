@@ -2,7 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MyPosAccurate2026.Produk.List_Produk"
-             BackgroundColor="#f8fafa"
+             BackgroundColor="#f8fafa" NavigationPage.HasNavigationBar="False"
              Title="List_Produk">
     <Grid RowDefinitions="Auto,*">
         <!--search & sort-->
@@ -26,7 +26,11 @@
         
         <!--daftar produk dengan pakai collectionview-->
         <RefreshView Grid.Row="1" x:Name="RefreshViewProduk" Refreshing="RefreshViewProduk_Refreshing" Margin="10,0,10,10">
-            <CollectionView x:Name="ProductList" RemainingItemsThreshold="2" RemainingItemsThresholdReached="CollectionView_RemainingItemsThresholdReached">
+            <CollectionView x:Name="ProductList" 
+                            RemainingItemsThreshold="2" 
+                            RemainingItemsThresholdReached="CollectionView_RemainingItemsThresholdReached"
+                            SelectionMode="Single"
+                            SelectionChanged="ProductList_SelectionChanged">
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical" Span="2" HorizontalItemSpacing="10" VerticalItemSpacing="10" />
                 </CollectionView.ItemsLayout>
