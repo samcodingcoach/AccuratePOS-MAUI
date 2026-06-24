@@ -120,6 +120,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <MauiXaml Update="Produk\List-Produk.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
 	  <MauiXaml Update="Produk\ScanQR.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
