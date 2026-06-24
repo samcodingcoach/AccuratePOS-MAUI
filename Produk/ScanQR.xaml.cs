@@ -163,11 +163,25 @@ public partial class ScanQR : ContentPage
         });
     }
 
-    private async void BDetail_Clicked(object sender, EventArgs e)
+    private void BDetail_Clicked(object sender, EventArgs e)
     {
         if (!string.IsNullOrEmpty(_scannedItemNo))
         {
-            await Navigation.PushAsync(new DetailScan(_scannedItemNo));
+            MainThread.BeginInvokeOnMainThread(async () =>
+            {
+                try
+                {
+                    // Hentikan proses kamera sebelum navigasi untuk menghindari JavaProxyThrowable (Bug di ZXing MAUI)
+                    CameraScanner.IsDetecting = false;
+                    await Task.Delay(150); // Jeda sejenak agar resource native surface Android terlepas dengan aman
+
+                    await Navigation.PushAsync(new DetailScan(_scannedItemNo));
+                }
+                catch (Exception ex)
+                {
+                    await Application.Current.MainPage.DisplayAlertAsync("Error", ex.Message, "OK");
+                }
+            });
         }
     }
 

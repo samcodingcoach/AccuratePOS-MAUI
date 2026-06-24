@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using System.Text;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
@@ -26,7 +26,7 @@ public partial class App : Application
 
         UserAppTheme = AppTheme.Light;
 
-        MainPage = new Produk.List_Produk();
+        MainPage = new NavigationPage(new Produk.ScanQR());
 
     }
 
